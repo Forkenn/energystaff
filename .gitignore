@@ -1,0 +1,9 @@
+.vscode
+.idea
+backup
+postgresql
+pgadmin
+storage
+.python-version
+.env
+nginx.conf
