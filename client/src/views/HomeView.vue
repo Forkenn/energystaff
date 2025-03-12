@@ -1,9 +1,14 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import TheHeader from '../components/global/TheHeader.vue'
+import TheFooter from '../components/global/TheFooter.vue'
 </script>
 
 <template>
+  <TheHeader />
   <main>
-    <TheWelcome />
+    <div style="display: flex; height: 850px; align-items: center;">
+      Hello World
+    </div>
   </main>
+  <TheFooter />
 </template>
