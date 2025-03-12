@@ -1,11 +1,41 @@
+<script setup>
+import { useUserStore } from '@/stores/user';
+
+const { user } = useUserStore()
+</script>
+
 <template>
     <header class="wrapper">
         <div class="container container-pd52">
-            <router-link to="/">
-                <span class="logo">ENERGY//STAFF</span>
-            </router-link>
-            <div class="uauth-user-icon">
-                <img src="../../assets/icons/Account.svg" width="48" height="48" alt="Личный кабинет">
+            <a href="#" class="logo">ENERGY//STAFF</a>
+            <nav class="nav-panel">
+                <div v-if="!user.status.loggedIn">
+                    <a href="#">Соискателям</a>
+                    <a href="#">Работодателям</a>
+                </div>
+                <div v-else-if="user.data.is_admin">
+                    <a href="#">Управление</a>
+                </div>
+                <div v-else-if="user.data.is_edu">
+                    <a href="#">Подтверждения</a>
+                </div>
+                <div v-else-if="user.data.is_employer">
+                    <a href="#">Компания</a>
+                    <a href="#">Отклики</a>
+                </div>
+                <div v-else>
+                    <a href="#">Моё резюме</a>
+                    <a href="#">Отклики и приглашения </a>
+                </div>
+            </nav>
+            <div class="right-nav">
+                <div v-if="user.status.loggedIn" class="location-block">
+                    <img src="../../assets/icons/Location.svg" width="24" height="24">
+                    <span class="location-text">Местоположение</span>
+                </div>
+                <div class="unauth-user-icon">
+                    <img src="../../assets/icons/Account.svg" width="48" height="48" alt="Личный кабинет">
+                </div>
             </div>
         </div>
     </header>
@@ -29,10 +59,40 @@
 .logo {
     color: #FFFFFF;
     font-weight: 600;
+    text-decoration: none !important;
 }
 
-.uauth-user-icon {
+.nav-panel {
+    display: flex;
+    margin-left: 24px;
+}
+
+.nav-panel a {
+    color: #FFFFFF;
+    font-weight: 400;
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+.nav-panel a:hover {
+  color: #B0B3B8;
+}
+
+.right-nav {
+    display: flex;
     margin-left: auto;
+    align-items: center;
+}
+
+.location-block span {
+    color: #FFFFFF;
+    font-weight: 700;
+    margin-right: 30px;
+}
+
+.location-block img {
+    margin-right: 2px;
+    margin-bottom: 5px;
 }
 
 </style>
