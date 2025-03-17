@@ -12,17 +12,17 @@ import TheFooter from '../components/global/TheFooter.vue'
         <div class="sign-in-form-group">
           <input
             type="email"
-            class="form-control"
+            class="form-control sys-input-288"
             id="FormControlEmailInput"
             placeholder="Электронная почта"
           >
           <input
             type="password"
             id="SignInInputPassword"
-            class="form-control"
+            class="form-control sys-input-288"
             placeholder="Пароль"
           >
-          <button type="button" class="btn btn-primary">Вход</button>
+          <button type="button" class="btn btn-primary sys-btn-288">Вход</button>
           <div>
             <router-link class="registration-link" to="/registration">
               <img src="../assets/icons/Chevron.svg" width="24" height="24">
@@ -67,16 +67,7 @@ import TheFooter from '../components/global/TheFooter.vue'
 
 .sign-in-form-group input {
   margin: 0 auto;
-  width: 288px;
-  height: 48px;
   margin-bottom: 24px;
-}
-
-.sign-in-form-group button {
-  width: 288px;
-  height: 48px;
-  margin-bottom: 24px;
-  border-radius: 40px;
 }
 
 .registration-link {

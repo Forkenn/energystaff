@@ -5,6 +5,8 @@ import { ref } from 'vue'
 
 const flexSwitchEmployer = ref(false)
 const flexSwitchEDU = ref(false)
+const containerFlag = ref(true)
+const employerContainerFlag = ref(false)
 
 const toggleSwitch = (num) => {
     if (num == 1)
@@ -12,43 +14,54 @@ const toggleSwitch = (num) => {
     else
         flexSwitchEmployer.value = false;
 }
+
+const toggleContainer = () => {
+  if (flexSwitchEmployer.value) {
+    containerFlag.value = !containerFlag.value
+    employerContainerFlag.value = !employerContainerFlag.value
+    return
+  }
+  if (flexSwitchEDU.value) {
+    return
+  }
+}
 </script>
 
 <template>
   <TheHeader />
   <main>
     <div class="container container-pd52">
-      <div class="sign-up-container">
+      <div v-if="containerFlag" class="sign-up-container container-all">
         <h1>Регистрация</h1>
         <div class="sign-up-form-group">
           <input
-            class="form-control form-text-field"
+            class="form-control form-text-field sys-input-288"
             type="text form-text-field"
             placeholder="Фамилия"
             aria-label="Фамилия"
           >
           <input
-            class="form-control form-text-field"
+            class="form-control form-text-field sys-input-288"
             type="text form-text-field"
             placeholder="Имя"
             aria-label="Имя"
           >
           <input
             type="email"
-            class="form-control form-text-field"
+            class="form-control form-text-field sys-input-288"
             id="FormControlEmailInput"
             placeholder="Электронная почта"
           >
           <input
             type="password"
             id="SignInInputPassword"
-            class="form-control form-text-field"
+            class="form-control form-text-field sys-input-288"
             placeholder="Пароль"
           >
           <input
             type="password"
             id="SignInInputPassword"
-            class="form-control form-text-field"
+            class="form-control form-text-field sys-input-288"
             placeholder="Подтверждение пароля"
           >
           <div class="form-check form-switch">
@@ -77,7 +90,30 @@ const toggleSwitch = (num) => {
               Я работник ОУ
             </label>
           </div>
-          <button type="button" class="btn btn-primary">Далее</button>
+          <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">
+            {{ flexSwitchEmployer ? 'Далее' : 'Зарегистрироваться'}}
+          </button>
+        </div>
+      </div>
+      <div v-if="employerContainerFlag" class="sign-up-container container-employer">
+        <h1>Компания</h1>
+        <div class="sign-up-form-group">
+          <input
+            class="form-control form-text-field sys-input-288"
+            type="text form-text-field"
+            placeholder="Наименование компании"
+            aria-label="Фамилия"
+          >
+          <select class="form-select" aria-label="Город">
+            <option selected>Город</option>
+            <option value="1">Москва</option>
+            <option value="2">Смоленск</option>
+            <option value="3">Санкт-Петербург</option>
+          </select>
+          <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">Назад</button>
+          <button type="button" class="btn btn-primary sys-btn-288">
+            Зарегистрироваться
+          </button>
         </div>
       </div>
     </div>
@@ -89,9 +125,6 @@ const toggleSwitch = (num) => {
 
 .sign-up-container {
   width: 382px;
-  height: 659px;
-  margin-top: 121px;
-  margin-bottom: 121px;
   margin-left: auto;
   margin-right: auto;
   border-color: #DBE0E5;
@@ -110,22 +143,39 @@ const toggleSwitch = (num) => {
   text-align: center;
 }
 
+.container-all {
+  height: 659px;
+  margin-top: 121px;
+  margin-bottom: 121px;
+}
+
+.container-employer {
+  height: 420px;
+  margin-top: 266px;
+  margin-bottom: 266px;
+  margin-left: auto;
+  margin-right: auto;
+  border-color: #DBE0E5;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 10px;
+  background-color: #FFFFFF;
+}
+
 .sign-up-form-group {
   text-align: center;
 }
 
 .form-text-field {
   margin: 0 auto;
-  width: 288px;
-  height: 48px;
   margin-bottom: 24px;
 }
 
-.sign-up-form-group button {
+.sign-up-form-group select {
   width: 288px;
   height: 48px;
+  margin: 0 auto;
   margin-bottom: 24px;
-  border-radius: 40px;
 }
 
 .form-check {
