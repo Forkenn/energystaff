@@ -1,7 +1,7 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import { useUserStore } from '@/stores/user';
-import { onMounted, provide } from 'vue';
+import { onMounted } from 'vue';
 
 const currentUserStore = useUserStore();
 
