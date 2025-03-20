@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import SignInView from '@/views/SignInView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import AccountView from '@/views/AccountView.vue'
+import NegotiationsView from '@/views/NegotiationsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/account',
       name: 'account_page',
       component: AccountView,
+    },
+    {
+      path: '/negotiations',
+      name: 'negotiations_page',
+      component: NegotiationsView,
     },
   ],
 })

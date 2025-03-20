@@ -1,11 +1,11 @@
 import { ref } from 'vue';
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
-export const useVacanciesStore = defineStore('vacancies', () => {
-    const vacancies = ref({count: 0, items: [] });
-    const getVacancies = async() => {
-        vacancies.value = {
-            count: 6,
+export const useNegotiationsStore = defineStore('negotiations', () => {
+    const negotiations = ref({count: 0, items: [] });
+    const getNegotiations = async() => {
+        negotiations.value = {
+            count: 3,
             items: [
                 {
                     id: 1,
@@ -40,37 +40,13 @@ export const useVacanciesStore = defineStore('vacancies', () => {
                         name: "Отказ"
                     }
                 },
-                {
-                    id: 4,
-                    name: "Вакансия 4",
-                    salary: 15000,
-                    city: "Смоленск",
-                    company: "X5-Group",
-                    negotiations: null
-                },
-                {
-                    id: 5,
-                    name: "Вакансия 5",
-                    salary: 15000,
-                    city: "Смоленск",
-                    company: "X5-Group",
-                    negotiations: null
-                },
-                {
-                    id: 6,
-                    name: "Вакансия 6",
-                    salary: 15000,
-                    city: "Смоленск",
-                    company: "X5-Group",
-                    negotiations: null
-                },
             ]
         }
     };
 
-    return { vacancies, getVacancies };
+    return { negotiations, getNegotiations };
 })
 
 if (import.meta.hot) {
-    import.meta.hot.accept(acceptHMRUpdate(useVacanciesStore, import.meta.hot))
+    import.meta.hot.accept(acceptHMRUpdate(useNegotiationsStore, import.meta.hot))
 }

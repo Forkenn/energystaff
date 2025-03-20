@@ -6,9 +6,12 @@ defineProps({
 
 <template>
   <div class="vacancy-card">
-    <div class="card-wrapper">
+    <div class="card-wrapper" style="align-items: center;">
         <h1>
             {{ vacancy.name }}
+            <img v-if="vacancy.negotiations && vacancy.negotiations.id == 1" src="../../assets/icons/vacancies/Negotiation_process.svg">
+            <img v-if="vacancy.negotiations && vacancy.negotiations.id == 2" src="../../assets/icons/vacancies/Negotiation_success.svg">
+            <img v-if="vacancy.negotiations && vacancy.negotiations.id == 3" src="../../assets/icons/vacancies/Negotiation_reject.svg">
         </h1>
         <div class="salary">
             от {{ vacancy.salary }} ₽, до вычета налогов
@@ -48,6 +51,11 @@ defineProps({
     font-size: 32px;
     font-weight: 700;
     color: #343434;
+}
+
+.card-wrapper img {
+    margin-bottom: 5px;
+    margin-left: 2px;
 }
 
 .card-wrapper .salary {

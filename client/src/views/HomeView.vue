@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import { useVacanciesStore } from '@/stores/vacancies';
 
 import TheHeader from '@/components/global/TheHeader.vue'
@@ -84,6 +84,7 @@ onMounted(vacanciesStore.getVacancies);
 .vacancy-wrapper {
   min-width: 500px;
   max-width: 902px;
+  min-height: 740px;
   width: 100%;
 }
 
