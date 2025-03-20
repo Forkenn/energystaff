@@ -14,7 +14,7 @@
 }
 
 .custom-form-floating .form-control {
-  height: 46px;
+  height: 48px;
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -23,6 +23,24 @@
 .custom-form-floating .form-control:focus {
   border-color: #aaa;
   box-shadow: none;
+}
+
+.floating-input-group {
+  display: flex;
+}
+
+.sys-input-group-text-38 {
+  width: 38px;
+  height: 48px;
+  border-top-left-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+}
+
+.sys-input-group-250 {
+  width: 250px !important;
+  height: 48px;
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
 }
 
 .sys-btn-288 {
@@ -51,7 +69,17 @@
   height: 48px;
 }
 
+.sys-input-600-flex {
+  min-width: 288px;
+  max-width: 600px;
+}
+
 .sys-input-810-flex {
   min-width: 288px;
   max-width: 810px;
+}
+
+.sys-input-900-flex {
+  min-width: 288px;
+  max-width: 900px;
 }
