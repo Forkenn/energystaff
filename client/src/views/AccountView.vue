@@ -32,7 +32,7 @@ import TheFooter from '../components/global/TheFooter.vue'
         <div class="row form-row">
             <div class="col">
               <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputBirthdate" placeholder="Дата рождения">
+                <input type="date" class="form-control" id="InputBirthdate" placeholder="Дата рождения">
                 <label for="InputBirthdate">Дата рождения</label>
               </div>
             </div>

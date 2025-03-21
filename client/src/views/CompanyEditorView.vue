@@ -30,7 +30,7 @@ import TheHeader from '@/components/global/TheHeader.vue';
           <div class="row">
             <div class="col-auto">
               <div class="custom-form-floating">
-                <input type="text" class="form-control sys-input-288" id="InputCompanyDate" placeholder="Дата регистрации">
+                <input type="date" class="form-control sys-input-288" id="InputCompanyDate" placeholder="Дата регистрации">
                 <label for="InputCompanyDate">Дата регистрации</label>
               </div>
             </div>
