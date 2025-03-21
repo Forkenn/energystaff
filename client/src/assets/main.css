@@ -50,6 +50,13 @@
   border-radius: 40px !important;
 }
 
+.sys-btn-264 {
+  width: 264px;
+  height: 48px;
+  margin-bottom: 24px;
+  border-radius: 40px !important;
+}
+
 .sys-btn-200 {
   width: 200px;
   height: 48px;
@@ -71,15 +78,30 @@
 
 .sys-input-600-flex {
   min-width: 288px;
-  max-width: 600px;
+  max-width: 600px !important;
+  height: 48px;
 }
 
 .sys-input-810-flex {
   min-width: 288px;
   max-width: 810px;
+  height: 48px;
 }
 
 .sys-input-900-flex {
   min-width: 288px;
   max-width: 900px;
+  height: 48px;
+}
+
+.sys-col-600-flex {
+  box-sizing: content-box;
+  max-width: 600px !important;
+  width: 100% !important;
+}
+
+.sys-col-900-flex {
+  box-sizing: content-box;
+  max-width: 900px !important;
+  width: 100% !important;
 }
