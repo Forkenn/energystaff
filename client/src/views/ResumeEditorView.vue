@@ -1,6 +1,8 @@
 <script setup>
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
+
+//$('#formMultiselect').multiselect();
 </script>
 
 <template>
@@ -74,7 +76,7 @@ import TheFooter from '@/components/global/TheFooter.vue'
                     </div>
                 </div>
                 <div class="col d-flex">
-                    <select class="form-select sys-input-288" aria-label="Навыки">
+                    <select id="formMultiselect" class="form-select sys-input-288" aria-label="Навыки">
                         <option selected>Навыки</option>
                         <option value="1">SQL</option>
                         <option value="2">Python</option>
