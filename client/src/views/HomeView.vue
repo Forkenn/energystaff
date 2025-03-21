@@ -62,10 +62,6 @@ onMounted(vacanciesStore.getVacancies);
   margin-top: 55px;
 }
 
-.search-wrapper input {
-  height: 48px;
-}
-
 .home-wrapper {
   margin-top: 55px;
   margin-bottom: 55px;
