@@ -6,6 +6,7 @@ import AccountView from '@/views/AccountView.vue'
 import NegotiationsView from '@/views/NegotiationsView.vue'
 import ResumeEditorView from '@/views/ResumeEditorView.vue'
 import CompanyEditorView from '@/views/CompanyEditorView.vue'
+import VacancyEditorView from '@/views/VacancyEditorView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/company/editor',
       name: 'company_editor',
       component: CompanyEditorView,
+    },
+    {
+      path: '/vacancy/editor',
+      name: 'vacancy_editor',
+      component: VacancyEditorView,
     },
   ],
 })

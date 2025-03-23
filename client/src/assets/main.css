@@ -94,6 +94,17 @@
   height: 48px;
 }
 
+.sys-input-912-flex {
+  min-width: 288px;
+  max-width: 912px;
+  height: 48px;
+}
+
+.sys-col-184 {
+  width: 184px !important;
+  box-sizing: content-box;
+}
+
 .sys-col-600-flex {
   box-sizing: content-box;
   max-width: 600px !important;
@@ -103,5 +114,11 @@
 .sys-col-900-flex {
   box-sizing: content-box;
   max-width: 900px !important;
+  width: 100% !important;
+}
+
+.sys-col-912-flex {
+  box-sizing: content-box;
+  max-width: 912px !important;
   width: 100% !important;
 }
