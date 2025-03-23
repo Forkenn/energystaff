@@ -8,6 +8,7 @@ import ResumeEditorView from '@/views/ResumeEditorView.vue'
 import CompanyEditorView from '@/views/CompanyEditorView.vue'
 import VacancyEditorView from '@/views/VacancyEditorView.vue'
 import VerificationView from '@/views/VerificationView.vue'
+import RecommendationEditorView from '@/views/RecommendationEditorView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +57,11 @@ const router = createRouter({
       path: '/edu/verification',
       name: 'edu_verification',
       component: VerificationView,
+    },
+    {
+      path: '/edu/recommendation/editor',
+      name: 'edu_recommendation_editor',
+      component: RecommendationEditorView,
     },
   ],
 })
