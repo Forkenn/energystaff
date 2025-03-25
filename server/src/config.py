@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 DEBUG = int(os.environ.get('DEBUG'))
 
 DB_USER = os.environ.get('DB_USER')
@@ -9,5 +13,5 @@ DB_PORT = os.environ.get('DB_PORT')
 DB_NAME = os.environ.get('DB_NAME')
 
 SECRET_TOKEN = os.environ.get('SECRET_TOKEN')
-TOKEN_EXPIRE_MINUTES = 10000
+TOKEN_EXPIRE_SECONDS = 259200
 COOKIE_NAME = "energystaff_token"

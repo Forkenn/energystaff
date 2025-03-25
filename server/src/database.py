@@ -1,4 +1,4 @@
-import config
+import src.config as config
 
 from typing import AsyncGenerator
 
