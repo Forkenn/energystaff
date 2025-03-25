@@ -1,0 +1,100 @@
+services:
+  energystaff_nginx:
+    command: nginx -g "daemon off;"
+    container_name: energystaff_nginx
+    image: nginx:1.27.4-alpine
+    restart: always
+    volumes:
+      - ./nginx-dev.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    networks:
+      - energystaff
+
+  energystaff_server:
+    tty: true
+    container_name: energystaff_server
+    image: energystaff_server
+    build:
+      context: ./server/
+    volumes:
+      - ./server/:/src/app
+    command: sh -c "sleep 15 && alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --reload"
+    links:
+      - energystaff_postgres
+    depends_on:
+      - energystaff_postgres
+    environment:
+      DB_HOST: energystaff_postgres   # WARNING ONLY FOR DEVELOPMENT!
+      DB_NAME: db_energystaff
+      DB_USER: admin
+      DB_PASS: admin
+      DB_PORT: 5432
+      SECRET_TOKEN: "energystaff_dev"
+      DEBUG: 1
+    restart: always
+    networks:
+      - energystaff
+
+  energystaff_client:
+    tty: true
+    container_name: energystaffc_client
+    image: energystaff_client
+    build:
+      context: client/
+    volumes:
+      - ./client/:/app
+    command: sh -c "chmod -R 777 /app/run_client_dev.sh && /app/run_client_dev.sh"
+    environment:
+      VITE_BACKEND_URL: "http://localhost/api/"
+      DEBUG: "True"
+    restart: on-failure
+    networks:
+      - energystaff
+
+  energystaff_postgres:
+    image: postgres:17.4-alpine3.21
+    container_name: energystaff_postgres
+    environment:
+      TZ: 'GMT-3'
+      PGTZ: 'GMT-3'
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: db_energystaff
+      PGDATA: /var/lib/postgresql/data/pgdata/
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backup:/backup
+      - pgdata:/var/lib/postgresql/data/pgdata/
+    restart: always
+    tty: true
+    stdin_open: true
+    #    healthcheck:
+    #      test: ["CMD-SHELL", "pg_isready -U admin -d db_energystaff"]
+    #      interval: 10s
+    #      timeout: 5s
+    #      retries: 5
+    #      start_period: 10s
+    networks:
+      - energystaff
+
+  energystaff_pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: energystaff_pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@energystaff.com
+      - PGADMIN_DEFAULT_PASSWORD=password
+    volumes:
+      - ./pgadmin/data:/var/lib/pgadmin/data
+    networks:
+      - energystaff
+
+volumes:
+  pgdata:
+
+networks:
+  energystaff:
+    external: false
