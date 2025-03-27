@@ -1,7 +1,11 @@
 <script setup>
+import { ref } from 'vue'
+
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
-import { ref } from 'vue'
+import AuthService from '@/services/auth.service'
+
+const userRegistration = ref({ surname: "", name: "", email: "", password: "" })
 
 const flexSwitchEmployer = ref(false)
 const flexSwitchEDU = ref(false)
@@ -25,6 +29,10 @@ const toggleContainer = () => {
     return
   }
 }
+
+const registerApplicant = async() => {
+  await AuthService.registerApplicant(userRegistration.value)
+}
 </script>
 
 <template>
@@ -39,24 +47,28 @@ const toggleContainer = () => {
             type="text form-text-field"
             placeholder="Фамилия"
             aria-label="Фамилия"
+            v-model="userRegistration.surname"
           >
           <input
             class="form-control form-text-field sys-input-288"
             type="text form-text-field"
             placeholder="Имя"
             aria-label="Имя"
+            v-model="userRegistration.name"
           >
           <input
             type="email"
             class="form-control form-text-field sys-input-288"
             id="FormControlEmailInput"
             placeholder="Электронная почта"
+            v-model="userRegistration.email"
           >
           <input
             type="password"
             id="SignInInputPassword"
             class="form-control form-text-field sys-input-288"
             placeholder="Пароль"
+            v-model="userRegistration.password"
           >
           <input
             type="password"
@@ -90,8 +102,11 @@ const toggleContainer = () => {
               Я работник ОУ
             </label>
           </div>
-          <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">
-            {{ flexSwitchEmployer ? 'Далее' : 'Зарегистрироваться'}}
+          <button v-if="flexSwitchEmployer" type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">
+            Далее
+          </button>
+          <button v-else type="button" class="btn btn-primary sys-btn-288" @click="registerApplicant">
+            Зарегистрироваться
           </button>
         </div>
       </div>

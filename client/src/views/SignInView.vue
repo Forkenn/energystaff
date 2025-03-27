@@ -1,6 +1,15 @@
 <script setup>
+import { ref } from 'vue'
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
+import AuthService from '@/services/auth.service'
+
+const userLogin = ref({ email: "", password: "" });
+
+const login = async() => {
+  await AuthService.login(userLogin.value);
+}
+
 </script>
 
 <template>
@@ -15,14 +24,16 @@ import TheFooter from '../components/global/TheFooter.vue'
             class="form-control sys-input-288"
             id="FormControlEmailInput"
             placeholder="Электронная почта"
+            v-model="userLogin.email"
           >
           <input
             type="password"
             id="SignInInputPassword"
             class="form-control sys-input-288"
             placeholder="Пароль"
+            v-model="userLogin.password"
           >
-          <button type="button" class="btn btn-primary sys-btn-288">Вход</button>
+          <button type="button" class="btn btn-primary sys-btn-288" @click="login">Вход</button>
           <div>
             <router-link class="registration-link" to="/registration">
               <img src="../assets/icons/Chevron.svg" width="24" height="24">
