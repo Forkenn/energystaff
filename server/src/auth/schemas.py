@@ -1,14 +1,13 @@
 from pydantic import BaseModel, EmailStr, model_validator
 from fastapi_users import schemas
 
-class SUserRead(schemas.BaseUser[int]):
-    pass
-
-class SUserCreate(schemas.CreateUpdateDictModel):
+class SUserCreateBase(BaseModel):
     surname: str
     name: str
     email: EmailStr
     password: str
+
+class SUserCreate(SUserCreateBase, schemas.CreateUpdateDictModel):
     is_edu: bool = False
     is_employer: bool = False
     is_applicant: bool = False
@@ -18,12 +17,6 @@ class SUserCreate(schemas.CreateUpdateDictModel):
         if sum((self.is_edu, self.is_applicant, self.is_employer)) != 1:
             raise ValueError("User can only have one role")
         return self
-
-class SUserCreateBase(BaseModel):
-    surname: str
-    name: str
-    email: EmailStr
-    password: str
 
 class SEmployerCreate(SUserCreateBase):
     company_id: int | None = None
@@ -37,6 +30,11 @@ class SEmployerCreate(SUserCreateBase):
 
 class SEduCreate(SUserCreateBase):
     edu_institution_id: int
+
+class SUserRead(schemas.BaseUser[int]):
+    is_edu: bool = False
+    is_employer: bool = False
+    is_applicant: bool = False
 
 class SUserUpdate(schemas.BaseUserUpdate):
     pass

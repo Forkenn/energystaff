@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .auth.config import auth_backend
 from .auth.manager import fastapi_users
-from .auth.schemas import SUserRead, SUserCreate
+
+from .auth.router import router as router_auth
 
 app = FastAPI(title='EnergyStaff', root_path='/api')
 
@@ -25,13 +26,9 @@ app.include_router(
 )
 
 app.include_router(
-    fastapi_users.get_register_router(SUserRead, SUserCreate),
-    prefix="/auth",
-    tags=["Auth"],
-)
-
-app.include_router(
     fastapi_users.get_reset_password_router(),
     prefix="/auth",
     tags=["Auth"],
 )
+
+app.include_router(router_auth)
