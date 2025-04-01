@@ -40,7 +40,7 @@ class Applicant(Base):
     __tablename__ = 'applicants'
 
     user_id: orm.Mapped[int] = orm.mapped_column(
-        alch.Integer(), alch.ForeignKey("users.id"), primary_key=True
+        alch.Integer(), alch.ForeignKey("users.id", ondelete='CASCADE'), primary_key=True
     )
     edu_institution_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=True)
     edu_level_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=True)
@@ -52,7 +52,7 @@ class Employer(Base):
     __tablename__ = 'employers'
 
     user_id: orm.Mapped[int] = orm.mapped_column(
-        alch.Integer(), alch.ForeignKey("users.id"), primary_key=True
+        alch.Integer(), alch.ForeignKey("users.id", ondelete='CASCADE'), primary_key=True
     )
     company_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=False)
 
@@ -63,7 +63,7 @@ class EduWorker(Base):
     __tablename__ = 'edu_workers'
 
     user_id: orm.Mapped[int] = orm.mapped_column(
-        alch.Integer(), alch.ForeignKey("users.id"), primary_key=True
+        alch.Integer(), alch.ForeignKey("users.id", ondelete='CASCADE'), primary_key=True
     )
     edu_institution_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=False)
 
