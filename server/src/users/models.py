@@ -9,6 +9,8 @@ from sqlalchemy import Date
 from fastapi_users.db import SQLAlchemyBaseUserTable
 
 from src.database import Base
+#from src.tools.models import EduInstitution, EduLevel, Location
+#TODO: abstract relationships
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):
@@ -42,8 +44,12 @@ class Applicant(Base):
     user_id: orm.Mapped[int] = orm.mapped_column(
         alch.Integer(), alch.ForeignKey("users.id", ondelete='CASCADE'), primary_key=True
     )
-    edu_institution_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=True)
-    edu_level_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=True)
+    edu_institution_id: orm.Mapped[int] = orm.mapped_column(
+        alch.ForeignKey("edu_institutions.id", ondelete='SET NULL'), nullable=True
+    )
+    edu_level_id: orm.Mapped[int] = orm.mapped_column(
+        alch.ForeignKey("edu_levels.id", ondelete='SET NULL'), nullable=True
+    )
 
     user: orm.Mapped["User"] = orm.relationship(back_populates="applicant")
 
@@ -54,7 +60,9 @@ class Employer(Base):
     user_id: orm.Mapped[int] = orm.mapped_column(
         alch.Integer(), alch.ForeignKey("users.id", ondelete='CASCADE'), primary_key=True
     )
-    company_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=False)
+    company_id: orm.Mapped[int] = orm.mapped_column(
+        alch.ForeignKey("companies.id", ondelete='CASCADE')
+    )
 
     user: orm.Mapped["User"] = orm.relationship(back_populates="employer")
 
@@ -65,6 +73,8 @@ class EduWorker(Base):
     user_id: orm.Mapped[int] = orm.mapped_column(
         alch.Integer(), alch.ForeignKey("users.id", ondelete='CASCADE'), primary_key=True
     )
-    edu_institution_id: orm.Mapped[int] = orm.mapped_column(alch.Integer(), nullable=False)
+    edu_institution_id: orm.Mapped[int] = orm.mapped_column(
+        alch.ForeignKey("edu_institutions.id", ondelete='CASCADE'), nullable=False
+    )
 
     user: orm.Mapped["User"] = orm.relationship(back_populates="edu_worker")
