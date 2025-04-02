@@ -12,6 +12,7 @@ from src.database import Base
 from src.users.models import *
 from src.companies.models import *
 from src.tools.models import *
+from src.vacancies.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
