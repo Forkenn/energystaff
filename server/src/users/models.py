@@ -27,9 +27,24 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_employer: orm.Mapped[bool] = orm.mapped_column(alch.Boolean(), default=False)
     is_applicant: orm.Mapped[bool] = orm.mapped_column(alch.Boolean(), default=False)
 
-    applicant: orm.Mapped[Optional["Applicant"]] = orm.relationship(back_populates="user", uselist=False)
-    employer: orm.Mapped[Optional["Employer"]] = orm.relationship(back_populates="user", uselist=False)
-    edu_worker: orm.Mapped[Optional["EduWorker"]] = orm.relationship(back_populates="user", uselist=False)
+    applicant: orm.Mapped[Optional["Applicant"]] = orm.relationship(
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+    employer: orm.Mapped[Optional["Employer"]] = orm.relationship(
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+    edu_worker: orm.Mapped[Optional["EduWorker"]] = orm.relationship(
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
 
     # fastapi-users fields by default:
     # hashed_password: orm.Mapped[str] = orm.mapped_column(String(256))
