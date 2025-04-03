@@ -5,6 +5,7 @@ from .auth.config import auth_backend
 from .auth.manager import fastapi_users
 
 from .auth.router import router as router_auth
+from .tools.router import router as router_tools
 
 app = FastAPI(title='EnergyStaff', root_path='/api')
 
@@ -32,3 +33,4 @@ app.include_router(
 )
 
 app.include_router(router_auth)
+app.include_router(router_tools)
