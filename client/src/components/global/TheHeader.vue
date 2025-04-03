@@ -1,7 +1,9 @@
 <script setup>
+import { computed } from 'vue'
 import { useUserStore } from '@/stores/user';
 
-const { user } = useUserStore()
+const userStore = useUserStore()
+const user = computed(() => userStore.user)
 </script>
 
 <template>
@@ -13,7 +15,7 @@ const { user } = useUserStore()
                     <a href="#">Соискателям</a>
                     <a href="#">Работодателям</a>
                 </div>
-                <div v-else-if="user.data.is_admin">
+                <div v-else-if="user.data.is_superuser">
                     <a href="#">Управление</a>
                 </div>
                 <div v-else-if="user.data.is_edu">
