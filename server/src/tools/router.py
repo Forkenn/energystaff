@@ -10,7 +10,8 @@ from src.auth.manager import fastapi_users
 from src.users.models import User
 from src.tools.models import Location, EduInstitution, EduLevel
 from src.tools.schemas import (
-    SBaseToolsRead, SBaseToolRead, SBaseToolsSearch
+    SBaseToolsRead, SBaseToolRead, SBaseToolsSearch, SEduInstitutionCreate,
+    SEduLevelCreate, SLocationCreate
 )
 
 router = APIRouter(prefix='/tools', tags=['Tools'])
@@ -47,16 +48,16 @@ async def get_location_by_id(
 
 @router.post('/locations', responses={**openapi_400})
 async def add_location(
-    name: str,
+    data: SLocationCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseToolRead:
-    query = alch.select(Location).where(Location.name == name)
+    query = alch.select(Location).where(Location.name == data.name)
     location = (await session.execute(query)).scalar()
     if location:
         raise AlreadyExistException()
 
-    location = Location(name=name)
+    location = Location(name=data.name)
     session.add(location)
     await session.commit()
     return location
@@ -78,11 +79,11 @@ async def delete_location_by_id(
 @router.patch('/locations/{id}', responses={**openapi_404, **openapi_400})
 async def edit_location_by_id(
     id: int,
-    name: str,
+    data: SLocationCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseToolRead:
-    query = alch.select(Location).where(Location.name == name)
+    query = alch.select(Location).where(Location.name == data.name)
     location = (await session.execute(query)).scalar()
     if location:
         raise AlreadyExistException()
@@ -91,7 +92,7 @@ async def edit_location_by_id(
     if not location:
         raise NotFoundException()
 
-    location.name = name
+    location.name = data.name
     await session.commit()
     return location
 
@@ -124,16 +125,16 @@ async def get_edu_institutions_by_id(
 
 @router.post('/edu-institutions', responses={**openapi_400})
 async def add_edu_institution(
-    name: str,
+    data: SEduInstitutionCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseToolRead:
-    query = alch.select(EduInstitution).where(EduInstitution.name == name)
+    query = alch.select(EduInstitution).where(EduInstitution.name == data.name)
     edu_institution = (await session.execute(query)).scalar()
     if edu_institution:
         raise AlreadyExistException()
 
-    edu_institution = EduInstitution(name=name)
+    edu_institution = EduInstitution(name=data.name)
     session.add(edu_institution)
     await session.commit()
     return edu_institution
@@ -155,11 +156,11 @@ async def delete_edu_institution_by_id(
 @router.patch('/edu-institutions/{id}', responses={**openapi_404, **openapi_400})
 async def edit_edu_institution_by_id(
     id: int,
-    name: str,
+    data: SEduInstitutionCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseToolRead:
-    query = alch.select(EduInstitution).where(EduInstitution.name == name)
+    query = alch.select(EduInstitution).where(EduInstitution.name == data.name)
     edu_institution = (await session.execute(query)).scalar()
     if edu_institution:
         raise AlreadyExistException()
@@ -168,7 +169,7 @@ async def edit_edu_institution_by_id(
     if not edu_institution:
         raise NotFoundException()
 
-    edu_institution.name = name
+    edu_institution.name = data.name
     await session.commit()
     return edu_institution
 
@@ -183,16 +184,16 @@ async def get_edu_levels(
 
 @router.post('/edu-levels', responses={**openapi_400})
 async def add_edu_level(
-    name: str,
+    data: SEduLevelCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseToolRead:
-    query = alch.select(EduLevel).where(EduLevel.name == name)
+    query = alch.select(EduLevel).where(EduLevel.name == data.name)
     edu_level = (await session.execute(query)).scalar()
     if edu_level:
         raise AlreadyExistException()
 
-    edu_level = EduLevel(name=name)
+    edu_level = EduLevel(name=data.name)
     session.add(edu_level)
     await session.commit()
     return edu_level
@@ -214,11 +215,11 @@ async def delete_edu_level_by_id(
 @router.patch('/edu-levels/{id}', responses={**openapi_404, **openapi_400})
 async def edit_edu_level_by_id(
     id: int,
-    name: str,
+    data: SEduLevelCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseToolRead:
-    query = alch.select(EduLevel).where(EduLevel.name == name)
+    query = alch.select(EduLevel).where(EduLevel.name == data.name)
     edu_level = (await session.execute(query)).scalar()
     if edu_level:
         raise AlreadyExistException()
@@ -227,6 +228,6 @@ async def edit_edu_level_by_id(
     if not edu_level:
         raise NotFoundException()
 
-    edu_level.name = name
+    edu_level.name = data.name
     await session.commit()
     return edu_level
