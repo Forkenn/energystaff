@@ -1,8 +1,12 @@
 <script setup>
+
 import { ref } from 'vue'
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
 import AuthService from '@/services/auth.service'
+import { useAuthRedirect } from '@/composables/useAuthRedirect';
+
+useAuthRedirect();
 
 const userLogin = ref({ email: "", password: "" });
 
