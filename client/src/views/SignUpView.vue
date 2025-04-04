@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router';
 
 import TheHeader from '../components/global/TheHeader.vue'
@@ -41,6 +41,9 @@ const registerApplicant = async() => {
 }
 
 const registerEmployer = async() => {
+  if (employerData.value.company_id) {
+    employerData.value.company_id = Number(employerData.value.company_id)
+  }
   const userEmployerData = reactive({
     ...userData.value,
     ...employerData.value
@@ -81,6 +84,7 @@ const registerEdu = async() => {
 //==============Containers state control=========================
 const flexSwitchEmployer = ref(false)
 const flexSwitchEDU = ref(false)
+const flexSwitchCompany = ref(false)
 const containerFlag = ref(true)
 const employerContainerFlag = ref(false)
 const eduContainerFlag = ref(false)
@@ -104,6 +108,10 @@ const toggleContainer = () => {
     return
   }
 }
+
+const validateCompanyID = (event) => {
+  employerData.value.company_id = event.target.value.replace(/[^\d]/g, '');
+};
 
 //==============Institutions Search Control=========================
 const searchQuery = ref('');
@@ -225,19 +233,33 @@ const fetchInstitutions = async () => {
       <div v-if="employerContainerFlag" class="sign-up-container container-employer">
         <h1>Компания</h1>
         <div class="sign-up-form-group">
-          <input
+          <input v-if="!flexSwitchCompany"
             class="form-control form-text-field sys-input-288"
             type="text form-text-field"
             placeholder="Наименование компании"
             aria-label="Наименование компании"
             v-model="employerData.company_name"
           >
-          <select class="form-select" aria-label="Город">
-            <option selected>Город</option>
-            <option value="1">Москва</option>
-            <option value="2">Смоленск</option>
-            <option value="3">Санкт-Петербург</option>
-          </select>
+          <input v-else
+            class="form-control form-text-field sys-input-288"
+            type="text form-text-field"
+            placeholder="Идентификатор компании"
+            aria-label="Идентификатор компании"
+            v-model="employerData.company_id"
+            @input="validateCompanyID"
+          >
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input form-switch-44px"
+              type="checkbox"
+              role="switch"
+              id="flexSwitchCompany"
+              v-model="flexSwitchCompany"
+            >
+            <label class="form-check-label" for="flexSwitchCompany">
+              По идентификатору
+            </label>
+          </div>
           <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">Назад</button>
           <button type="button" class="btn btn-primary sys-btn-288" @click="registerEmployer">
             Зарегистрироваться
