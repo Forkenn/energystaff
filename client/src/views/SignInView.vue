@@ -1,17 +1,27 @@
 <script setup>
 
 import { ref } from 'vue'
+import { useRouter } from 'vue-router';
+
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
 import AuthService from '@/services/auth.service'
 import { useAuthRedirect } from '@/composables/useAuthRedirect';
 
 useAuthRedirect();
+const router = useRouter();
 
 const userLogin = ref({ email: "", password: "" });
 
 const login = async() => {
-  await AuthService.login(userLogin.value);
+  try {
+    await AuthService.login(userLogin.value);
+    router.push({ name: 'home' });
+  } catch(err) {
+    if (err.response?.status == 400) {
+      alert("Неверный логин или пароль!");
+    }
+  }
 }
 
 </script>

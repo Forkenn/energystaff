@@ -24,6 +24,7 @@ class AuthService {
           } else {
             console.log('Error', err.message)
           }
+          throw err;
         })
     }
   
