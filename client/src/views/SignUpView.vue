@@ -1,19 +1,37 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive  } from 'vue'
+import { useRouter } from 'vue-router';
 
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
 import AuthService from '@/services/auth.service'
 import { useAuthRedirect } from '@/composables/useAuthRedirect';
+import { errorMessages } from 'vue/compiler-sfc';
 
 useAuthRedirect();
+const router = useRouter();
 
-const userRegistration = ref({ surname: "", name: "", email: "", password: "" })
+const userData= ref({
+  surname: "",
+  name: "",
+  email: "",
+  password: "",
+})
+
+const employerData = ref({
+  company_id: null,
+  company_name: null,
+})
+
+const eduData = ref({
+  edu_institution_id: null
+})
 
 const flexSwitchEmployer = ref(false)
 const flexSwitchEDU = ref(false)
 const containerFlag = ref(true)
 const employerContainerFlag = ref(false)
+const eduContainerFlag = ref(false)
 
 const toggleSwitch = (num) => {
     if (num == 1)
@@ -29,13 +47,55 @@ const toggleContainer = () => {
     return
   }
   if (flexSwitchEDU.value) {
+    containerFlag.value = !containerFlag.value
+    eduContainerFlag.value = !eduContainerFlag.value
     return
   }
 }
 
 const registerApplicant = async() => {
-  await AuthService.registerApplicant(userRegistration.value)
+  try {
+    await AuthService.registerApplicant(userData.value)
+    router.push({ name: 'login_page' });
+  } catch(err) {
+    if (err.response?.status == 400) {
+      alert("Данный E-mail уже занят");
+    }
+  }
 }
+
+const registerEmployer = async() => {
+  const userEmployerData = reactive({
+    ...userData.value,
+    ...employerData.value
+  });
+
+  try {
+    await AuthService.registerEmployer(userEmployerData)
+    router.push({ name: 'login_page' });
+  } catch(err) {
+    if (err.response?.status == 400) {
+      alert("Данный E-mail уже занят");
+    }
+  }
+}
+
+const registerEdu = async() => {
+  const userEduData = reactive({
+    ...userData.value,
+    ...eduData.value
+  });
+
+  try {
+    await AuthService.registerEDU(userEduData.value)
+    router.push({ name: 'login_page' });
+  } catch(err) {
+    if (err.response?.status == 400) {
+      alert("Данный E-mail уже занят");
+    }
+  }
+}
+
 </script>
 
 <template>
@@ -50,28 +110,28 @@ const registerApplicant = async() => {
             type="text form-text-field"
             placeholder="Фамилия"
             aria-label="Фамилия"
-            v-model="userRegistration.surname"
+            v-model="userData.surname"
           >
           <input
             class="form-control form-text-field sys-input-288"
             type="text form-text-field"
             placeholder="Имя"
             aria-label="Имя"
-            v-model="userRegistration.name"
+            v-model="userData.name"
           >
           <input
             type="email"
             class="form-control form-text-field sys-input-288"
             id="FormControlEmailInput"
             placeholder="Электронная почта"
-            v-model="userRegistration.email"
+            v-model="userData.email"
           >
           <input
             type="password"
             id="SignInInputPassword"
             class="form-control form-text-field sys-input-288"
             placeholder="Пароль"
-            v-model="userRegistration.password"
+            v-model="userData.password"
           >
           <input
             type="password"
@@ -100,12 +160,17 @@ const registerApplicant = async() => {
               id="flexSwitchEDU"
               v-model="flexSwitchEDU"
               @change="toggleSwitch(2)"
-              >
+            >
             <label class="form-check-label" for="flexSwitchEDU">
               Я работник ОУ
             </label>
           </div>
-          <button v-if="flexSwitchEmployer" type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">
+          <button
+            v-if="flexSwitchEmployer || flexSwitchEDU"
+            type="button"
+            class="btn btn-primary sys-btn-288"
+            @click="toggleContainer"
+          >
             Далее
           </button>
           <button v-else type="button" class="btn btn-primary sys-btn-288" @click="registerApplicant">
@@ -120,7 +185,8 @@ const registerApplicant = async() => {
             class="form-control form-text-field sys-input-288"
             type="text form-text-field"
             placeholder="Наименование компании"
-            aria-label="Фамилия"
+            aria-label="Наименование компании"
+            v-model="employerData.company_name"
           >
           <select class="form-select" aria-label="Город">
             <option selected>Город</option>
@@ -129,7 +195,22 @@ const registerApplicant = async() => {
             <option value="3">Санкт-Петербург</option>
           </select>
           <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">Назад</button>
-          <button type="button" class="btn btn-primary sys-btn-288">
+          <button type="button" class="btn btn-primary sys-btn-288" @click="registerEmployer">
+            Зарегистрироваться
+          </button>
+        </div>
+      </div>
+      <div v-if="eduContainerFlag" class="sign-up-container container-employer">
+        <h1>Образовательное учреждение</h1>
+        <div class="sign-up-form-group">
+          <input
+            class="form-control form-text-field sys-input-288"
+            type="text form-text-field"
+            placeholder="Наименование ОУ"
+            aria-label="Наименование ОУ"
+          >
+          <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">Назад</button>
+          <button type="button" class="btn btn-primary sys-btn-288" @click="registerEdu">
             Зарегистрироваться
           </button>
         </div>

@@ -1,4 +1,3 @@
-import { useAttrs } from 'vue'
 import getInstance from './apiInstance.js'
 
 const instance = getInstance(true)
@@ -11,7 +10,6 @@ class UserService {
             if (err.response) {
                 console.log(err.response.data)
                 console.log(err.response.status)
-                console.log(err.response.headers)
             } else if (err.request) {
                 console.log(err.request)
             } else {

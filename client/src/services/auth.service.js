@@ -19,7 +19,6 @@ class AuthService {
           if (err.response) {
             console.log(err.response.data)
             console.log(err.response.status)
-            console.log(err.response.headers)
           } else if (err.request) {
             console.log(err.request)
           } else {
@@ -38,7 +37,6 @@ class AuthService {
           if (err.response) {
             console.log(err.response.data)
             console.log(err.response.status)
-            console.log(err.response.headers)
           } else if (err.request) {
             console.log(err.request)
           } else {
@@ -60,13 +58,12 @@ class AuthService {
           if (err.response) {
             console.log(err.response.data)
             console.log(err.response.status)
-            console.log(err.response.headers)
-            return err.response
           } else if (err.request) {
             console.log(err.request)
           } else {
             console.log('Error', err.message)
           }
+          throw err;
         })
     }
     async registerEmployer(user) {
@@ -84,13 +81,12 @@ class AuthService {
           if (err.response) {
             console.log(err.response.data)
             console.log(err.response.status)
-            console.log(err.response.headers)
-            return err.response
           } else if (err.request) {
             console.log(err.request)
           } else {
             console.log('Error', err.message)
           }
+          throw err;
         })
     }
     async registerEDU(user) {
@@ -107,13 +103,12 @@ class AuthService {
           if (err.response) {
             console.log(err.response.data)
             console.log(err.response.status)
-            console.log(err.response.headers)
-            return err.response
           } else if (err.request) {
             console.log(err.request)
           } else {
             console.log('Error', err.message)
           }
+          throw err;
         })
     }
   }
