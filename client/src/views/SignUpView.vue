@@ -1,12 +1,13 @@
 <script setup>
-import { ref, reactive  } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router';
 
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
 import AuthService from '@/services/auth.service'
+import ToolsService from '@/services/tools.service';
 import { useAuthRedirect } from '@/composables/useAuthRedirect';
-import { errorMessages } from 'vue/compiler-sfc';
+import { debounce } from '@/composables/useDebounce';
 
 useAuthRedirect();
 const router = useRouter();
@@ -23,35 +24,10 @@ const employerData = ref({
   company_name: null,
 })
 
+const selectedInstitution = ref(null);
 const eduData = ref({
   edu_institution_id: null
 })
-
-const flexSwitchEmployer = ref(false)
-const flexSwitchEDU = ref(false)
-const containerFlag = ref(true)
-const employerContainerFlag = ref(false)
-const eduContainerFlag = ref(false)
-
-const toggleSwitch = (num) => {
-    if (num == 1)
-        flexSwitchEDU.value = false;
-    else
-        flexSwitchEmployer.value = false;
-}
-
-const toggleContainer = () => {
-  if (flexSwitchEmployer.value) {
-    containerFlag.value = !containerFlag.value
-    employerContainerFlag.value = !employerContainerFlag.value
-    return
-  }
-  if (flexSwitchEDU.value) {
-    containerFlag.value = !containerFlag.value
-    eduContainerFlag.value = !eduContainerFlag.value
-    return
-  }
-}
 
 const registerApplicant = async() => {
   try {
@@ -81,13 +57,19 @@ const registerEmployer = async() => {
 }
 
 const registerEdu = async() => {
+  if (!selectedInstitution.value) {
+    alert("Не выбрано образовательное учреждение!");
+    return
+  }
+
+  eduData.value.edu_institution_id = selectedInstitution.value.id
   const userEduData = reactive({
     ...userData.value,
     ...eduData.value
   });
 
   try {
-    await AuthService.registerEDU(userEduData.value)
+    await AuthService.registerEDU(userEduData)
     router.push({ name: 'login_page' });
   } catch(err) {
     if (err.response?.status == 400) {
@@ -95,6 +77,68 @@ const registerEdu = async() => {
     }
   }
 }
+
+//==============Containers state control=========================
+const flexSwitchEmployer = ref(false)
+const flexSwitchEDU = ref(false)
+const containerFlag = ref(true)
+const employerContainerFlag = ref(false)
+const eduContainerFlag = ref(false)
+
+const toggleSwitch = (num) => {
+    if (num == 1)
+        flexSwitchEDU.value = false;
+    else
+        flexSwitchEmployer.value = false;
+}
+
+const toggleContainer = () => {
+  if (flexSwitchEmployer.value) {
+    containerFlag.value = !containerFlag.value
+    employerContainerFlag.value = !employerContainerFlag.value
+    return
+  }
+  if (flexSwitchEDU.value) {
+    containerFlag.value = !containerFlag.value
+    eduContainerFlag.value = !eduContainerFlag.value
+    return
+  }
+}
+
+//==============Institutions Search Control=========================
+const searchQuery = ref('');
+const institutions = ref([]);
+const isLoading = ref(false);
+
+const debouncedSearch = debounce(async () => {
+  if (searchQuery.value.length > 2) {
+    await fetchInstitutions();
+  } else {
+    institutions.value = [];
+  }
+}, 300);
+
+const onSearchInput = (event) => {
+  searchQuery.value = event.target.value;
+  debouncedSearch();
+  const found = institutions.value.find(inst => inst.name === searchQuery.value);
+  selectedInstitution.value = found || null;
+};
+
+const fetchInstitutions = async () => {
+  isLoading.value = true;
+  try {
+    const params = { q: searchQuery.value }
+    const response = await ToolsService.getEduInstitutions(params)
+    institutions.value = response.data.items;
+  } catch (err) {
+    console.log(err)
+    alert('Ошибка при загрузке учебных заведений');
+    institutions.value = [];
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 </script>
 
@@ -208,7 +252,19 @@ const registerEdu = async() => {
             type="text form-text-field"
             placeholder="Наименование ОУ"
             aria-label="Наименование ОУ"
+            id="edu-institution-input"
+            v-model="searchQuery"
+            @input="onSearchInput"
+            list="institutions-list"
           >
+          <datalist id="institutions-list">
+            <option 
+              v-for="institution in institutions" 
+              :key="institution.id" 
+              :value="institution.name"
+              :data-id="institution.id"
+            ></option>
+          </datalist>
           <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">Назад</button>
           <button type="button" class="btn btn-primary sys-btn-288" @click="registerEdu">
             Зарегистрироваться
