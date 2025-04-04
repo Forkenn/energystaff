@@ -22,8 +22,7 @@ current_superuser = fastapi_users.current_user(superuser=True)
 @router.get('/locations')
 async def get_locations(
     params: SBaseToolsSearch = Depends(),
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user)
+    session: AsyncSession = Depends(get_async_session)
 ) -> SBaseToolsRead:
     query = alch.select(Location)
     if params.q:
@@ -37,8 +36,7 @@ async def get_locations(
 @router.get('/locations/{id}', responses={**openapi_404})
 async def get_location_by_id(
     id: int,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user)
+    session: AsyncSession = Depends(get_async_session)
 ) -> SBaseToolRead:
     location = await session.get(Location, id)
     if not location:
@@ -99,8 +97,7 @@ async def edit_location_by_id(
 @router.get('/edu-institutions')
 async def get_edu_institutions(
     params: SBaseToolsSearch = Depends(),
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user)
+    session: AsyncSession = Depends(get_async_session)
 ) -> SBaseToolsRead:
     query = alch.select(EduInstitution)
     if params.q:
@@ -114,8 +111,7 @@ async def get_edu_institutions(
 @router.get('/edu-institutions/{id}', responses={**openapi_404})
 async def get_edu_institutions_by_id(
     id: int,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user)
+    session: AsyncSession = Depends(get_async_session)
 ) -> SBaseToolRead:
     response = await session.get(EduInstitution, id)
     if not response:
@@ -175,8 +171,7 @@ async def edit_edu_institution_by_id(
 
 @router.get('/edu-levels')
 async def get_edu_levels(
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user)
+    session: AsyncSession = Depends(get_async_session)
 ) -> SBaseToolsRead:
     query = alch.select(EduLevel)
     edu_levels = (await session.execute(query)).scalars().all()
