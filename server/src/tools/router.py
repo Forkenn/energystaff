@@ -6,12 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from src.responses import response_204, openapi_404, openapi_204, openapi_400
 from src.exceptions import NotFoundException, AlreadyExistException
+from src.schemas import SBaseCatalogItemRead, SBaseCatalogRead
 from src.auth.manager import fastapi_users
 from src.users.models import User
 from src.tools.models import Location, EduInstitution, EduLevel
 from src.tools.schemas import (
-    SBaseToolsRead, SBaseToolRead, SBaseToolsSearch, SEduInstitutionCreate,
-    SEduLevelCreate, SLocationCreate
+    SBaseToolsSearch, SEduInstitutionCreate, SEduLevelCreate, SLocationCreate
 )
 
 router = APIRouter(prefix='/tools', tags=['Tools'])
@@ -23,7 +23,7 @@ current_superuser = fastapi_users.current_user(superuser=True)
 async def get_locations(
     params: SBaseToolsSearch = Depends(),
     session: AsyncSession = Depends(get_async_session)
-) -> SBaseToolsRead:
+) -> SBaseCatalogRead:
     query = alch.select(Location)
     if params.q:
         query = query.where(Location.name.like(f'{params.q}%'))
@@ -37,7 +37,7 @@ async def get_locations(
 async def get_location_by_id(
     id: int,
     session: AsyncSession = Depends(get_async_session)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     location = await session.get(Location, id)
     if not location:
         raise NotFoundException()
@@ -49,7 +49,7 @@ async def add_location(
     data: SLocationCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     query = alch.select(Location).where(Location.name == data.name)
     location = (await session.execute(query)).scalar()
     if location:
@@ -80,7 +80,7 @@ async def edit_location_by_id(
     data: SLocationCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     query = alch.select(Location).where(Location.name == data.name)
     location = (await session.execute(query)).scalar()
     if location:
@@ -98,7 +98,7 @@ async def edit_location_by_id(
 async def get_edu_institutions(
     params: SBaseToolsSearch = Depends(),
     session: AsyncSession = Depends(get_async_session)
-) -> SBaseToolsRead:
+) -> SBaseCatalogRead:
     query = alch.select(EduInstitution)
     if params.q:
         query = query.where(EduInstitution.name.like(f'%{params.q}%'))
@@ -112,7 +112,7 @@ async def get_edu_institutions(
 async def get_edu_institutions_by_id(
     id: int,
     session: AsyncSession = Depends(get_async_session)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     response = await session.get(EduInstitution, id)
     if not response:
         raise NotFoundException()
@@ -124,7 +124,7 @@ async def add_edu_institution(
     data: SEduInstitutionCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     query = alch.select(EduInstitution).where(EduInstitution.name == data.name)
     edu_institution = (await session.execute(query)).scalar()
     if edu_institution:
@@ -155,7 +155,7 @@ async def edit_edu_institution_by_id(
     data: SEduInstitutionCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     query = alch.select(EduInstitution).where(EduInstitution.name == data.name)
     edu_institution = (await session.execute(query)).scalar()
     if edu_institution:
@@ -172,7 +172,7 @@ async def edit_edu_institution_by_id(
 @router.get('/edu-levels')
 async def get_edu_levels(
     session: AsyncSession = Depends(get_async_session)
-) -> SBaseToolsRead:
+) -> SBaseCatalogRead:
     query = alch.select(EduLevel)
     edu_levels = (await session.execute(query)).scalars().all()
     return {'count': len(edu_levels),'items': edu_levels}
@@ -182,7 +182,7 @@ async def add_edu_level(
     data: SEduLevelCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     query = alch.select(EduLevel).where(EduLevel.name == data.name)
     edu_level = (await session.execute(query)).scalar()
     if edu_level:
@@ -213,7 +213,7 @@ async def edit_edu_level_by_id(
     data: SEduLevelCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
-) -> SBaseToolRead:
+) -> SBaseCatalogItemRead:
     query = alch.select(EduLevel).where(EduLevel.name == data.name)
     edu_level = (await session.execute(query)).scalar()
     if edu_level:

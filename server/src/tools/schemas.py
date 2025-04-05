@@ -1,16 +1,6 @@
 from pydantic import BaseModel, Field
 
 
-class SBaseToolRead(BaseModel):
-    id: int
-    name: str
-
-
-class SBaseToolsRead(BaseModel):
-    count: int
-    items: list[SBaseToolRead]
-
-
 class SBaseToolsSearch(BaseModel):
     q: str | None = None
     start: int | None = Field(None, ge=0)
