@@ -7,6 +7,7 @@ from src.database import get_async_session
 from src.responses import response_204, openapi_404, openapi_204, openapi_400
 from src.exceptions import NotFoundException, AlreadyExistException
 from src.schemas import SBaseCatalogItemRead, SBaseCatalogRead
+from src.dao.common import search_catalog_multi, fetch_one
 from src.auth.manager import fastapi_users
 from src.users.models import User
 from src.tools.models import Location, EduInstitution, EduLevel
@@ -24,13 +25,10 @@ async def get_locations(
     params: SBaseToolsSearch = Depends(),
     session: AsyncSession = Depends(get_async_session)
 ) -> SBaseCatalogRead:
-    query = alch.select(Location)
-    if params.q:
-        query = query.where(Location.name.like(f'{params.q}%'))
-    if params.start and params.end:
-        query = query.slice(params.start, params.end)
+    locations = await search_catalog_multi(
+        session, Location, params.q, params.start, params.end
+    )
 
-    locations = (await session.execute(query)).scalars().all()
     return {'count': len(locations),'items': locations}
 
 @router.get('/locations/{id}', responses={**openapi_404})
@@ -50,8 +48,7 @@ async def add_location(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    query = alch.select(Location).where(Location.name == data.name)
-    location = (await session.execute(query)).scalar()
+    location = await fetch_one(session, Location, Location.name == data.name)
     if location:
         raise AlreadyExistException()
 
@@ -81,8 +78,7 @@ async def edit_location_by_id(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    query = alch.select(Location).where(Location.name == data.name)
-    location = (await session.execute(query)).scalar()
+    location = await fetch_one(session, Location, Location.name == data.name)
     if location:
         raise AlreadyExistException()
 
@@ -99,13 +95,10 @@ async def get_edu_institutions(
     params: SBaseToolsSearch = Depends(),
     session: AsyncSession = Depends(get_async_session)
 ) -> SBaseCatalogRead:
-    query = alch.select(EduInstitution)
-    if params.q:
-        query = query.where(EduInstitution.name.like(f'%{params.q}%'))
-    if params.start and params.end:
-        query = query.slice(params.start, params.end)
+    response = await search_catalog_multi(
+        session, EduInstitution, params.q, params.start, params.end
+    )
 
-    response = (await session.execute(query)).scalars().all()
     return {'count': len(response),'items': response}
 
 @router.get('/edu-institutions/{id}', responses={**openapi_404})
@@ -125,8 +118,9 @@ async def add_edu_institution(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    query = alch.select(EduInstitution).where(EduInstitution.name == data.name)
-    edu_institution = (await session.execute(query)).scalar()
+    edu_institution = await fetch_one(
+        session, EduInstitution, EduInstitution.name == data.name
+    )
     if edu_institution:
         raise AlreadyExistException()
 
@@ -156,8 +150,9 @@ async def edit_edu_institution_by_id(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    query = alch.select(EduInstitution).where(EduInstitution.name == data.name)
-    edu_institution = (await session.execute(query)).scalar()
+    edu_institution = await fetch_one(
+        session, EduInstitution, EduInstitution.name == data.name
+    )
     if edu_institution:
         raise AlreadyExistException()
 
@@ -173,8 +168,9 @@ async def edit_edu_institution_by_id(
 async def get_edu_levels(
     session: AsyncSession = Depends(get_async_session)
 ) -> SBaseCatalogRead:
-    query = alch.select(EduLevel)
-    edu_levels = (await session.execute(query)).scalars().all()
+    edu_levels = await search_catalog_multi(
+        session, EduLevel
+    )
     return {'count': len(edu_levels),'items': edu_levels}
 
 @router.post('/edu-levels', responses={**openapi_400})
@@ -183,8 +179,7 @@ async def add_edu_level(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    query = alch.select(EduLevel).where(EduLevel.name == data.name)
-    edu_level = (await session.execute(query)).scalar()
+    edu_level = await fetch_one(session, EduLevel, EduLevel.name == data.name)
     if edu_level:
         raise AlreadyExistException()
 
@@ -214,8 +209,7 @@ async def edit_edu_level_by_id(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    query = alch.select(EduLevel).where(EduLevel.name == data.name)
-    edu_level = (await session.execute(query)).scalar()
+    edu_level = await fetch_one(session, EduLevel, EduLevel.name == data.name)
     if edu_level:
         raise AlreadyExistException()
 
