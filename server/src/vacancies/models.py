@@ -67,7 +67,7 @@ class Vacancy(Base):
     specialization: orm.Mapped[str] = orm.mapped_column(
         alch.String(120), nullable=False
     )
-    salary: orm.Mapped[int] = orm.mapped_collection(alch.Integer())
+    salary: orm.Mapped[int] = orm.mapped_column(alch.Integer(), server_default='0')
     description: orm.Mapped[str] = orm.mapped_column(alch.String(500))
     timestamp: orm.Mapped[datetime] = orm.mapped_column(
         DateTime(timezone=True), default=func.now()
@@ -76,13 +76,13 @@ class Vacancy(Base):
         alch.ForeignKey("companies.id", ondelete='CASCADE'), index=True
     )
 
-    vacancy_types: orm.Mapped["EmploymentType"] = orm.relationship(
+    vacancy_types: orm.Mapped[list["EmploymentType"]] = orm.relationship(
         "EmploymentType", secondary=vacancies_types
     )
-    vacancy_formats: orm.Mapped["EmploymentFormat"] = orm.relationship(
+    vacancy_formats: orm.Mapped[list["EmploymentFormat"]] = orm.relationship(
         "EmploymentFormat", secondary=vacancies_formats
     )
-    vacancy_schedules: orm.Mapped["EmploymentSchedule"] = orm.relationship(
+    vacancy_schedules: orm.Mapped[list["EmploymentSchedule"]] = orm.relationship(
         "EmploymentSchedule", secondary=vacancies_schedules
     )
 
