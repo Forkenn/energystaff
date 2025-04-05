@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-import sqlalchemy as alch
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
@@ -48,7 +47,9 @@ async def add_location(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    location = await fetch_one(session, Location, Location.name == data.name)
+    location = await fetch_one(
+        session, Location, where=(Location.name == data.name,)
+    )
     if location:
         raise AlreadyExistException()
 
@@ -78,7 +79,9 @@ async def edit_location_by_id(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    location = await fetch_one(session, Location, Location.name == data.name)
+    location = await fetch_one(
+        session, Location, where=(Location.name == data.name,)
+    )
     if location:
         raise AlreadyExistException()
 
@@ -119,7 +122,7 @@ async def add_edu_institution(
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
     edu_institution = await fetch_one(
-        session, EduInstitution, EduInstitution.name == data.name
+        session, EduInstitution, where=(EduInstitution.name == data.name,)
     )
     if edu_institution:
         raise AlreadyExistException()
@@ -151,7 +154,7 @@ async def edit_edu_institution_by_id(
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
     edu_institution = await fetch_one(
-        session, EduInstitution, EduInstitution.name == data.name
+        session, EduInstitution, where=(EduInstitution.name == data.name,)
     )
     if edu_institution:
         raise AlreadyExistException()
@@ -179,7 +182,9 @@ async def add_edu_level(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    edu_level = await fetch_one(session, EduLevel, EduLevel.name == data.name)
+    edu_level = await fetch_one(
+        session, EduLevel, where=(EduLevel.name == data.name,)
+    )
     if edu_level:
         raise AlreadyExistException()
 
@@ -209,7 +214,9 @@ async def edit_edu_level_by_id(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser)
 ) -> SBaseCatalogItemRead:
-    edu_level = await fetch_one(session, EduLevel, EduLevel.name == data.name)
+    edu_level = await fetch_one(
+        session, EduLevel, where=(EduLevel.name == data.name,)
+    )
     if edu_level:
         raise AlreadyExistException()
 

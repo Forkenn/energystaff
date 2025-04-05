@@ -4,6 +4,7 @@ from typing import TypeVar, Type, Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import ColumnElement
+from sqlalchemy.sql.base import ExecutableOption
 
 T = TypeVar("T")    # SQLAlchemy Model
 P = TypeVar("P")    # Pydantic Schema
@@ -11,9 +12,11 @@ P = TypeVar("P")    # Pydantic Schema
 async def fetch_one(
         session: AsyncSession,
         model: Type[T],
-        *where: ColumnElement[bool]
+        *,
+        where: Sequence[ColumnElement[bool]] = (),
+        options: Sequence[ExecutableOption] = ()
 ) -> T | None:
-    query = alch.select(model).where(*where)
+    query = alch.select(model).where(*where).options(*options)
     return (await session.execute(query)).scalar()
 
 async def fetch_all(
