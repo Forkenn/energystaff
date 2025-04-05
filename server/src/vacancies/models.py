@@ -80,10 +80,10 @@ class Vacancy(Base):
         "EmploymentType", secondary=vacancies_types
     )
     vacancy_formats: orm.Mapped["EmploymentFormat"] = orm.relationship(
-        "EmploymentFormat", secondary=vacancies_types
+        "EmploymentFormat", secondary=vacancies_formats
     )
     vacancy_schedules: orm.Mapped["EmploymentSchedule"] = orm.relationship(
-        "EmploymentSchedule", secondary=vacancies_types
+        "EmploymentSchedule", secondary=vacancies_schedules
     )
 
 
