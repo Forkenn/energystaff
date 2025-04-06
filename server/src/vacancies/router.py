@@ -23,6 +23,27 @@ current_user = RoleManager(SystemRole.VERIFIED, SystemRole.ACTIVE)
 current_employer = RoleManager(SystemRole.VERIFIED, SystemRole.EMPLOYER)
 current_superuser = RoleManager(SystemRole.SUPERUSER)
 
+@router.get('/schedules')
+async def get_vacancies_schedules(
+        session: AsyncSession = Depends(get_async_session)
+) -> SBaseCatalogRead:
+    results = await fetch_all(session, EmploymentSchedule)
+    return {'count': len(results), 'items': results}
+
+@router.get('/formats')
+async def get_vacancies_formats(
+        session: AsyncSession = Depends(get_async_session)
+) -> SBaseCatalogRead:
+    results = await fetch_all(session, EmploymentFormat)
+    return {'count': len(results), 'items': results}
+
+@router.get('/types')
+async def get_vacancies_types(
+        session: AsyncSession = Depends(get_async_session)
+) -> SBaseCatalogRead:
+    results = await fetch_all(session, EmploymentType)
+    return {'count': len(results), 'items': results}
+
 @router.get('')
 async def get_vacancies_cards(
     data: SBaseQueryBody = Depends(),
@@ -147,24 +168,3 @@ async def edit_vacancy_by_id(
     await session.commit()
     
     return vacancy
-
-@router.get('/schedules')
-async def get_vacancies_schedules(
-        session: AsyncSession = Depends(get_async_session)
-) -> SBaseCatalogRead:
-    results = await fetch_all(session, EmploymentSchedule)
-    return {'count': len(results), 'items': results}
-
-@router.get('/formats')
-async def get_vacancies_formats(
-        session: AsyncSession = Depends(get_async_session)
-) -> SBaseCatalogRead:
-    results = await fetch_all(session, EmploymentFormat)
-    return {'count': len(results), 'items': results}
-
-@router.get('/types')
-async def get_vacancies_types(
-        session: AsyncSession = Depends(get_async_session)
-) -> SBaseCatalogRead:
-    results = await fetch_all(session, EmploymentType)
-    return {'count': len(results), 'items': results}
