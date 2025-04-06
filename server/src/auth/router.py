@@ -15,10 +15,6 @@ from src.tools.models import EduInstitution
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
-current_user = fastapi_users.current_user(active=True)
-current_user_verified = fastapi_users.current_user(active=True, verified=True)
-current_superuser = fastapi_users.current_user(superuser=True)
-
 responses ={
     404: {"description": "Item not found"},
     401: {"description": "Missing token or inactive/unverified user."},

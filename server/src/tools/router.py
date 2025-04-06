@@ -8,6 +8,7 @@ from src.exceptions import NotFoundException, AlreadyExistException
 from src.core.schemas.catalog import SBaseCatalogItemRead, SBaseCatalogRead
 from src.core.dao.common import search_catalog_multi, fetch_one
 from src.auth.manager import fastapi_users
+from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.tools.models import Location, EduInstitution, EduLevel
 from src.tools.schemas import (
@@ -16,8 +17,8 @@ from src.tools.schemas import (
 
 router = APIRouter(prefix='/tools', tags=['Tools'])
 
-current_user = fastapi_users.current_user(active=True)
-current_superuser = fastapi_users.current_user(superuser=True)
+current_user = RoleManager(SystemRole.ACTIVE)
+current_superuser = RoleManager(SystemRole.SUPERUSER)
 
 @router.get('/locations')
 async def get_locations(

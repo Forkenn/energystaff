@@ -42,8 +42,6 @@ class RoleManager:
             role for role in self.required_roles if not roles_mapping.get(role, False)
         ]
 
-        print(missing_roles)
-
         if missing_roles:
             raise ForbiddenException()
         
