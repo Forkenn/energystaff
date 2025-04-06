@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from src.responses import response_204, openapi_404, openapi_204, openapi_400
 from src.exceptions import NotFoundException, AlreadyExistException
-from src.schemas import SBaseCatalogItemRead, SBaseCatalogRead
-from src.dao.common import search_catalog_multi, fetch_one
+from src.core.schemas.catalog import SBaseCatalogItemRead, SBaseCatalogRead
+from src.core.dao.common import search_catalog_multi, fetch_one
 from src.auth.manager import fastapi_users
 from src.users.models import User
 from src.tools.models import Location, EduInstitution, EduLevel

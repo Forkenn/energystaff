@@ -9,13 +9,3 @@ class SBaseQueryBody(BaseModel):
 
 class SBaseQueryCountResponse(BaseModel):
     count: int
-
-
-class SBaseCatalogItemRead(BaseModel):
-    id: int
-    name: str
-
-
-class SBaseCatalogRead(BaseModel):
-    count: int
-    items: list[SBaseCatalogItemRead]

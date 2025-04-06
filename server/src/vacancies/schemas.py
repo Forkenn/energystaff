@@ -1,7 +1,7 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 
-from src.schemas import SBaseCatalogItemRead
+from src.core.schemas.catalog import SBaseCatalogItemRead
 
 class SVacancyCreate(BaseModel):
     position: str = Field(

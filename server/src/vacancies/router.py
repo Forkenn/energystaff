@@ -6,9 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from src.responses import openapi_404, openapi_403
 from src.exceptions import NotFoundException
-from src.schemas import SBaseCatalogRead, SBaseQueryBody, SBaseQueryCountResponse
-from src.dao.common import fetch_all, fetch_one
-from src.dao.vacancies import fetch_vacancies_cards, count_vacancies
+from src.core.schemas.catalog import SBaseCatalogRead
+from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
+from src.core.dao.common import fetch_all, fetch_one
+from src.core.dao.vacancies import fetch_vacancies_cards, count_vacancies
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.vacancies.models import (
