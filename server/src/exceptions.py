@@ -24,7 +24,7 @@ class BadRequestException(HTTPException):
 
 class ForbiddenException(HTTPException):
     status_code = status.HTTP_403_FORBIDDEN
-    detail = ''
+    detail = 'FORBIDDEN'
 
     def __init__(self, headers = None):
         super().__init__(self.status_code, self.detail, headers)
