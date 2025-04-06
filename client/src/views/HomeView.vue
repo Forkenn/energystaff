@@ -1,13 +1,22 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useVacanciesStore } from '@/stores/vacancies';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import TheVacancyCard from '@/components/home/TheVacancyCard.vue';
+import VacanciesService from '@/services/vacancies.service';
 
-const vacanciesStore  = useVacanciesStore();
-onMounted(vacanciesStore.getVacancies);
+const filters = ref({ "q": "", "start": 0, "end": 50 });
+const vacancies = ref({ "count": 0, "items": [] });
+
+const getVacancies = async() => {
+  const response = await VacanciesService.getVacancies(filters.value);
+  vacancies.value = response.data;
+  console.log(vacancies.value);
+}
+
+onMounted(getVacancies);
 
 </script>
 
@@ -37,8 +46,8 @@ onMounted(vacanciesStore.getVacancies);
               </div>
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
-              <div v-if="vacanciesStore.vacancies.count" class="vacancy-wrapper">
-                <TheVacancyCard v-for="vacancy in vacanciesStore.vacancies.items" :key="vacancy.id" :vacancy="vacancy"/>
+              <div v-if="vacancies.count" class="vacancy-wrapper">
+                <TheVacancyCard v-for="vacancy in vacancies.items" :key="vacancy.id" :vacancy="vacancy"/>
               </div>
               <nav aria-label="Навигация" style="margin: 0 auto;">
                 <ul class="pagination">

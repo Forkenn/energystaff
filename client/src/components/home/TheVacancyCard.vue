@@ -8,7 +8,7 @@ defineProps({
   <div class="vacancy-card">
     <div class="card-wrapper" style="align-items: center;">
         <h1>
-            {{ vacancy.name }}
+            {{ vacancy.position }}
             <img v-if="vacancy.negotiations && vacancy.negotiations.id == 1" src="../../assets/icons/vacancies/Negotiation_process.svg">
             <img v-if="vacancy.negotiations && vacancy.negotiations.id == 2" src="../../assets/icons/vacancies/Negotiation_success.svg">
             <img v-if="vacancy.negotiations && vacancy.negotiations.id == 3" src="../../assets/icons/vacancies/Negotiation_reject.svg">
@@ -17,7 +17,7 @@ defineProps({
             от {{ vacancy.salary }} ₽, до вычета налогов
         </div>
         <div class="company">
-            {{ vacancy.company }}
+            {{ vacancy.company_name }}
         </div>
         <div class="city">
             {{ vacancy.city }}
