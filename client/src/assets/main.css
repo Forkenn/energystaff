@@ -71,6 +71,12 @@
   border-radius: 40px !important;
 }
 
+.sys-input-flex {
+  height: 48px;
+  min-width: 288px;
+  width: 100%;
+}
+
 .sys-input-288 {
   width: 288px !important;
   height: 48px;

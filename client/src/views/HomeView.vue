@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useVacanciesStore } from '@/stores/vacancies';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
@@ -27,11 +26,8 @@ onMounted(getVacancies);
       <div class="home-wrapper">
         <div class="search-wrapper">
           <div class="row">
-            <div class="col-auto">
-              <button type="button" class="btn btn-primary sys-btn-288">Моё резюме</button>
-            </div>
             <div class="col d-flex">
-              <input type="text" class="form-control flex-grow-1 sys-input-810-flex" id="InputSearch" placeholder="Профессия, должность или компания">
+              <input type="text" class="form-control flex-grow-1 sys-input-flex" id="InputSearch" placeholder="Профессия, должность или компания">
             </div>
             <div class="col-auto">
               <button type="button" class="btn btn-primary sys-btn-150">Поиск</button>

@@ -1,7 +1,27 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
+import VacanciesService from '@/services/vacancies.service';
+
+const props = defineProps({
     vacancy: Object,
-})
+});
+
+const router = useRouter();
+
+const userStore = useUserStore();
+const user = computed(() => userStore.user);
+
+const deleteVacancy = async() => {
+    await VacanciesService.deleteVacancy(props.vacancy.id);
+    router.go(0);
+}
+
+const editVacancy = async() => {
+    router.push({ name: 'vacancy_editor', query: { id: props.vacancy.id } });
+}
+
 </script>
 
 <template>
@@ -22,7 +42,10 @@ defineProps({
         <div class="city">
             {{ vacancy.city }}
         </div>
-        <button type="button" class="btn btn-primary sys-btn-288">Откликнуться</button>
+        <button v-if="user.data.is_applicant" class="btn btn-primary sys-btn-200" style="margin-right: 24px;">Откликнуться</button>
+        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" style="margin-right: 24px;" @click="editVacancy">Редактировать</button>
+        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" style="margin-right: 24px;" @click="deleteVacancy">Удалить</button>
+        <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" style="margin-right: 24px;" @click="deleteVacancy">Удалить</button>
     </div>
   </div>
 </template>
