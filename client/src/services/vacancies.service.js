@@ -24,7 +24,7 @@ class VacanciesService {
         throw err;
       })
   }
-  async editVacancy(id) {
+  async editVacancy(id, data) {
     return await instance
       .post(`/vacancies/${id}`)
       .then((response) => response)
@@ -43,6 +43,22 @@ class VacanciesService {
   async deleteVacancy(id) {
     return await instance
       .delete(`/vacancies/${id}`)
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async getVacancy(id) {
+    return await instance
+      .get(`/vacancies/${id}`)
       .then((response) => response)
       .catch((err) => {
         if (err.response) {

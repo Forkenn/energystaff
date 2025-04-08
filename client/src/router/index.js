@@ -101,12 +101,12 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !userStore.user.status.loggedIn) {
-    next('/login');
+    next({ name: 'login_page' });
     return;
   }
 
   if (to.meta.authRedirect && userStore.user.status.loggedIn) {
-    next('/');
+    next({ name: 'home' });
     return;
   }
 

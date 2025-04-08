@@ -1,6 +1,51 @@
 <script setup>
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
 import TheFooter from '@/components/global/TheFooter.vue';
 import TheHeader from '@/components/global/TheHeader.vue';
+import VacanciesService from '@/services/vacancies.service';
+
+const route = useRoute();
+const router = useRouter();
+
+const vacancy_id = route.query.id;
+const vacancy_data = ref({
+  position: "",
+  specialization: "",
+  description: "",
+  salary: 0,
+  vacancy_types: [
+    {
+      id: 0,
+      name: "string"
+    }
+  ],
+  vacancy_formats: [
+    {
+      id: 0,
+      name: "string"
+    }
+  ],
+  vacancy_schedules: [
+    {
+      id: 0,
+      name: "string"
+    }
+  ]
+})
+
+onMounted(async () => {
+  if (vacancy_id) {
+    try {
+      const response = await VacanciesService.getVacancy(vacancy_id);
+      vacancy_data.value = response.data;
+    } catch(err) {
+      alert('Вакансия не найдена!')
+      router.push({ name: 'vacancy_editor' });
+    }
+  }
+})
 
 </script>
 
@@ -16,7 +61,13 @@ import TheHeader from '@/components/global/TheHeader.vue';
           <div class="row">
             <div class="col-auto sys-col-912-flex">
               <div class="custom-form-floating">
-                <input type="text" class="form-control flex-grow-1 sys-input-912-flex" id="InputName" placeholder="Должность">
+                <input
+                  type="text"
+                  class="form-control flex-grow-1 sys-input-912-flex"
+                  id="InputName"
+                  placeholder="Должность"
+                  v-model="vacancy_data.position"
+                >
                 <label for="InputName">Должность</label>
               </div>
             </div>
@@ -24,14 +75,26 @@ import TheHeader from '@/components/global/TheHeader.vue';
           <div class="row">
             <div class="col-auto sys-col-600-flex">
               <div class="custom-form-floating">
-                <input type="text" class="form-control flex-grow-1 sys-input-600-flex" id="InputSpecialization" placeholder="Специализация">
+                <input
+                  type="text"
+                  class="form-control flex-grow-1 sys-input-600-flex"
+                  id="InputSpecialization"
+                  placeholder="Специализация"
+                  v-model="vacancy_data.specialization"
+                >
                 <label for="InputSpecialization">Специализация</label>
               </div>
             </div>
             <div class="col d-flex">
               <div class="floating-input-group">
                 <div class="custom-form-floating">
-                  <input type="text" class="form-control flex-grow-1 sys-input-group-250" id="InputSalary" placeholder="Зарплата">
+                  <input
+                    type="text"
+                    class="form-control flex-grow-1 sys-input-group-250"
+                    id="InputSalary"
+                    placeholder="Зарплата"
+                    v-model="vacancy_data.salary"
+                  >
                   <label for="InputSalary">Зарплата</label>
                 </div>
                 <span class="input-group-text sys-input-group-text-38">₽</span>
@@ -144,7 +207,12 @@ import TheHeader from '@/components/global/TheHeader.vue';
             <div class="col d-flex">
               <div class="vacancy-text-area">
                 <label for="formControlExtended" class="form-label">Описание</label>
-                <textarea class="form-control" id="formControlExtended" rows="15"></textarea>
+                <textarea
+                  class="form-control"
+                  id="formControlExtended"
+                  rows="15"
+                  v-model="vacancy_data.description"
+                ></textarea>
               </div>
             </div>
           </div>
