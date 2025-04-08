@@ -29,15 +29,18 @@ class SVacancyCreate(BaseModel):
 
 
 class SVacancyRead(BaseModel):
+    id: int
     position: str
     specialization: str
     salary: int
+    description: str
     vacancy_types: list[SBaseCatalogItemRead]
     vacancy_formats: list[SBaseCatalogItemRead]
     vacancy_schedules: list[SBaseCatalogItemRead]
 
 
 class SVacancyPreview(BaseModel):
+    id: int
     position: str
     salary: int
     city: str | None = "Тестовый город, заменить!"
