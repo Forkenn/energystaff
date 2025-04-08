@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import SignInView from '@/views/SignInView.vue'
@@ -10,60 +11,106 @@ import VacancyEditorView from '@/views/VacancyEditorView.vue'
 import VerificationView from '@/views/VerificationView.vue'
 import RecommendationEditorView from '@/views/RecommendationEditorView.vue'
 
+import { useUserStore } from '@/stores/user';
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       name: 'home',
+      meta: { requiresAuth: true },
       component: HomeView,
     },
     {
       path: '/login',
       name: 'login_page',
+      meta: {
+        requiresAuth: false,
+        authRedirect: true
+       },
       component: SignInView,
     },
     {
       path: '/registration',
       name: 'registration_page',
+      meta: {
+        requiresAuth: false,
+        authRedirect: true
+      },
       component: SignUpView,
     },
     {
       path: '/account',
       name: 'account_page',
+      meta: { requiresAuth: true },
       component: AccountView,
     },
     {
       path: '/negotiations',
       name: 'negotiations_page',
+      meta: { requiresAuth: true },
       component: NegotiationsView,
     },
     {
       path: '/resume/editor',
       name: 'resume_editor',
+      meta: { requiresAuth: true },
       component: ResumeEditorView,
     },
     {
       path: '/company/editor',
       name: 'company_editor',
+      meta: { requiresAuth: true },
       component: CompanyEditorView,
     },
     {
       path: '/vacancy/editor',
       name: 'vacancy_editor',
+      meta: { requiresAuth: true },
       component: VacancyEditorView,
     },
     {
       path: '/edu/verification',
       name: 'edu_verification',
+      meta: { requiresAuth: true },
       component: VerificationView,
     },
     {
       path: '/edu/recommendation/editor',
       name: 'edu_recommendation_editor',
+      meta: { requiresAuth: true },
       component: RecommendationEditorView,
     },
   ],
+})
+
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+  await userStore.getUser();
+
+  if (userStore.isLoading) {
+    const unwatch = watch(
+      () => userStore.isLoading,
+      (val) => {
+        if (!val) {
+          unwatch();
+        }
+      }
+    )
+  }
+
+  if (to.meta.requiresAuth && !userStore.user.status.loggedIn) {
+    next('/login');
+    return;
+  }
+
+  if (to.meta.authRedirect && userStore.user.status.loggedIn) {
+    next('/');
+    return;
+  }
+
+  next();
 })
 
 export default router
