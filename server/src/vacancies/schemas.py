@@ -34,6 +34,7 @@ class SVacancyRead(BaseModel):
     specialization: str
     salary: int
     description: str
+    company_id: int
     vacancy_types: list[SBaseCatalogItemRead]
     vacancy_formats: list[SBaseCatalogItemRead]
     vacancy_schedules: list[SBaseCatalogItemRead]
