@@ -26,7 +26,15 @@ class VacanciesService {
   }
   async editVacancy(id, data) {
     return await instance
-      .post(`/vacancies/${id}`)
+      .post(`/vacancies/${id}`, {
+        position: data.position,
+        specialization: data.specialization,
+        salary: data.salary,
+        description: data.description,
+        vacancy_types_ids: data.vacancy_types_ids,
+        vacancy_formats_ids: data.vacancy_formats_ids,
+        vacancy_schedules_ids: data.vacancy_schedules_ids
+      })
       .then((response) => response)
       .catch((err) => {
         if (err.response) {
@@ -59,6 +67,22 @@ class VacanciesService {
   async getVacancy(id) {
     return await instance
       .get(`/vacancies/${id}`)
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async getVacanciesSchedules() {
+    return await instance
+      .get('/vacancies/schedules')
       .then((response) => response)
       .catch((err) => {
         if (err.response) {

@@ -112,6 +112,11 @@
   height: 48px;
 }
 
+.sys-select-288 {
+  width: 288px !important;
+  height: 48px;
+}
+
 .sys-col-184 {
   width: 184px !important;
   box-sizing: content-box;

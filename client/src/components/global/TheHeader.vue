@@ -9,7 +9,9 @@ const user = computed(() => userStore.user)
 <template>
     <header class="wrapper">
         <div class="container container-pd52">
-            <a href="#" class="logo">ENERGY//STAFF</a>
+            <router-link class="logo" to="/">
+                ENERGY//STAFF
+            </router-link>
             <nav class="nav-panel">
                 <div v-if="!user.status.loggedIn">
                     <a href="#">Соискателям</a>
@@ -22,7 +24,12 @@ const user = computed(() => userStore.user)
                     <a href="#">Подтверждения</a>
                 </div>
                 <div v-else-if="user.data.is_employer">
-                    <a href="#">Компания</a>
+                    <router-link to="/company/editor">
+                        Компания
+                    </router-link>
+                    <router-link to="/vacancy/editor">
+                        Добавить вакансию
+                    </router-link>
                     <a href="#">Отклики</a>
                 </div>
                 <div v-else>

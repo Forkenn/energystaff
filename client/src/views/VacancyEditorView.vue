@@ -4,47 +4,101 @@ import { useRoute, useRouter } from 'vue-router';
 
 import TheFooter from '@/components/global/TheFooter.vue';
 import TheHeader from '@/components/global/TheHeader.vue';
+import MultiSelect from '@/components/global/MultiSelect.vue';
 import VacanciesService from '@/services/vacancies.service';
+import { useUserStore } from '@/stores/user';
 
 const route = useRoute();
 const router = useRouter();
 
-const vacancy_id = route.query.id;
-const vacancy_data = ref({
+const userStore = useUserStore();
+
+const creatorMode = ref(true);
+const vacancyId = route.query.id;
+
+const serverTypes = ref([]);
+const serverFormats = ref([]);
+const serverSchedules = ref([]);
+const selectedSchedules = ref([]);
+const schedulesLoading = ref(true);
+
+const vacancyData = ref({
   position: "",
   specialization: "",
   description: "",
   salary: 0,
-  vacancy_types: [
-    {
+  vacancy_types: [{
       id: 0,
       name: "string"
-    }
-  ],
-  vacancy_formats: [
-    {
+  }],
+  vacancy_formats: [{
       id: 0,
       name: "string"
-    }
-  ],
-  vacancy_schedules: [
-    {
+  }],
+  vacancy_schedules: [{
       id: 0,
       name: "string"
-    }
-  ]
+  }],
+  vacancy_types_ids: [],
+  vacancy_formats_ids: [],
+  vacancy_schedules_ids: []
 })
 
+const convertIds = () => {
+  const vacancySchedulesObj = vacancyData.value.vacancy_schedules
+  const vacancyTypesObj = vacancyData.value.vacancy_types
+  const vacancyFormatsObj = vacancyData.value.vacancy_formats
+  vacancyData.value.vacancy_schedules_ids = vacancySchedulesObj.map(
+    vacancySchedulesObj => vacancySchedulesObj.id
+  );
+  vacancyData.value.vacancy_types_ids = vacancyTypesObj.map(
+    vacancyTypesObj => vacancyTypesObj.id
+  );
+  vacancyData.value.vacancy_formats_ids = vacancyFormatsObj.map(
+    vacancyFormatsObj => vacancyFormatsObj.id
+  );
+}
+
+const editVacancy = async() => {
+  convertIds()
+  try {
+    await VacanciesService.editVacancy(vacancyId, vacancyData.value);
+    router.push({ name: 'home' });
+  } catch(err) {
+    alert('Ошибка публикации вакансии!')
+  }
+}
+
+const createVacancy = async() => {
+  router.push({ name: 'home' });
+}
+
 onMounted(async () => {
-  if (vacancy_id) {
+  if (vacancyId) {
     try {
-      const response = await VacanciesService.getVacancy(vacancy_id);
-      vacancy_data.value = response.data;
+      const response = await VacanciesService.getVacancy(vacancyId);
+      if(response.data.company_id != userStore.user.data.employer?.company_id) {
+        router.push({ name: 'vacancy_editor' });
+        return;
+      }
+      vacancyData.value = response.data;
     } catch(err) {
       alert('Вакансия не найдена!')
       router.push({ name: 'vacancy_editor' });
+    } finally {
+      creatorMode.value = false;
+      selectedSchedules.value = vacancyData.value.vacancy_schedules;
     }
   }
+  try {
+      const response = await VacanciesService.getVacanciesSchedules();
+      serverSchedules.value = response.data.items;
+      convertIds()
+      schedulesLoading.value = false;
+    } catch(err) {
+      alert('Ошибка сервера!')
+      router.push({ name: 'home' });
+    }
 })
 
 </script>
@@ -66,7 +120,7 @@ onMounted(async () => {
                   class="form-control flex-grow-1 sys-input-912-flex"
                   id="InputName"
                   placeholder="Должность"
-                  v-model="vacancy_data.position"
+                  v-model="vacancyData.position"
                 >
                 <label for="InputName">Должность</label>
               </div>
@@ -80,7 +134,7 @@ onMounted(async () => {
                   class="form-control flex-grow-1 sys-input-600-flex"
                   id="InputSpecialization"
                   placeholder="Специализация"
-                  v-model="vacancy_data.specialization"
+                  v-model="vacancyData.specialization"
                 >
                 <label for="InputSpecialization">Специализация</label>
               </div>
@@ -93,7 +147,7 @@ onMounted(async () => {
                     class="form-control flex-grow-1 sys-input-group-250"
                     id="InputSalary"
                     placeholder="Зарплата"
-                    v-model="vacancy_data.salary"
+                    v-model="vacancyData.salary"
                   >
                   <label for="InputSalary">Зарплата</label>
                 </div>
@@ -195,12 +249,12 @@ onMounted(async () => {
               </div>
             </div>
             <div class="col-auto">
-              <select id="formMultiselect" class="form-select sys-input-288" aria-label="График">
-                <option selected>График</option>
-                <option value="1">5/2</option>
-                <option value="2">2/2</option>
-                <option value="3">4/2</option>
-              </select>
+              <MultiSelect class="sys-select-288"
+                v-model="vacancyData.vacancy_schedules"
+                :items="serverSchedules"
+                :isLoading="schedulesLoading"
+                placeholder="Графики работы"
+              />
             </div>
           </div>
           <div class="row">
@@ -211,14 +265,17 @@ onMounted(async () => {
                   class="form-control"
                   id="formControlExtended"
                   rows="15"
-                  v-model="vacancy_data.description"
+                  v-model="vacancyData.description"
                 ></textarea>
               </div>
             </div>
           </div>
           <div class="col d-flex">
             <div style="margin-left: auto;">
-              <button type="button" class="btn btn-primary sys-btn-264">
+              <button v-if="creatorMode" type="button" class="btn btn-primary sys-btn-264" @click="createVacancy">
+                Опубликовать
+              </button>
+              <button v-else type="button" class="btn btn-primary sys-btn-264" @click="editVacancy">
                 Сохранить изменения
               </button>
             </div>
