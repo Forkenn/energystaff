@@ -19,8 +19,7 @@ const vacancyId = route.query.id;
 const serverTypes = ref([]);
 const serverFormats = ref([]);
 const serverSchedules = ref([]);
-const selectedSchedules = ref([]);
-const schedulesLoading = ref(true);
+const dataLoading = ref(true);
 
 const vacancyData = ref({
   position: "",
@@ -44,23 +43,26 @@ const vacancyData = ref({
   vacancy_schedules_ids: []
 })
 
-const convertIds = () => {
+const convertIds = (full=false) => {
   const vacancySchedulesObj = vacancyData.value.vacancy_schedules
-  const vacancyTypesObj = vacancyData.value.vacancy_types
-  const vacancyFormatsObj = vacancyData.value.vacancy_formats
   vacancyData.value.vacancy_schedules_ids = vacancySchedulesObj.map(
     vacancySchedulesObj => vacancySchedulesObj.id
   );
-  vacancyData.value.vacancy_types_ids = vacancyTypesObj.map(
-    vacancyTypesObj => vacancyTypesObj.id
-  );
-  vacancyData.value.vacancy_formats_ids = vacancyFormatsObj.map(
-    vacancyFormatsObj => vacancyFormatsObj.id
-  );
+
+  if(full) {
+    const vacancyTypesObj = vacancyData.value.vacancy_types
+    const vacancyFormatsObj = vacancyData.value.vacancy_formats
+    vacancyData.value.vacancy_types_ids = vacancyTypesObj.map(
+      vacancyTypesObj => vacancyTypesObj.id
+    );
+    vacancyData.value.vacancy_formats_ids = vacancyFormatsObj.map(
+      vacancyFormatsObj => vacancyFormatsObj.id
+    );
+  }
 }
 
 const editVacancy = async() => {
-  convertIds()
+  convertIds();
   try {
     await VacanciesService.editVacancy(vacancyId, vacancyData.value);
     router.push({ name: 'home' });
@@ -70,7 +72,57 @@ const editVacancy = async() => {
 }
 
 const createVacancy = async() => {
-  router.push({ name: 'home' });
+  convertIds();
+  try {
+    await VacanciesService.addVacancy(vacancyData.value);
+    router.push({ name: 'home' });
+  } catch(err) {
+    alert('Ошибка публикации вакансии!')
+  }
+}
+
+const isSelectedType = (id) => {
+  if (dataLoading.value) {
+    return false;
+  }
+  for (var i = 0; i < vacancyData.value.vacancy_types_ids.length; i++) {
+    if (vacancyData.value.vacancy_types_ids[i] === id) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const toggleCheckType = (id) => {
+  if (isSelectedType(id)) {
+    vacancyData.value.vacancy_types_ids = vacancyData.value.vacancy_types_ids.filter(
+      selectedId => selectedId !== id
+    );
+  } else {
+    vacancyData.value.vacancy_types_ids = [...vacancyData.value.vacancy_types_ids, id];
+  }
+}
+
+const isSelectedFormat = (id) => {
+  if (dataLoading.value) {
+    return false;
+  }
+  for (var i = 0; i < vacancyData.value.vacancy_formats_ids.length; i++) {
+    if (vacancyData.value.vacancy_formats_ids[i] === id) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const toggleCheckFormat = (id) => {
+  if (isSelectedFormat(id)) {
+    vacancyData.value.vacancy_formats_ids = vacancyData.value.vacancy_formats_ids.filter(
+      selectedId => selectedId !== id
+    );
+  } else {
+    vacancyData.value.vacancy_formats_ids = [...vacancyData.value.vacancy_formats_ids, id];
+  }
 }
 
 onMounted(async () => {
@@ -87,14 +139,18 @@ onMounted(async () => {
       router.push({ name: 'vacancy_editor' });
     } finally {
       creatorMode.value = false;
-      selectedSchedules.value = vacancyData.value.vacancy_schedules;
     }
   }
+
   try {
-      const response = await VacanciesService.getVacanciesSchedules();
+      let response = await VacanciesService.getVacanciesSchedules();
       serverSchedules.value = response.data.items;
-      convertIds()
-      schedulesLoading.value = false;
+      response = await VacanciesService.getVacanciesFormats();
+      serverFormats.value = response.data.items;
+      response = await VacanciesService.getVacanciesTypes();
+      serverTypes.value = response.data.items;
+      convertIds(true);
+      dataLoading.value = false;
     } catch(err) {
       alert('Ошибка сервера!')
       router.push({ name: 'home' });
@@ -163,33 +219,39 @@ onMounted(async () => {
             </div>
             <div class="col-auto sys-col-184">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckEmploymentFull">
-                <label class="form-check-label" for="flexCheckEmploymentFull">
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkTypeFull" :id="1" @click="toggleCheckType(1)" :checked="isSelectedType(1)">
+                <label class="form-check-label sys-check-label" for="checkTypeFull">
                     Полная занятость
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckEmploymentPartial">
-                <label class="form-check-label" for="flexCheckEmploymentPartial">
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkTypePartial" :id="2" @click="toggleCheckType(2)" :checked="isSelectedType(2)">
+                <label class="form-check-label sys-check-label" for="checkTypePartial">
                     Частичная занятость
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckEmploymentProject">
-                <label class="form-check-label" for="flexCheckEmploymentProject">
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkTypeProject" :id="3" @click="toggleCheckType(3)" :checked="isSelectedType(3)">
+                <label class="form-check-label sys-check-label" for="checkTypeProject">
                     Проектная работа
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckEmploymentIntern">
-                <label class="form-check-label" for="flexCheckEmploymentIntern">
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkTypeIntern" :id="4" @click="toggleCheckType(4)" :checked="isSelectedType(4)">
+                <label class="form-check-label sys-check-label" for="checkTypeIntern">
                     Стажировка
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckEmploymentPractice">
-                <label class="form-check-label" for="flexCheckEmploymentPractice">
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkTypePractice" :id="5" @click="toggleCheckType(5)" :checked="isSelectedType(5)">
+                <label class="form-check-label sys-check-label" for="checkTypePractice">
                     Практика
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkTypeVacht" :id="6" @click="toggleCheckType(6)" :checked="isSelectedType(6)">
+                <label class="form-check-label sys-check-label" for="checkTypeVacht">
+                    Вахта
                 </label>
               </div>
             </div>
@@ -213,38 +275,32 @@ onMounted(async () => {
           <div class="row">
             <div class="col-auto">
               <div style="width: 80px;">
-                  График
+                  Формат
               </div>
             </div>
             <div class="col-auto sys-col-184" style="flex-direction: column;">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDayFull">
-                <label class="form-check-label" for="flexCheckDayFull">
-                    Полный день
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkFormatPlace" :id="1" @click="toggleCheckFormat(1)" :checked="isSelectedFormat(1)">
+                <label class="form-check-label" for="checkFormatPlace">
+                    На месте
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDayShift">
-                <label class="form-check-label" for="flexCheckDayShift">
-                    Сменный день
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkFormatRemote" :id="2" @click="toggleCheckFormat(2)" :checked="isSelectedFormat(2)">
+                <label class="form-check-label" for="checkFormatRemote">
+                    Удалённый
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDayFlex">
-                <label class="form-check-label" for="flexCheckDayFlex">
-                    Гибкий график
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkFormatGybrid" :id="3" @click="toggleCheckFormat(3)" :checked="isSelectedFormat(3)">
+                <label class="form-check-label" for="checkFormatGybrid">
+                    Гибрид
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckRemote">
-                <label class="form-check-label" for="flexCheckRemote">
-                    Удалённая работа
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                <label class="form-check-label" for="flexCheckDefault">
-                    Вахтовый метод
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkFormatTravel" :id="4" @click="toggleCheckFormat(4)" :checked="isSelectedFormat(4)">
+                <label class="form-check-label" for="checkFormatTravel">
+                    Разъездной
                 </label>
               </div>
             </div>
@@ -252,8 +308,8 @@ onMounted(async () => {
               <MultiSelect class="sys-select-288"
                 v-model="vacancyData.vacancy_schedules"
                 :items="serverSchedules"
-                :isLoading="schedulesLoading"
-                placeholder="Графики работы"
+                :isLoading="dataLoading"
+                placeholder="График работы"
               />
             </div>
           </div>

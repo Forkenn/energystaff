@@ -48,6 +48,30 @@ class VacanciesService {
         throw err;
       })
   }
+  async addVacancy(data) {
+    return await instance
+      .post('/vacancies', {
+        position: data.position,
+        specialization: data.specialization,
+        salary: data.salary,
+        description: data.description,
+        vacancy_types_ids: data.vacancy_types_ids,
+        vacancy_formats_ids: data.vacancy_formats_ids,
+        vacancy_schedules_ids: data.vacancy_schedules_ids
+      })
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
   async deleteVacancy(id) {
     return await instance
       .delete(`/vacancies/${id}`)
@@ -83,6 +107,38 @@ class VacanciesService {
   async getVacanciesSchedules() {
     return await instance
       .get('/vacancies/schedules')
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async getVacanciesFormats() {
+    return await instance
+      .get('/vacancies/formats')
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async getVacanciesTypes() {
+    return await instance
+      .get('/vacancies/types')
       .then((response) => response)
       .catch((err) => {
         if (err.response) {

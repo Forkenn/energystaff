@@ -60,7 +60,7 @@ const toggleCheck = (item) => {
         <li v-for="item in items" :key="item.id" @click="toggleCheck(item)">
           <div class="dropdown-item">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="" :id="'flexCheck-' + item.id" :checked="isSelected(item)">
+              <input class="form-check-input sys-check-20" type="checkbox" value="" :id="'flexCheck-' + item.id" :checked="isSelected(item)">
               <label class="form-check-label" :for="'flexCheck-' + item.id">
                 {{ item.name }}
               </label>
@@ -102,6 +102,11 @@ const toggleCheck = (item) => {
 
 .dropdown-toggle::after {
   content: none;
+}
+
+.dropdown-item label {
+  align-content: center;
+  margin-bottom: 0;
 }
 
 </style>
