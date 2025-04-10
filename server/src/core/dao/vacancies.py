@@ -22,6 +22,7 @@ async def fetch_vacancies_cards(
             Company.name.label("company_name")
         )
         .join(Company, Vacancy.company_id == Company.id)
+        .order_by(Vacancy.timestamp.desc())
         .slice(start, end)
     )
     
