@@ -8,6 +8,7 @@ from .auth.router import router as router_auth
 from .users.router import router as router_users
 from .tools.router import router as router_tools
 from .vacancies.router import router as router_vacancies
+from .companies.router import router as router_companies
 
 app = FastAPI(title='EnergyStaff', root_path='/api')
 
@@ -36,5 +37,6 @@ app.include_router(
 
 app.include_router(router_auth)
 app.include_router(router_users)
+app.include_router(router_companies)
 app.include_router(router_vacancies)
 app.include_router(router_tools)
