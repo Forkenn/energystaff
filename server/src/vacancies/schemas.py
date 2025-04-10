@@ -23,9 +23,9 @@ class SVacancyCreate(BaseModel):
         max_length=500,
         description="Description from 0 to 500 symbols"
     )
-    vacancy_types_ids: list[Annotated[int, Field(strict=True, gt=0)]] = Field(..., min_length=1)
-    vacancy_formats_ids: list[Annotated[int, Field(strict=True, gt=0)]] = Field(..., min_length=1)
-    vacancy_schedules_ids: list[Annotated[int, Field(strict=True, gt=0)]] = Field(..., min_length=1)
+    vacancy_types_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
+    vacancy_formats_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
+    vacancy_schedules_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
 
 
 class SVacancyRead(BaseModel):
