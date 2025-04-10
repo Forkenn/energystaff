@@ -4,8 +4,8 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from src.responses import openapi_404, openapi_403
-from src.exceptions import NotFoundException
+from src.responses import openapi_404, openapi_403, openapi_204, response_204
+from src.exceptions import NotFoundException, NotAllowedException
 from src.core.schemas.catalog import SBaseCatalogRead
 from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
 from src.core.dao.common import fetch_all, fetch_one
@@ -84,6 +84,29 @@ async def get_vacancy_by_id(
 
     return vacancy
 
+@router.delete('/{id}', responses={**openapi_404, **openapi_403, **openapi_204})
+async def delete_vacancy_by_id(
+    id: int,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_employer)
+):
+    vacancy: Vacancy = await fetch_one(
+        session,
+        Vacancy,
+        where=(Vacancy.id == id,)
+    )
+
+    if not vacancy:
+        raise NotFoundException()
+    
+    if vacancy.company_id != user.employer.company_id:
+        raise NotAllowedException()
+    
+    await session.delete(vacancy)
+    await session.commit()
+
+    return response_204
+
 @router.post('', responses={**openapi_403})
 async def add_vacancy(
     data: SVacancyCreate,
@@ -141,6 +164,9 @@ async def edit_vacancy_by_id(
     )
     if not vacancy:
         raise NotFoundException()
+    
+    if vacancy.company_id != user.employer.company_id:
+        raise NotAllowedException()
     
     formats = await fetch_all(
         session,
