@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SApplicantRead(BaseModel):
@@ -33,3 +33,26 @@ class SUserReadFull(BaseModel):
     applicant: SApplicantRead | None = None
     employer: SEmployerRead | None = None
     edu_worker: SEduWorkerRead | None = None
+
+
+class SUserEdit(BaseModel):
+    surname: str = Field(
+        default=...,
+        min_length=2,
+        max_length=120,
+        description="User surname from 2 to 120 symbols"
+    )
+    name: str  = Field(
+        default=...,
+        min_length=3,
+        max_length=120,
+        description="User name from 3 to 120 symbols"
+    )
+    last_name: str | None = Field(
+        default=...,
+        min_length=0,
+        max_length=120,
+        description="User last name from 0 to 120 symbols"
+    )
+    birthdate: date | None = None
+    #sex: str
