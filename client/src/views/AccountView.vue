@@ -1,6 +1,38 @@
 <script setup>
+import { computed } from 'vue';
+
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
+import { useUserStore } from '@/stores/user';
+import UserService from '@/services/user.service';
+
+const userStore = useUserStore();
+const userData = computed(() => userStore.user.data);
+const systemStatus = computed(() => {
+  if(userData.value.is_superuser) {
+    return "Администратор"
+  }
+  if(userData.value.is_edu) {
+    return "Работник ОУ"
+  }
+  if(userData.value.is_employer) {
+    return "Работодатель"
+  }
+  if(userData.value.applicant) {
+    return "Соискатель"
+  }
+  return "Загрузка..."
+})
+
+const saveChanges = async() => {
+  try{
+    await UserService.editCurrent(userData.value)
+    alert("Изменения сохранены!")
+  } catch(err) {
+    alert("Ошибка сохранения данных!")
+  }
+}
+
 </script>
 
 <template>
@@ -12,19 +44,19 @@ import TheFooter from '../components/global/TheFooter.vue'
         <div class="row form-row">
           <div class="col">
             <div class="custom-form-floating">
-              <input type="text" class="form-control" id="InputSurname" placeholder="Фамилия">
+              <input type="text" class="form-control" id="InputSurname" placeholder="Фамилия" v-model="userData.surname">
               <label for="InputSurname">Фамилия</label>
             </div>
           </div>
           <div class="col">
             <div class="custom-form-floating">
-              <input type="text" class="form-control" id="InputFirstname" placeholder="Имя">
+              <input type="text" class="form-control" id="InputFirstname" placeholder="Имя" v-model="userData.name">
               <label for="InputFirstname">Имя</label>
             </div>
           </div>
           <div class="col">
             <div class="custom-form-floating">
-              <input type="text" class="form-control" id="InputSecondname" placeholder="Отчество">
+              <input type="text" class="form-control" id="InputSecondname" placeholder="Отчество" v-model="userData.last_name">
               <label for="InputSecondname">Отчество</label>
             </div>
           </div>
@@ -32,7 +64,7 @@ import TheFooter from '../components/global/TheFooter.vue'
         <div class="row form-row">
             <div class="col">
               <div class="custom-form-floating">
-                <input type="date" class="form-control" id="InputBirthdate" placeholder="Дата рождения">
+                <input type="date" class="form-control" id="InputBirthdate" placeholder="Дата рождения" v-model="userData.birthdate">
                 <label for="InputBirthdate">Дата рождения</label>
               </div>
             </div>
@@ -44,7 +76,7 @@ import TheFooter from '../components/global/TheFooter.vue'
             </div>
             <div class="col">
               <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputSystemID" placeholder="Идентификатор">
+                <input type="text" class="form-control" id="InputSystemID" placeholder="Идентификатор" v-model="userData.id">
                 <label for="InputSystemID">Идентификатор</label>
               </div>
             </div>
@@ -67,7 +99,7 @@ import TheFooter from '../components/global/TheFooter.vue'
             </div>
             <div class="col">
               <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputSystemRole" placeholder="Соискатель">
+                <input type="text" class="form-control" id="InputSystemRole" placeholder="Соискатель" v-model="systemStatus">
                 <label for="InputSystemRole">Статус в системе</label>
               </div>
             </div>
@@ -98,7 +130,7 @@ import TheFooter from '../components/global/TheFooter.vue'
             </div>
         </div>
         <div class="btn-account-wrapper">
-          <button type="button" class="btn btn-primary sys-btn-288 btn-account">
+          <button type="button" class="btn btn-primary sys-btn-288 btn-account" @click="saveChanges">
             Сохранить изменения
           </button>
         </div>
