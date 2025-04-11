@@ -9,7 +9,7 @@ const user = computed(() => userStore.user)
 <template>
     <header class="wrapper">
         <div class="container container-pd52">
-            <router-link class="logo" to="/">
+            <router-link class="logo" :to="{ name: 'home' }">
                 ENERGY//STAFF
             </router-link>
             <nav class="nav-panel">
@@ -24,10 +24,10 @@ const user = computed(() => userStore.user)
                     <a href="#">Подтверждения</a>
                 </div>
                 <div v-else-if="user.data.is_employer">
-                    <router-link to="/company/editor">
+                    <router-link :to="{ name: 'company_editor' }">
                         Компания
                     </router-link>
-                    <router-link to="/vacancy/editor">
+                    <router-link :to="{ name: 'vacancy_editor' }">
                         Добавить вакансию
                     </router-link>
                     <a href="#">Отклики</a>
@@ -43,7 +43,9 @@ const user = computed(() => userStore.user)
                     <span class="location-text">Местоположение</span>
                 </div>
                 <div class="unauth-user-icon">
-                    <img src="../../assets/icons/Account.svg" width="48" height="48" alt="Личный кабинет">
+                    <router-link :to="{ name: 'account_page' }">
+                        <img src="../../assets/icons/Account.svg" width="48" height="48" alt="Личный кабинет">
+                    </router-link>
                 </div>
             </div>
         </div>
