@@ -42,10 +42,10 @@ const editVacancy = async() => {
         <div class="city">
             {{ vacancy.city }}
         </div>
-        <button v-if="user.data.is_applicant" class="btn btn-primary sys-btn-200" style="margin-right: 24px;">Откликнуться</button>
-        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" style="margin-right: 24px;" @click="editVacancy">Редактировать</button>
-        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" style="margin-right: 24px;" @click="deleteVacancy">Удалить</button>
-        <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" style="margin-right: 24px;" @click="deleteVacancy">Удалить</button>
+        <button v-if="user.data.is_applicant" class="btn btn-primary sys-btn-200">Откликнуться</button>
+        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" @click="editVacancy">Редактировать</button>
+        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
+        <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
     </div>
   </div>
 </template>
@@ -54,7 +54,6 @@ const editVacancy = async() => {
 
 .vacancy-card {
   width: 100%;
-  height: 344px;
   margin-bottom: 24px;
   border-color: #DBE0E5;
   border-width: 1px;
@@ -79,6 +78,11 @@ const editVacancy = async() => {
 .card-wrapper img {
     margin-bottom: 5px;
     margin-left: 2px;
+}
+
+.card-wrapper button {
+    margin-bottom: 0;
+    margin-right: 24px;
 }
 
 .card-wrapper .salary {
