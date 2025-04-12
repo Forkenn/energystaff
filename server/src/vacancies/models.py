@@ -14,13 +14,13 @@ vacancies_types = alch.Table(
     alch.Column(
         "vacancy_id",
         alch.Integer, alch.ForeignKey("vacancies.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True, index=True
     ),
     alch.Column(
         "type_id",
         alch.Integer,
         alch.ForeignKey("employment_types.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True, index=True
     )
 )
 
@@ -30,13 +30,13 @@ vacancies_formats = alch.Table(
     alch.Column(
         "vacancy_id",
         alch.Integer, alch.ForeignKey("vacancies.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True, index=True
     ),
     alch.Column(
         "format_id",
         alch.Integer,
         alch.ForeignKey("employment_formats.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True, index=True
     )
 )
 
@@ -46,13 +46,13 @@ vacancies_schedules = alch.Table(
     alch.Column(
         "vacancy_id",
         alch.Integer, alch.ForeignKey("vacancies.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True, index=True
     ),
     alch.Column(
         "schedule_id",
         alch.Integer,
         alch.ForeignKey("employment_schedules.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True, index=True
     )
 )
 
@@ -60,7 +60,7 @@ vacancies_schedules = alch.Table(
 class Vacancy(Base):
     __tablename__ = 'vacancies'
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
     position: orm.Mapped[str] = orm.mapped_column(
         alch.String(120), nullable=False
     )
@@ -90,7 +90,7 @@ class Vacancy(Base):
 class EmploymentType(Base):
     __tablename__ = 'employment_types'
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
     name: orm.Mapped[str] = orm.mapped_column(
         alch.String(20), nullable=False
     )
@@ -99,7 +99,7 @@ class EmploymentType(Base):
 class EmploymentFormat(Base):
     __tablename__ = 'employment_formats'
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
     name: orm.Mapped[str] = orm.mapped_column(
         alch.String(20), nullable=False
     )
@@ -108,7 +108,7 @@ class EmploymentFormat(Base):
 class EmploymentSchedule(Base):
     __tablename__ = 'employment_schedules'
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
     name: orm.Mapped[str] = orm.mapped_column(
         alch.String(20), nullable=False
     )

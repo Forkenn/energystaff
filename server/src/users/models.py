@@ -16,7 +16,7 @@ from src.database import Base
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = 'users'
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
     email: orm.Mapped[str] = orm.mapped_column(alch.String(120), index=True, unique=True)
     surname: orm.Mapped[str] = orm.mapped_column(alch.String(120), index=True)
     name: orm.Mapped[str] = orm.mapped_column(alch.String(120), index=True)
