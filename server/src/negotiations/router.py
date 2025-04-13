@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
 from src.responses import openapi_401, openapi_400, response_204
-from src.exceptions import NotFoundException, AlreadyExistException
+from src.exceptions import (
+    NotFoundException, AlreadyExistException, WrongStateException
+)
 from src.core.dao.common import fetch_one
 from src.core.dao.negotiations import (
     fetch_negotiations_applicant, count_negotiations_applicant
@@ -62,7 +64,7 @@ async def get_employer_negotiations_count(
 ) -> SBaseQueryCountResponse:
     pass
 
-@router.post('', responses={**openapi_400})
+@router.post('/applicant', responses={**openapi_400})
 async def create_negotiation(
         vacancy_id: int,
         user: User = Depends(current_applicant),
@@ -96,9 +98,9 @@ async def create_negotiation(
     await session.commit()
     return negotiation
 
-@router.delete('', responses={**openapi_400})
+@router.delete('/{id}', responses={**openapi_400})
 async def delete_negotiation(
-        negotiation_id: int,
+        id: int,
         user: User = Depends(current_applicant),
         session: AsyncSession = Depends(get_async_session)
 ):
@@ -106,13 +108,18 @@ async def delete_negotiation(
         session,
         Negotiation,
         where=(
-            Negotiation.id == negotiation_id,
+            Negotiation.id == id,
             Negotiation.applicant_id == user.id
         )
     )
 
     if not negotiation:
         raise NotFoundException()
+    
+    if negotiation.status not in (
+        NegotiationStatus.ACCEPTED.value, NegotiationStatus.PENDING.value
+    ):
+        raise WrongStateException()
 
     await session.delete(negotiation)
     await session.commit()

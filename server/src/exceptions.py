@@ -62,5 +62,9 @@ class MaxObjectsException(BadRequestException):
     detail = 'MAX_OBJECTS_COUNT_IN_DB'
 
 
+class WrongStateException(BadRequestException):
+    detail = 'OBJECT_IN_THE_WRONG_STATE'
+
+
 class NotAllowedException(ForbiddenException):
     detail = 'NOT_ALLOWED'
