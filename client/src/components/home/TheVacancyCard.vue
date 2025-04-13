@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import VacanciesService from '@/services/vacancies.service';
+import NegotiationsService from '@/services/negotiations.service';
 
 const props = defineProps({
     vacancy: Object,
@@ -20,6 +21,11 @@ const deleteVacancy = async() => {
 
 const editVacancy = async() => {
     router.push({ name: 'vacancy_editor', query: { id: props.vacancy.id } });
+}
+
+const applyVacancy = async() => {
+    await NegotiationsService.createNegotiation(props.vacancy.id);
+    router.go(0);
 }
 
 </script>
@@ -42,7 +48,7 @@ const editVacancy = async() => {
         <div class="city">
             {{ vacancy.city }}
         </div>
-        <button v-if="user.data.is_applicant" class="btn btn-primary sys-btn-200">Откликнуться</button>
+        <button v-if="user.data.is_applicant" class="btn btn-primary sys-btn-200" @click="applyVacancy">Откликнуться</button>
         <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" @click="editVacancy">Редактировать</button>
         <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
         <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
