@@ -28,6 +28,11 @@ const applyVacancy = async() => {
     router.go(0);
 }
 
+const deleteNegotiation = async() => {
+    await NegotiationsService.deleteNegotiation(props.vacancy.negotiation?.id);
+    router.go(0);
+}
+
 </script>
 
 <template>
@@ -35,9 +40,9 @@ const applyVacancy = async() => {
     <div class="card-wrapper" style="align-items: center;">
         <h1>
             {{ vacancy.position }}
-            <img v-if="vacancy.negotiations && vacancy.negotiations.id == 1" src="../../assets/icons/vacancies/Negotiation_process.svg">
-            <img v-if="vacancy.negotiations && vacancy.negotiations.id == 2" src="../../assets/icons/vacancies/Negotiation_success.svg">
-            <img v-if="vacancy.negotiations && vacancy.negotiations.id == 3" src="../../assets/icons/vacancies/Negotiation_reject.svg">
+            <img v-if="vacancy.negotiation?.status == 'pending'" src="../../assets/icons/vacancies/Negotiation_process.svg">
+            <img v-if="vacancy.negotiation?.status == 'accepted'" src="../../assets/icons/vacancies/Negotiation_success.svg">
+            <img v-if="vacancy.negotiation?.status == 'rejected'" src="../../assets/icons/vacancies/Negotiation_reject.svg">
         </h1>
         <div class="salary">
             от {{ vacancy.salary }} ₽, до вычета налогов
@@ -48,7 +53,8 @@ const applyVacancy = async() => {
         <div class="city">
             {{ vacancy.city }}
         </div>
-        <button v-if="user.data.is_applicant" class="btn btn-primary sys-btn-200" @click="applyVacancy">Откликнуться</button>
+        <button v-if="user.data.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-200" @click="applyVacancy">Откликнуться</button>
+        <button v-else-if="user.data.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation.status)" class="btn btn-primary sys-btn-200" @click="deleteNegotiation">Отозвать отклик</button>
         <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click="editVacancy">Редактировать</button>
         <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
         <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
