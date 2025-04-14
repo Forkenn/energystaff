@@ -19,6 +19,7 @@ async def fetch_vacancies_cards(
             Vacancy.position,
             Vacancy.salary,
             Vacancy.company_id,
+            Vacancy.author_id,
             Company.name.label("company_name")
         )
         .join(Company, Vacancy.company_id == Company.id)

@@ -46,6 +46,7 @@ class SVacancyPreview(BaseModel):
     salary: int
     city: str | None = "Тестовый город, заменить!"
     company_id: int
+    author_id: int
     company_name: str| None = 'Тестовая комания, заменить!'
 
 
