@@ -72,6 +72,9 @@ class Vacancy(Base):
     timestamp: orm.Mapped[datetime] = orm.mapped_column(
         DateTime(timezone=True), default=func.now()
     )
+    author_id: orm.Mapped[int] = orm.mapped_column(
+        alch.ForeignKey("users.id", ondelete='CASCADE'), index=True
+    )
     company_id: orm.Mapped[int] = orm.mapped_column(
         alch.ForeignKey("companies.id", ondelete='CASCADE'), index=True
     )
