@@ -49,8 +49,8 @@ const applyVacancy = async() => {
             {{ vacancy.city }}
         </div>
         <button v-if="user.data.is_applicant" class="btn btn-primary sys-btn-200" @click="applyVacancy">Откликнуться</button>
-        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" @click="editVacancy">Редактировать</button>
-        <button v-if="user.data.is_employer && vacancy.company_id == user.data.employer?.company_id" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
+        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click="editVacancy">Редактировать</button>
+        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
         <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
     </div>
   </div>
