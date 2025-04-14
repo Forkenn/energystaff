@@ -99,7 +99,7 @@ async def delete_vacancy_by_id(
     if not vacancy:
         raise NotFoundException()
     
-    if vacancy.company_id != user.employer.company_id:
+    if vacancy.author_id != user.id:
         raise NotAllowedException()
     
     await session.delete(vacancy)
@@ -134,7 +134,8 @@ async def add_vacancy(
         specialization=data.specialization,
         salary=data.salary,
         description=data.description,
-        company_id=user.employer.company_id
+        company_id=user.employer.company_id,
+        author_id=user.id
     )
 
     new_vacancy.vacancy_formats = formats
@@ -165,7 +166,7 @@ async def edit_vacancy_by_id(
     if not vacancy:
         raise NotFoundException()
     
-    if vacancy.company_id != user.employer.company_id:
+    if vacancy.author_id != user.id:
         raise NotAllowedException()
     
     formats = await fetch_all(
