@@ -9,7 +9,8 @@ from src.exceptions import (
 )
 from src.core.dao.common import fetch_one
 from src.core.dao.negotiations import (
-    fetch_negotiations_applicant, count_negotiations_applicant
+    fetch_negotiations_applicant, count_negotiations_applicant,
+    fetch_negotiations_employer, count_negotiations_employer
 )
 from src.core.schemas.common import SBaseQueryCountResponse
 from src.auth.roles import SystemRole, RoleManager
@@ -54,15 +55,26 @@ async def get_applicant_negotiations_count(
 @router.get('/employer')
 async def get_employer_negotiations_cards(
         data: SNegotiationsFilter = Depends(),
-        user: User = Depends(current_employer)
+        user: User = Depends(current_employer),
+        session: AsyncSession = Depends(get_async_session)
 ) -> SNegotiationEmpPreviews:
-    pass
+    negotiations = await fetch_negotiations_employer(
+        session, user.id, data.start, data.end, data.status
+    )
+
+    return {'count': len(negotiations), 'items': negotiations}
 
 @router.get('/employer/count')
 async def get_employer_negotiations_count(
-        user: User = Depends(current_employer)
+        status: NegotiationStatus = None,
+        user: User = Depends(current_employer),
+        session: AsyncSession = Depends(get_async_session)
 ) -> SBaseQueryCountResponse:
-    pass
+    count = await count_negotiations_employer(
+        session, user.id, status
+    )
+
+    return {'count': count}
 
 @router.post('/applicant', responses={**openapi_400})
 async def create_negotiation(
