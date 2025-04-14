@@ -1,16 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
 from src.responses import openapi_401, openapi_400, response_204
 from src.exceptions import (
-    NotFoundException, AlreadyExistException, WrongStateException
+    NotFoundException, AlreadyExistException, WrongStateException,
+    NotAllowedException
 )
 from src.core.dao.common import fetch_one
 from src.core.dao.negotiations import (
     fetch_negotiations_applicant, count_negotiations_applicant,
-    fetch_negotiations_employer, count_negotiations_employer
+    fetch_negotiations_employer, count_negotiations_employer,
+    set_negotiation_status
 )
 from src.core.schemas.common import SBaseQueryCountResponse
 from src.auth.roles import SystemRole, RoleManager
@@ -19,7 +21,7 @@ from src.vacancies.models import Vacancy
 from src.negotiations.models import Negotiation, NegotiationStatus
 from src.negotiations.schemas import (
     SNegotiationResult, SNegotiationsFilter, SNegotiationAppPreviews,
-    SNegotiationEmpPreviews
+    SNegotiationEmpPreviews, SNegotiationChangeStatus, SNegotiationsIdBody
 )
 
 router = APIRouter(prefix='/negotiations', tags=['Negotiations'])
@@ -75,6 +77,71 @@ async def get_employer_negotiations_count(
     )
 
     return {'count': count}
+
+@router.post('/employer/accept')
+async def accept_negotiation(
+        data: SNegotiationChangeStatus,
+        user: User = Depends(current_employer),
+        session: AsyncSession = Depends(get_async_session)
+) -> SNegotiationResult:
+    negotiation: Negotiation = await session.get(Negotiation, data.negotiation_id)
+    if not negotiation:
+        raise NotFoundException()
+    
+    if negotiation.employer_id != user.id:
+        raise NotAllowedException()
+    
+    await set_negotiation_status(
+        session,
+        negotiation,
+        NegotiationStatus.ACCEPTED.value,
+        description=data.desctiption
+    )
+
+    return negotiation
+
+@router.post('/employer/reject')
+async def reject_negotiation(
+        data: SNegotiationChangeStatus,
+        user: User = Depends(current_employer),
+        session: AsyncSession = Depends(get_async_session)
+) -> SNegotiationResult:
+    negotiation: Negotiation = await session.get(Negotiation, data.negotiation_id)
+    if not negotiation:
+        raise NotFoundException()
+    
+    if negotiation.employer_id != user.id:
+        raise NotAllowedException()
+    
+    await set_negotiation_status(
+        session, negotiation, NegotiationStatus.REJECTED.value
+    )
+
+    return negotiation
+
+@router.post('/employer/reset')
+async def reset_negotiation(
+        data: SNegotiationsIdBody,
+        user: User = Depends(current_employer),
+        session: AsyncSession = Depends(get_async_session)
+) -> SNegotiationResult:
+    negotiation: Negotiation = await session.get(Negotiation, data.negotiation_id)
+    if not negotiation:
+        raise NotFoundException()
+    
+    if negotiation.employer_id != user.id:
+        raise NotAllowedException()
+    
+    if negotiation.status not in (
+        NegotiationStatus.ACCEPTED.value, NegotiationStatus.REJECTED.value
+    ):
+        raise WrongStateException()
+    
+    await set_negotiation_status(
+        session, negotiation, NegotiationStatus.PENDING.value
+    )
+
+    return negotiation
 
 @router.post('/applicant', responses={**openapi_400})
 async def create_negotiation(

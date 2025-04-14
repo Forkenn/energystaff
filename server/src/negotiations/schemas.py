@@ -1,9 +1,13 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.core.schemas.common import SBaseQuerySliceBody, SBaseQueryCountResponse
 from src.negotiations.models import NegotiationStatus
+
+
+class SNegotiationsIdBody(BaseModel):
+    negotiation_id: int
 
 
 class SNegotiationsFilter(SBaseQuerySliceBody):
@@ -18,11 +22,21 @@ class SNegotiationResult(BaseModel):
     vacancy_id: int
 
 
+class SNegotiationChangeStatus(SNegotiationsIdBody):
+    desctiption: str = Field(
+        default=...,
+        min_length=12,
+        max_length=150,
+        description="Description from 12 to 150 symbols"
+    )
+
+
 class SNegotiationAppPreview(SNegotiationResult):
     company_name: str
     vacancy_position: str
     vacancy_salary: int
     vacancy_location: str | None = 'Тестовый город, заменить!'
+    employer_description: str | None = None
 
 
 class SNegotiationAppPreviews(SBaseQueryCountResponse):

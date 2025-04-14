@@ -27,7 +27,11 @@ class Negotiation(Base):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
     status: orm.Mapped[str] = orm.mapped_column(alch.String(), default=NegotiationStatus.PENDING.value)
+    employer_description: orm.Mapped[str] = orm.mapped_column(alch.String(150), nullable=True)
     applicant_id: orm.Mapped[int] = orm.mapped_column(
+        alch.ForeignKey("users.id", ondelete='CASCADE'), index=True
+    )
+    employer_id: orm.Mapped[int] = orm.mapped_column(
         alch.ForeignKey("users.id", ondelete='CASCADE'), index=True
     )
     vacancy_id: orm.Mapped[int] = orm.mapped_column(
@@ -39,7 +43,13 @@ class Negotiation(Base):
 
     applicant: orm.Mapped[Optional["User"]] = orm.relationship(
         uselist=False,
-        passive_deletes=True
+        passive_deletes=True,
+        foreign_keys=(applicant_id,)
+    )
+    employer: orm.Mapped[Optional["User"]] = orm.relationship(
+        uselist=False,
+        passive_deletes=True,
+        foreign_keys=(employer_id,)
     )
     vacancy: orm.Mapped[Optional["Vacancy"]] = orm.relationship(
         uselist=False,

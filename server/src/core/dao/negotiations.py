@@ -110,3 +110,15 @@ async def count_negotiations_employer(
 
     result = await session.execute(query)
     return result.scalar()
+
+async def set_negotiation_status(
+        session: AsyncSession,
+        negotiation: Negotiation,
+        status: NegotiationStatus,
+        description: str = None
+) -> Negotiation:
+    negotiation.status = status
+    negotiation.employer_description = description
+
+    await session.commit()
+    return negotiation
