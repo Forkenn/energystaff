@@ -1,7 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Any
 from pydantic import BaseModel, Field
 
 from src.core.schemas.catalog import SBaseCatalogItemRead
+from src.negotiations.models import NegotiationStatus
 
 class SVacancyCreate(BaseModel):
     position: str = Field(
@@ -40,6 +41,11 @@ class SVacancyRead(BaseModel):
     vacancy_schedules: list[SBaseCatalogItemRead]
 
 
+class SVacancyNegotiation(BaseModel):
+    id: int
+    status: NegotiationStatus
+
+
 class SVacancyPreview(BaseModel):
     id: int
     position: str
@@ -47,7 +53,16 @@ class SVacancyPreview(BaseModel):
     city: str | None = "Тестовый город, заменить!"
     company_id: int
     author_id: int
-    company_name: str| None = 'Тестовая комания, заменить!'
+    company_name: str | None = 'Тестовая комания, заменить!'
+    negotiation_id: int | None = Field(..., exclude=True)
+    negotiation_status: NegotiationStatus | None = Field(..., exclude=True)
+    negotiation: SVacancyNegotiation | None = None
+
+    def model_post_init(self, __context: Any):
+        if self.negotiation_id:
+            self.negotiation = SVacancyNegotiation(
+                id=self.negotiation_id, status=self.negotiation_status
+            )
 
 
 class SVacanciesPreview(BaseModel):

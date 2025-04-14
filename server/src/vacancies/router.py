@@ -50,7 +50,7 @@ async def get_vacancies_cards(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user)
 ) -> SVacanciesPreview:
-    vacancies = await fetch_vacancies_cards(session, data.start, data.end)
+    vacancies = await fetch_vacancies_cards(session, user.id, data.start, data.end)
     return {'count': len(vacancies), 'items': vacancies}
 
 @router.get('/count')
