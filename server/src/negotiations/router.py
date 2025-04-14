@@ -173,6 +173,7 @@ async def create_negotiation(
     negotiation = Negotiation()
     negotiation.applicant = user
     negotiation.vacancy = vacancy
+    negotiation.employer_id = vacancy.author_id
     session.add(negotiation)
     await session.commit()
     return negotiation
