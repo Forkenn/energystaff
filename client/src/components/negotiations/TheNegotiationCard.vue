@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 
@@ -14,6 +14,11 @@ const router = useRouter();
 const userStore = useUserStore();
 const user = computed(() => userStore.user.data);
 
+const negotiationData = ref({
+    negotiation_id: props.negotiation.id,
+    desctiption: "Тестовое описание!"
+})
+
 const deleteNegotiation = async() => {
     try {
         await NegotiationsService.deleteNegotiation(props.negotiation.id);
@@ -24,23 +29,44 @@ const deleteNegotiation = async() => {
 }
 
 const showContacts = async() => {
-
+    alert(negotiationData.value.desctiption);
 }
 
 const invite = async() => {
-
+    try {
+        await NegotiationsService.acceptNegotiation(negotiationData.value);
+        router.go(0);
+    } catch(err) {
+        console.log(err)
+        alert('Ошибка приглашения!');
+    }
 }
 
 const reject = async() => {
-
+    try {
+        await NegotiationsService.regectNegotiation(negotiationData.value);
+        router.go(0);
+    } catch(err) {
+        alert('Ошибка отказа!');
+    }
 }
 
 const revokeAndInvite = async() => {
-
+    try {
+        await NegotiationsService.resetNegotiation(negotiationData.value);
+        invite();
+    } catch(err) {
+        alert('Ошибка обработки!');
+    }
 }
 
 const revokeAndReject = async() => {
-
+    try {
+        await NegotiationsService.resetNegotiation(negotiationData.value);
+        reject();
+    } catch(err) {
+        alert('Ошибка обработки!');
+    }
 }
 
 </script>
