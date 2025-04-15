@@ -7,6 +7,7 @@ from src.database import get_async_session
 from src.responses import openapi_404, openapi_403, openapi_204, openapi_400, response_204
 from src.exceptions import NotFoundException, AlreadyExistException, NotAllowedException
 from src.core.dao.common import fetch_all, fetch_one
+from src.core.dao.resume import get_secure_resume
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.vacancies.models import EmploymentFormat, EmploymentType
@@ -125,7 +126,7 @@ async def edit_my_resume(
 async def delete_my_resume(
         session: AsyncSession = Depends(get_async_session),
         user: User = Depends(current_user)
-) -> SResumeRead:
+):
     resume: Resume = await fetch_one(
         session,
         Resume,
@@ -137,3 +138,20 @@ async def delete_my_resume(
     await session.delete(resume)
     await session.commit()
     return response_204
+
+@router.get('')
+async def get_resume_by_user_id(
+        applicant_id: int,
+        session: AsyncSession = Depends(get_async_session),
+        user: User = Depends(current_employer)
+) -> SResumeRead:
+    resume: Resume = await get_secure_resume(
+        session,
+        user.id,
+        applicant_id
+    )
+
+    if not resume:
+        raise NotFoundException()
+
+    return resume
