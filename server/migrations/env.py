@@ -15,6 +15,7 @@ from src.tools.models import *
 from src.vacancies.models import *
 from src.negotiations.models import *
 from src.resume.models import *
+from src.recommendations.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
