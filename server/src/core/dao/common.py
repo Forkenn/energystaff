@@ -41,3 +41,12 @@ async def search_catalog_multi(
         query = query.slice(start, end)
 
     return (await session.execute(query)).scalars().all()
+
+async def object_exists(
+        session: AsyncSession,
+        model: Type[T],
+        *where: ColumnElement[bool],
+) -> bool:
+    query = alch.select(1).where(*where)
+    result = await session.scalar(query)
+    return result is not None
