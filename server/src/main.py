@@ -10,6 +10,7 @@ from .tools.router import router as router_tools
 from .vacancies.router import router as router_vacancies
 from .companies.router import router as router_companies
 from .negotiations.router import router as router_negotiations
+from .resume.router import router as router_resume
 
 app = FastAPI(title='EnergyStaff', root_path='/api')
 
@@ -38,6 +39,7 @@ app.include_router(
 
 app.include_router(router_auth)
 app.include_router(router_users)
+app.include_router(router_resume)
 app.include_router(router_companies)
 app.include_router(router_vacancies)
 app.include_router(router_negotiations)
