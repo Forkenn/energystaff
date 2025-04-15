@@ -35,7 +35,9 @@ const user = computed(() => userStore.user)
                     </router-link>
                 </div>
                 <div v-else>
-                    <a href="#">Моё резюме</a>
+                    <router-link :to="{ name: 'resume_editor' }">
+                        Моё резюме
+                    </router-link>
                     <router-link :to="{ name: 'negotiations_page' }">
                         Отклики и приглашения
                     </router-link>
