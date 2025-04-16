@@ -24,6 +24,39 @@ current_employer = RoleManager(SystemRole.VERIFIED, SystemRole.ACTIVE, SystemRol
 current_edu = RoleManager(SystemRole.VERIFIED, SystemRole.ACTIVE, SystemRole.EDU_WORKER)
 current_superuser = RoleManager(SystemRole.SUPERUSER)
 
+@router.get('')
+async def get_recommendation_by_user_id(
+        applicant_id: int,
+        session: AsyncSession = Depends(get_async_session),
+        user: User = Depends(current_edu)
+) -> SRecommendationRead:
+    applicant: Applicant = await fetch_one(
+        session,
+        Applicant,
+        where=(
+            Applicant.edu_institution_id == user.edu_worker.edu_institution_id,
+        )
+    )
+
+    if not applicant:
+        raise NotAllowedException()
+    
+    recommendation = await fetch_one(
+        session,
+        Recommendation,
+        where=(
+            Recommendation.applicant_id == applicant_id,
+        ),
+        options=(
+            joinedload(Recommendation.documents),
+        )
+    )
+
+    if not recommendation:
+        raise NotFoundException()
+    
+    return recommendation
+
 @router.post('')
 async def add_recommendation(
         applicant_id: int,
@@ -33,7 +66,7 @@ async def add_recommendation(
         user: User = Depends(current_edu)
 ) -> SRecommendationRead:
     if not await object_exists(
-        session, Applicant, Applicant.user_id == applicant_id
+        session, Applicant.user_id == applicant_id
     ):
         raise NotFoundException()
     
@@ -66,9 +99,6 @@ async def edit_recommendation(
     await session.refresh(recommendation, ('documents',))
     
     deleted_documents = data.deleted_documents
-
-    if deleted_documents and not documents:
-        raise BadRequestException()
     
     if deleted_documents:
         await StorageManager.delete_files(deleted_documents, DOCUMENTS_PATH)

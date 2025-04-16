@@ -44,7 +44,6 @@ async def search_catalog_multi(
 
 async def object_exists(
         session: AsyncSession,
-        model: Type[T],
         *where: ColumnElement[bool],
 ) -> bool:
     query = alch.select(1).where(*where)
