@@ -2,6 +2,8 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from src.core.schemas.common import SBaseQueryCountResponse
+
 
 class SApplicantRead(BaseModel):
     edu_institution_id: int | None = None
@@ -33,6 +35,42 @@ class SUserReadFull(BaseModel):
     applicant: SApplicantRead | None = None
     employer: SEmployerRead | None = None
     edu_worker: SEduWorkerRead | None = None
+
+
+class SUserPreview(BaseModel):
+    id: int
+    surname: str
+    name: str
+    last_name: str | None = None
+    birthdate: date | None = None
+    #sex: str
+    is_edu: bool
+    is_employer: bool
+    is_applicant: bool
+    is_verified: bool
+    is_active: bool
+    is_superuser: bool
+    applicant: SApplicantRead | None = None
+    employer: SEmployerRead | None = None
+    edu_worker: SEduWorkerRead | None = None
+
+
+class SUsersPreview(SBaseQueryCountResponse):
+    items: list[SUserPreview]
+
+
+class SApplicantPreview(BaseModel):
+    id: int
+    surname: str
+    name: str
+    last_name: str | None = None
+    is_verified: bool
+    lcoation: str | None = "Тестовый город, заменить!"
+    applicant: SApplicantRead | None = None
+
+
+class SApplicantsPreview(SBaseQueryCountResponse):
+    items: list[SApplicantPreview]
 
 
 class SUserEdit(BaseModel):

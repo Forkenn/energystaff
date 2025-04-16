@@ -51,7 +51,6 @@ async def add_recommendation(
     await session.refresh(new_recommendation, ('documents',))
     return new_recommendation
 
-
 @router.patch('/{id}')
 async def edit_recommendation(
         id: int,
