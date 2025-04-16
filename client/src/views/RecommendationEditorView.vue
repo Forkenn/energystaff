@@ -1,8 +1,59 @@
 <script setup>
+import { ref, onMounted } from 'vue';
+
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
+import MultiUpload from '@/components/global/MultiUpload.vue';
 
-//$('#formMultiselect').multiselect();
+const isLoading = ref(true);
+const creatorMode = ref(true);
+
+let recommendationData = {
+  description: "Проверка связи",
+  documents: [{
+      "id": 1,
+      "download_name": "Тестовый_файл.doc",
+      "real_name": "555_Тестовый_файл.doc",
+      "size": 500
+  }]
+}
+
+const newRecommendationData = ref({
+  description: "",
+  documents: [],
+  deleted_documents: []
+})
+
+const files = ref([]);
+
+const prepareFiles = () => {
+  if (!creatorMode) {
+    recommendationData.documents.forEach(uploadedFile => {
+      const exists = uploadedFile.id
+        ? files.value.some(file => file.id === uploadedFile.id)
+        : false;
+      
+      if (!exists) {
+        newRecommendationData.value.deleted_documents.push(uploadedFile.real_name);
+      }
+    });
+  }
+
+  for (const uploadFile of files.value)
+    if(uploadFile.data)
+      newRecommendationData.value.documents.push(uploadFile.data);
+}
+
+const saveRecommendation = async() => {
+  prepareFiles();
+  files.value = [...recommendationData.documents]; // после запроса, если редактирование
+  console.log(newRecommendationData.value);
+}
+
+onMounted(async () => {
+  console.log(files.value); isLoading.value = false;
+})
+
 </script>
 
 <template>
@@ -21,18 +72,18 @@ import TheFooter from '@/components/global/TheFooter.vue'
                 </div>
             </div>
             <div class="row">
-                <div class="col d-flex" style="flex-direction: column;">
-                    <label for="formFileMultiple" class="form-label">Подтверждающие документы</label>
-                    <input class="form-control sys-input-900-flex" type="file" id="formFileMultiple" multiple>
+                <div class="col-auto" style="flex-direction: column;">
+                  <label class="form-label">Подтверждающие документы</label>
+                    <MultiUpload v-model="files" :isLoading="isLoading" />
                 </div>
             </div>
             <div class="row">
                 <div class="col d-flex">
                     <div class="editor-buttons">
                         <button type="button" class="btn btn-primary sys-btn-288">
-                            Скрыть рекомендацию
+                            Удалить рекомендацию
                         </button>
-                        <button type="button" class="btn btn-primary sys-btn-288">
+                        <button type="button" class="btn btn-primary sys-btn-288" @click="saveRecommendation">
                             Сохранить изменения
                         </button>
                     </div>
