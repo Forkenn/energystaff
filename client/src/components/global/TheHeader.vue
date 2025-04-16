@@ -21,7 +21,9 @@ const user = computed(() => userStore.user)
                     <a href="#">Управление</a>
                 </div>
                 <div v-else-if="user.data.is_edu">
-                    <a href="#">Подтверждения</a>
+                    <router-link :to="{ name: 'edu_verification' }">
+                        Подтверждения
+                    </router-link>
                 </div>
                 <div v-else-if="user.data.is_employer">
                     <router-link :to="{ name: 'company_editor' }">

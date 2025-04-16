@@ -1,13 +1,28 @@
 <script setup>
-import { onMounted } from 'vue';
-import { useUsersStore } from '@/stores/users';
+import { onMounted, ref } from 'vue';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
-import TheUserCard from '@/components/global/TheUserCard.vue';
+import TheUserCard from '@/components/verification/TheUserCard.vue';
 
-const usersStore  = useUsersStore();
-onMounted(usersStore.getUsers);
+import UserService from '@/services/user.service';
+
+const filters = ref({ "q": "", "start": 0, "end": 50 });
+const users = ref({
+  count: 0,
+  items: []
+})
+
+const loadApplicants = async() => {
+  try {
+    const response = await UserService.getApplicants(filters.value);
+    users.value = response.data;
+  } catch(err) {
+    alert('Ошибка загрузки данных с сервера!');
+  }
+}
+
+onMounted(loadApplicants);
 
 </script>
 
@@ -34,8 +49,8 @@ onMounted(usersStore.getUsers);
               </div>
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
-              <div v-if="usersStore.users.count" class="vacancy-wrapper">
-                <TheUserCard v-for="user in usersStore.users.items" :key="user.id" :user="user"/>
+              <div v-if="users.count" class="vacancy-wrapper">
+                <TheUserCard v-for="user in users.items" :key="user.id" :user="user"/>
               </div>
               <nav aria-label="Навигация" style="margin: 0 auto;">
                 <ul class="pagination">

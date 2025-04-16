@@ -1,23 +1,40 @@
 <script setup>
+import { useRouter } from 'vue-router';
+
 defineProps({
     user: Object,
 })
+
+const router = useRouter()
+
+const editRecommendation = () => {
+    router.push({ name: "edu_recommendation_editor" });
+}
+
+const verifyUser = async() => {
+    router.go(0);
+}
+
+const resetUser = async() => {
+    router.go(0);
+}
+
 </script>
 
 <template>
   <div class="user-card">
     <div class="card-wrapper" style="align-items: center;">
         <h1>
-            {{ user.secondname }} {{ user.name }} {{ user.surname }}
+            {{ user.surname }} {{ user.name }} {{ user.last_name }}
             <img v-if="user.is_verified" src="../../assets/icons/users/User_verified.svg">
             <img v-else src="../../assets/icons/users/User_unverified.svg">
         </h1>
         <div class="city">
-            {{ user.city }}
+            {{ user.location }}, {{ user.birthdate }}
         </div>
-        <button v-if="user.is_verified" type="button" class="btn btn-primary sys-btn-288">Сбросить</button>
-        <button v-else type="button" class="btn btn-primary sys-btn-288">Подтвердить</button>
-        <button type="button" class="btn btn-primary sys-btn-288">Дополнить</button>
+        <button v-if="user.is_verified" type="button" class="btn btn-danger sys-btn-288" @click="resetUser">Сбросить</button>
+        <button v-else type="button" class="btn btn-success sys-btn-288" @click="verifyUser">Подтвердить</button>
+        <button type="button" class="btn btn-primary sys-btn-288" @click="editRecommendation">Рекомендация</button>
     </div>
   </div>
 </template>
