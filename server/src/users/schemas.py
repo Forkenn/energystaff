@@ -65,7 +65,8 @@ class SApplicantPreview(BaseModel):
     name: str
     last_name: str | None = None
     is_verified: bool
-    lcoation: str | None = "Тестовый город, заменить!"
+    birthdate: date
+    location: str | None = "Тестовый город, заменить!"
     applicant: SApplicantRead | None = None
 
 
