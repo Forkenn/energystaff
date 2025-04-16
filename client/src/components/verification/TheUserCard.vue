@@ -1,14 +1,14 @@
 <script setup>
 import { useRouter } from 'vue-router';
 
-defineProps({
+const props = defineProps({
     user: Object,
 })
 
 const router = useRouter()
 
 const editRecommendation = () => {
-    router.push({ name: "edu_recommendation_editor" });
+    router.push({ name: "edu_recommendation_editor", query: { id: props.user.id } });
 }
 
 const verifyUser = async() => {

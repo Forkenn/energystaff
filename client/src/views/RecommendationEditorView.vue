@@ -1,12 +1,20 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import MultiUpload from '@/components/global/MultiUpload.vue';
 
+import RecommendationsService from '@/services/recommendations.service';
+
+const router = useRouter();
+const route = useRoute();
+const applicantId = route.query.id;
+
 const isLoading = ref(true);
 const creatorMode = ref(true);
+
 
 let recommendationData = {
   description: "Проверка связи",
@@ -27,7 +35,7 @@ const newRecommendationData = ref({
 const files = ref([]);
 
 const prepareFiles = () => {
-  if (!creatorMode) {
+  if (!creatorMode.value) {
     recommendationData.documents.forEach(uploadedFile => {
       const exists = uploadedFile.id
         ? files.value.some(file => file.id === uploadedFile.id)
@@ -46,12 +54,53 @@ const prepareFiles = () => {
 
 const saveRecommendation = async() => {
   prepareFiles();
-  files.value = [...recommendationData.documents]; // после запроса, если редактирование
-  console.log(newRecommendationData.value);
+  if(!creatorMode.value) {
+    try {
+      await RecommendationsService.editRecommendation(recommendationData.id, newRecommendationData.value)
+      router.go(0);
+    } catch(err) {
+      console.log(err);
+      alert('Ошибка сохранения!');
+    }
+  } else {
+    try {
+      await RecommendationsService.addRecommendation(applicantId, newRecommendationData.value)
+      router.go(0);
+    } catch(err) {
+      console.log(err);
+      alert('Ошибка сохранения!');
+    }
+  }
+}
+
+const deleteRecommendation = async() => {
+  try {
+    await RecommendationsService.deleteRecommendation(recommendationData.id);
+    router.push({ name: 'edu_verification' });
+  } catch(err) {
+    alert('Ошибка удаления!');
+  }
 }
 
 onMounted(async () => {
-  console.log(files.value); isLoading.value = false;
+  if(!applicantId)
+    router.push({ name: 'home' });
+
+  try {
+    const response = await RecommendationsService.getApplicantRec(applicantId);
+    recommendationData = response.data;
+    creatorMode.value = false;
+  } catch(err) {
+    if(err.response?.status != 404) {
+      router.push({ name: 'home' });
+    }
+    isLoading.value = false;
+  }
+  if(!creatorMode.value) {
+    files.value = [...recommendationData.documents];
+    newRecommendationData.value.description = recommendationData.description;
+    isLoading.value = false;
+  }
 })
 
 </script>
@@ -67,12 +116,12 @@ onMounted(async () => {
                 <div class="col d-flex">
                     <div class="resume-text-area">
                         <label for="formControlExtended" class="form-label">Описание рекомендации</label>
-                        <textarea class="form-control" id="formControlExtended" rows="15"></textarea>
+                        <textarea class="form-control" id="formControlExtended" rows="15" v-model="newRecommendationData.description"></textarea>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-auto" style="flex-direction: column;">
+                <div class="col" style="flex-direction: column;">
                   <label class="form-label">Подтверждающие документы</label>
                     <MultiUpload v-model="files" :isLoading="isLoading" />
                 </div>
@@ -80,7 +129,7 @@ onMounted(async () => {
             <div class="row">
                 <div class="col d-flex">
                     <div class="editor-buttons">
-                        <button type="button" class="btn btn-primary sys-btn-288">
+                        <button v-if="!creatorMode" type="button" class="btn btn-danger sys-btn-288" @click="deleteRecommendation">
                             Удалить рекомендацию
                         </button>
                         <button type="button" class="btn btn-primary sys-btn-288" @click="saveRecommendation">
