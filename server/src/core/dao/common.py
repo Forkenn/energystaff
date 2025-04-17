@@ -36,7 +36,7 @@ async def search_catalog_multi(
 ) -> Sequence[T | None]:
     query = alch.select(model)
     if q:
-        query = query.where(model.name.like(f'{q}%'))
+        query = query.where(model.name.like(f'%{q}%'))
     if start and end:
         query = query.slice(start, end)
 
