@@ -23,7 +23,10 @@ class UserService {
           name: data.name,
           surname: data.surname,
           last_name: data.last_name,
-          birthdate: data.birthdate
+          birthdate: data.birthdate,
+          sex: data.sex,
+          location_id: data.location_id,
+          applicant: data.applicant
         })
         .then((response) => response)
         .catch((err) => {

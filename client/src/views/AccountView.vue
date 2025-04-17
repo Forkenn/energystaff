@@ -1,13 +1,16 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
-import { useUserStore } from '@/stores/user';
+import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import UserService from '@/services/user.service';
+import ToolsService from '@/services/tools.service';
+import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
 const userData = computed(() => userStore.user.data);
+const dataLoading = ref(true);
 const systemStatus = computed(() => {
   if(userData.value.is_superuser) {
     return "Администратор"
@@ -18,13 +21,20 @@ const systemStatus = computed(() => {
   if(userData.value.is_employer) {
     return "Работодатель"
   }
-  if(userData.value.applicant) {
+  if(userData.value.is_applicant) {
     return "Соискатель"
   }
   return "Загрузка..."
 })
+const selectedInstitution = ref(null);
+const selectedLocation = ref(userData.value.location);
+const eduLevels = ref([]);
 
 const saveChanges = async() => {
+  if (userData.value.is_applicant)
+    userData.value.applicant.edu_institution_id = selectedInstitution.value?.id;
+
+  userData.value.location_id = selectedLocation.value?.id;
   try{
     await UserService.editCurrent(userData.value)
     alert("Изменения сохранены!")
@@ -32,6 +42,58 @@ const saveChanges = async() => {
     alert("Ошибка сохранения данных!")
   }
 }
+
+const fetchInstitutions = async(params) => {
+  const response = await ToolsService.getEduInstitutions(params);
+  return response;
+};
+
+const fetchLocations = async(params) => {
+  const response = await ToolsService.getLocations(params);
+  return response;
+};
+
+const checkLevelSelected = (id) => {
+  if (userData.value.is_applicant) {
+    const edu_level_id = userData.value.applicant.edu_level_id;
+    if(edu_level_id == id) return true;
+  }
+  return false;
+}
+
+const setSex = (type) => {
+  userData.value.sex = type;
+}
+
+const setStatus = (type) => {
+  userData.value.applicant.edu_status = type;
+}
+
+const setLevel = (level) => {
+  userData.value.applicant.edu_level_id = level;
+}
+
+onMounted(async () => {
+  const edu_institution_id = userData.value.applicant?.edu_institution_id;
+  if (userData.value.is_applicant) {
+    if (edu_institution_id) {
+      try {
+        const response = await ToolsService.getEduInstitutionbyId(edu_institution_id);
+        selectedInstitution.value = response.data;
+      } catch(err) {
+        alert('Ошибка загрузки данных с сервера!');
+      }
+    }
+  
+    try {
+      const response = await ToolsService.getEduLevels();
+      eduLevels.value = response.data;
+    } catch(err) {
+      alert('Ошибка загрузки данных с сервера!');
+    }
+  }
+  dataLoading.value = false;
+})
 
 </script>
 
@@ -42,95 +104,91 @@ const saveChanges = async() => {
       <div class="account-container account-data-container">
         <h1>Личные данные</h1>
         <div class="row form-row">
-          <div class="col">
+          <div class="col-auto">
             <div class="custom-form-floating">
-              <input type="text" class="form-control" id="InputSurname" placeholder="Фамилия" v-model="userData.surname">
+              <input type="text" class="form-control sys-input-288" id="InputSurname" placeholder="Фамилия" v-model="userData.surname">
               <label for="InputSurname">Фамилия</label>
             </div>
           </div>
-          <div class="col">
+          <div class="col-auto">
             <div class="custom-form-floating">
-              <input type="text" class="form-control" id="InputFirstname" placeholder="Имя" v-model="userData.name">
+              <input type="text" class="form-control sys-input-288" id="InputFirstname" placeholder="Имя" v-model="userData.name">
               <label for="InputFirstname">Имя</label>
             </div>
           </div>
-          <div class="col">
+          <div class="col-auto">
             <div class="custom-form-floating">
-              <input type="text" class="form-control" id="InputSecondname" placeholder="Отчество" v-model="userData.last_name">
+              <input type="text" class="form-control sys-input-288" id="InputSecondname" placeholder="Отчество" v-model="userData.last_name">
               <label for="InputSecondname">Отчество</label>
             </div>
           </div>
         </div>
         <div class="row form-row">
-            <div class="col">
+            <div class="col-auto">
               <div class="custom-form-floating">
-                <input type="date" class="form-control" id="InputBirthdate" placeholder="Дата рождения" v-model="userData.birthdate">
+                <input type="date" class="form-control sys-input-288" id="InputBirthdate" placeholder="Дата рождения" v-model="userData.birthdate">
                 <label for="InputBirthdate">Дата рождения</label>
               </div>
             </div>
-            <div class="col">
-              <select class="form-select" aria-label="Город">
-                  <option selected>Город</option>
-                  <option value="1">Москва</option>
-                  <option value="2">Смоленск</option>
-                  <option value="3">Санкт-Петербург</option>
-              </select>
+            <div class="col-auto">
+              <CatalogSearch :callback="fetchLocations" :isLoading="dataLoading" placeholder="Город" v-model="selectedLocation"/>
             </div>
-            <div class="col">
-              <select class="form-select" aria-label="Пол">
-                <option selected>Пол</option>
-                <option value="1">Мужской</option>
-                <option value="2">Женский</option>
+            <div class="col-auto">
+              <select class="form-select sys-input-288" aria-label="Пол">
+                <option v-if="userData.sex == undefined" @click="setSex(null)" selected>Пол</option>
+                <option :value="false" :selected="userData.sex == false" @click="setSex(false)">Мужской</option>
+                <option :value="true" :selected="userData.sex == true" @click="setSex(true)">Женский</option>
               </select>
             </div>
         </div>
         <div class="row form-row">
-            <div class="col">
+            <div class="col-auto">
               <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputSystemID" placeholder="Идентификатор" v-model="userData.id" readonly>
+                <input type="text" class="form-control sys-input-288" id="InputSystemID" placeholder="Идентификатор" v-model="userData.id" readonly>
                 <label for="InputSystemID">Идентификатор</label>
               </div>
             </div>
-            <div class="col">
+            <div class="col-auto">
               <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputSystemRole" placeholder="Соискатель" v-model="systemStatus" readonly>
+                <input type="text" class="form-control sys-input-288" id="InputSystemRole" placeholder="Соискатель" v-model="systemStatus" readonly>
                 <label for="InputSystemRole">Статус в системе</label>
               </div>
             </div>
-            <div class="col">
-              <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputEDUid" placeholder="Номер зачётной книжки">
+            <div class="col-auto">
+              <div v-if="userData.applicant" class="custom-form-floating">
+                <input type="text" class="form-control sys-input-288" id="InputEDUid" placeholder="Номер зачётной книжки" v-model="userData.applicant.edu_number">
                 <label for="InputEDUid">Номер зачётной книжки</label>
               </div>
             </div>
         </div>
-        <div class="row form-row">
-            <div class="col">
-              <select class="form-select" aria-label="Образовательное учреждение">
-                <option selected>Образовательное учреждение</option>
-                <option value="1">МГУ</option>
-                <option value="2">МГИМО</option>
-                <option value="3">МЭИ</option>
+        <div v-if="userData.applicant" class="row form-row">
+            <div class="col-auto">
+              <CatalogSearch :callback="fetchInstitutions" :isLoading="dataLoading" v-model="selectedInstitution"/>
+            </div>
+            <div class="col-auto">
+              <select v-if="eduLevels.count" class="form-select sys-input-288" aria-label="Уровень образования">
+                <option v-if="!userData.applicant.edu_level_id" @click="setLevel(null)" selected>Уровень образования</option>
+                <option
+                  v-for="level in eduLevels.items" 
+                  :key="level.id"
+                  :value="level.id"
+                  :selected="checkLevelSelected(level.id)"
+                  @click="setLevel(level.id)"
+                >
+                  {{ level.name }}
+                </option>
               </select>
             </div>
-            <div class="col">
-              <select class="form-select" aria-label="Уровень образования">
-                <option selected>Уровень образования</option>
-                <option value="1">Бакалавриват</option>
-                <option value="2">Специалитет</option>
-                <option value="3">Магистратура</option>
-              </select>
-            </div>
-            <div class="col">
-              <select class="form-select" aria-label="Статус обучения">
-                <option selected>Статус обучения</option>
-                <option value="1">Студент</option>
-                <option value="2">Выпускник</option>
+            <div class="col-auto">
+              <select class="form-select sys-input-288" aria-label="Статус обучения">
+                <option v-if="!userData.applicant.edu_status" @click="setStatus(null)" selected>Статус обучения</option>
+                <option :value="'progress'" @click="setStatus('progress')">Студент</option>
+                <option :value="'completed'" @click="setStatus('completed')">Выпускник</option>
               </select>
             </div>
         </div>
         <div class="btn-account-wrapper">
-          <button type="button" class="btn btn-primary sys-btn-288 btn-account" @click="saveChanges">
+          <button type="button" class="btn btn-primary sys-btn-264 btn-account" @click="saveChanges">
             Сохранить изменения
           </button>
         </div>
@@ -154,7 +212,7 @@ const saveChanges = async() => {
             </div>
           </div>
           <div class="col">
-            <button type="button" class="btn btn-primary sys-btn-288 btn-account">
+            <button type="button" class="btn btn-primary sys-btn-264 btn-account">
               Сменить пароль
             </button>
           </div>
@@ -176,7 +234,7 @@ const saveChanges = async() => {
             </div>
           </div>
           <div class="col">
-            <button type="button" class="btn btn-primary sys-btn-288 btn-account">
+            <button type="button" class="btn btn-primary sys-btn-264 btn-account">
               Сменить почту
             </button>
           </div>
@@ -210,7 +268,6 @@ const saveChanges = async() => {
 }
 
 .account-data-container {
-  min-height: 500px;
   margin-top: 55px;
   margin-bottom: 37px;
 }
@@ -221,7 +278,6 @@ const saveChanges = async() => {
 }
 
 .form-row {
-  margin-right: 360px;
   margin-left: 34px;
   margin-bottom: 24px;
 }
@@ -240,6 +296,7 @@ const saveChanges = async() => {
 
 .btn-account-wrapper {
   display: flex;
+  margin-bottom: 48px;
 }
 
 .btn-account {

@@ -46,9 +46,9 @@ const user = computed(() => userStore.user)
                 </div>
             </nav>
             <div class="right-nav">
-                <div v-if="user.status.loggedIn" class="location-block">
+                <div v-if="user.status.loggedIn && user.data.location" class="location-block">
                     <img src="../../assets/icons/Location.svg" width="24" height="24">
-                    <span class="location-text">Местоположение</span>
+                    <span class="location-text">{{ user.data.location.name }}</span>
                 </div>
                 <div class="unauth-user-icon">
                     <router-link :to="{ name: 'account_page' }">
