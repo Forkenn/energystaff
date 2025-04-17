@@ -65,7 +65,7 @@ onMounted(async () => {
             </div>
             <div class="col d-flex">
               <div class="custom-form-floating">
-                <input type="text" class="form-control sys-input-288" id="InputCompanyID" placeholder="Отсутсвует" v-model="companyData.id">
+                <input type="text" class="form-control sys-input-288" id="InputCompanyID" placeholder="Отсутсвует" v-model="companyData.id" readonly>
                 <label for="InputCompanyID">Идентификатор</label>
               </div>
             </div>
@@ -79,28 +79,22 @@ onMounted(async () => {
             </div>
             <div class="col-auto">
               <div class="custom-form-floating">
-                <input type="text" class="form-control sys-input-288" id="InputCompanyID" placeholder="Отсутсвует">
-                <label for="InputCompanyID">Место</label>
-              </div>
-            </div>
-            <div class="col-auto">
-              <div class="custom-form-floating">
                 <input type="text" class="form-control sys-input-288" id="InputCompanyINN" placeholder="ИНН" v-model="companyData.inn">
                 <label for="InputCompanyINN">ИНН</label>
               </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-auto sys-col-600-flex">
+            <div class="col-auto">
               <div class="custom-form-floating">
-                <input type="text" class="form-control flex-grow-1 sys-input-600-flex" id="InputCompanyAddress" placeholder="Юридический адрес" v-model="companyData.address">
-                <label for="InputCompanyAddress">Юридический адрес</label>
+                <input type="text" class="form-control sys-input-288" id="InputCompanyStatus" placeholder="Статус в системе" v-model="companyStatus" readonly>
+                <label for="InputCompanyStatus">Статус в системе</label>
               </div>
             </div>
-            <div class="col d-flex">
+          </div>
+          <div class="row">
+            <div class="col-auto sys-col-912-flex">
               <div class="custom-form-floating">
-                <input type="text" class="form-control sys-input-288" id="InputCompanyStatus" placeholder="Статус в системе" v-model="companyStatus">
-                <label for="InputCompanyStatus">Статус в системе</label>
+                <input type="text" class="form-control flex-grow-1 sys-input-912-flex" id="InputCompanyAddress" placeholder="Юридический адрес" v-model="companyData.address">
+                <label for="InputCompanyAddress">Юридический адрес</label>
               </div>
             </div>
           </div>
