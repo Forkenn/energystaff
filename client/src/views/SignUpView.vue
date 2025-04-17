@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 
 import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
+import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import AuthService from '@/services/auth.service'
 import ToolsService from '@/services/tools.service';
 import { useAuthRedirect } from '@/composables/useAuthRedirect';
@@ -113,39 +114,9 @@ const validateCompanyID = (event) => {
   employerData.value.company_id = event.target.value.replace(/[^\d]/g, '');
 };
 
-//==============Institutions Search Control=========================
-const searchQuery = ref('');
-const institutions = ref([]);
-const isLoading = ref(false);
-
-const debouncedSearch = debounce(async () => {
-  if (searchQuery.value.length > 2) {
-    await fetchInstitutions();
-  } else {
-    institutions.value = [];
-  }
-}, 300);
-
-const onSearchInput = (event) => {
-  searchQuery.value = event.target.value;
-  debouncedSearch();
-  const found = institutions.value.find(inst => inst.name === searchQuery.value);
-  selectedInstitution.value = found || null;
-};
-
-const fetchInstitutions = async () => {
-  isLoading.value = true;
-  try {
-    const params = { q: searchQuery.value }
-    const response = await ToolsService.getEduInstitutions(params)
-    institutions.value = response.data.items;
-  } catch (err) {
-    console.log(err)
-    alert('Ошибка при загрузке учебных заведений');
-    institutions.value = [];
-  } finally {
-    isLoading.value = false;
-  }
+const fetchInstitutions = async(params) => {
+  const response = await ToolsService.getEduInstitutions(params);
+  return response;
 };
 
 </script>
@@ -269,24 +240,7 @@ const fetchInstitutions = async () => {
       <div v-if="eduContainerFlag" class="sign-up-container container-employer">
         <h1>Образовательное учреждение</h1>
         <div class="sign-up-form-group">
-          <input
-            class="form-control form-text-field sys-input-288"
-            type="text form-text-field"
-            placeholder="Наименование ОУ"
-            aria-label="Наименование ОУ"
-            id="edu-institution-input"
-            v-model="searchQuery"
-            @input="onSearchInput"
-            list="institutions-list"
-          >
-          <datalist id="institutions-list">
-            <option 
-              v-for="institution in institutions" 
-              :key="institution.id" 
-              :value="institution.name"
-              :data-id="institution.id"
-            ></option>
-          </datalist>
+          <CatalogSearch class="institutions-search" :callback="fetchInstitutions" v-model="selectedInstitution"/>
           <button type="button" class="btn btn-primary sys-btn-288" @click="toggleContainer">Назад</button>
           <button type="button" class="btn btn-primary sys-btn-288" @click="registerEdu">
             Зарегистрироваться
@@ -341,6 +295,11 @@ const fetchInstitutions = async () => {
 
 .sign-up-form-group {
   text-align: center;
+}
+
+.institutions-search {
+  margin: 0 auto;
+  margin-bottom: 24px;
 }
 
 .form-text-field {
