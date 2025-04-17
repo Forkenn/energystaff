@@ -7,8 +7,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.models import User, Applicant
 
 async def edit_user(session: AsyncSession, user: User, data: dict) -> User:
+    applciant_data: dict = data.pop('applicant', None)
     for field, value in data.items():
         setattr(user, field, value)
+
+    if applciant_data:
+        for field, value in applciant_data.items():
+            if field == 'edu_status' and value is not None:
+                value = value.value
+
+            setattr(user.applicant, field, value)
 
     await session.commit()
     return user

@@ -9,6 +9,7 @@ from sqlalchemy import Date
 from fastapi_users.db import SQLAlchemyBaseUserTable
 
 from src.database import Base
+from src.tools.models import Location
 #from src.tools.models import EduInstitution, EduLevel, Location
 #TODO: abstract relationships
 
@@ -22,10 +23,18 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     name: orm.Mapped[str] = orm.mapped_column(alch.String(120), index=True)
     last_name: orm.Mapped[str] = orm.mapped_column(alch.String(120), index=True, nullable=True)
     birthdate: orm.Mapped[date] = orm.mapped_column(Date(), nullable=True)
-    #sex: orm.Mapped[bool] = orm.mapped_column(alch.Boolean, nullable=True)
+    sex: orm.Mapped[bool] = orm.mapped_column(alch.Boolean, nullable=True)
+    location_id: orm.Mapped[int] = orm.mapped_column(
+        alch.Integer(),
+        alch.ForeignKey("locations.id", ondelete='SET NULL'),
+        index=True,
+        nullable=True
+    )
     is_edu: orm.Mapped[bool] = orm.mapped_column(alch.Boolean(), default=False)
     is_employer: orm.Mapped[bool] = orm.mapped_column(alch.Boolean(), default=False)
     is_applicant: orm.Mapped[bool] = orm.mapped_column(alch.Boolean(), default=False)
+
+    location: orm.Mapped[Optional["Location"]] = orm.relationship("Location", uselist=False)
 
     applicant: orm.Mapped[Optional["Applicant"]] = orm.relationship(
         back_populates="user",
@@ -65,6 +74,8 @@ class Applicant(Base):
     edu_level_id: orm.Mapped[int] = orm.mapped_column(
         alch.ForeignKey("edu_levels.id", ondelete='SET NULL'), nullable=True
     )
+    edu_status: orm.Mapped[str] = orm.mapped_column(alch.String(), nullable=True)
+    edu_number: orm.Mapped[str] = orm.mapped_column(alch.String(10), nullable=True, index=True)
 
     user: orm.Mapped["User"] = orm.relationship(back_populates="applicant")
 

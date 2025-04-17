@@ -45,6 +45,6 @@ class RoleManager:
         if missing_roles:
             raise ForbiddenException()
         
-        await session.refresh(user, ('applicant', 'employer', 'edu_worker'))
+        await session.refresh(user, ('applicant', 'employer', 'edu_worker', 'location'))
         return user
 

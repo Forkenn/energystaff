@@ -3,11 +3,15 @@ from datetime import date
 from pydantic import BaseModel, Field
 
 from src.core.schemas.common import SBaseQueryCountResponse
+from src.core.schemas.catalog import SBaseCatalogItemRead
+from src.tools.models import EduStatus
 
 
 class SApplicantRead(BaseModel):
     edu_institution_id: int | None = None
     edu_level_id: int | None = None
+    edu_status: EduStatus | None = None
+    edu_number: str | None = None
 
 
 class SEmployerRead(BaseModel):
@@ -25,13 +29,14 @@ class SUserReadFull(BaseModel):
     name: str
     last_name: str | None = None
     birthdate: date | None = None
-    #sex: str
+    sex: bool | None = None
     is_edu: bool
     is_employer: bool
     is_applicant: bool
     is_verified: bool
     is_active: bool
     is_superuser: bool
+    location: SBaseCatalogItemRead | None = None
     applicant: SApplicantRead | None = None
     employer: SEmployerRead | None = None
     edu_worker: SEduWorkerRead | None = None
@@ -43,7 +48,7 @@ class SUserPreview(BaseModel):
     name: str
     last_name: str | None = None
     birthdate: date | None = None
-    #sex: str
+    sex: bool | None = None
     is_edu: bool
     is_employer: bool
     is_applicant: bool
@@ -66,7 +71,7 @@ class SApplicantPreview(BaseModel):
     last_name: str | None = None
     is_verified: bool
     birthdate: date
-    location: str | None = "Тестовый город, заменить!"
+    #location: str | None = "Тестовый город, заменить!"
     applicant: SApplicantRead | None = None
 
 
@@ -94,4 +99,6 @@ class SUserEdit(BaseModel):
         description="User last name from 0 to 120 symbols"
     )
     birthdate: date | None = None
-    #sex: str
+    sex: bool | None = None
+    location_id: int | None = None
+    applicant: SApplicantRead | None = None
