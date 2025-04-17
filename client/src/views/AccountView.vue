@@ -69,25 +69,11 @@ const saveChanges = async() => {
               </div>
             </div>
             <div class="col">
-              <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputEDUid" placeholder="Номер зачётной книжки">
-                <label for="InputEDUid">Номер зачётной книжки</label>
-              </div>
-            </div>
-            <div class="col">
-              <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputSystemID" placeholder="Идентификатор" v-model="userData.id">
-                <label for="InputSystemID">Идентификатор</label>
-              </div>
-            </div>
-        </div>
-        <div class="row form-row">
-            <div class="col">
               <select class="form-select" aria-label="Город">
-                <option selected>Город</option>
-                <option value="1">Москва</option>
-                <option value="2">Смоленск</option>
-                <option value="3">Санкт-Петербург</option>
+                  <option selected>Город</option>
+                  <option value="1">Москва</option>
+                  <option value="2">Смоленск</option>
+                  <option value="3">Санкт-Петербург</option>
               </select>
             </div>
             <div class="col">
@@ -97,10 +83,24 @@ const saveChanges = async() => {
                 <option value="2">Женский</option>
               </select>
             </div>
+        </div>
+        <div class="row form-row">
             <div class="col">
               <div class="custom-form-floating">
-                <input type="text" class="form-control" id="InputSystemRole" placeholder="Соискатель" v-model="systemStatus">
+                <input type="text" class="form-control" id="InputSystemID" placeholder="Идентификатор" v-model="userData.id" readonly>
+                <label for="InputSystemID">Идентификатор</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="custom-form-floating">
+                <input type="text" class="form-control" id="InputSystemRole" placeholder="Соискатель" v-model="systemStatus" readonly>
                 <label for="InputSystemRole">Статус в системе</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="custom-form-floating">
+                <input type="text" class="form-control" id="InputEDUid" placeholder="Номер зачётной книжки">
+                <label for="InputEDUid">Номер зачётной книжки</label>
               </div>
             </div>
         </div>
@@ -140,17 +140,17 @@ const saveChanges = async() => {
         <div class="row form-row-security">
           <div class="col">
             <div class="custom-form">
-              <input type="text" class="form-control" id="InputPassword" placeholder="Текущий пароль">
+              <input type="password" class="form-control" id="InputPassword" placeholder="Текущий пароль">
             </div>
           </div>
           <div class="col">
             <div class="custom-form">
-              <input type="text" class="form-control" id="InputNewPassword" placeholder="Новый пароль">
+              <input type="password" class="form-control" id="InputNewPassword" placeholder="Новый пароль">
             </div>
           </div>
           <div class="col">
             <div class="custom-form">
-              <input type="text" class="form-control" id="InputNewPassword2" placeholder="Подтверждение пароля">
+              <input type="password" class="form-control" id="InputNewPassword2" placeholder="Подтверждение пароля">
             </div>
           </div>
           <div class="col">
