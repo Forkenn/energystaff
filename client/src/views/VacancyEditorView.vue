@@ -26,6 +26,8 @@ const vacancyData = ref({
   specialization: "",
   description: "",
   salary: 0,
+  salaryFrom: true,
+  hours: "",
   vacancy_types: [{
       id: 0,
       name: "string"
@@ -169,16 +171,27 @@ onMounted(async () => {
             Данные вакансии
           </h1>
           <div class="row">
-            <div class="col-auto sys-col-912-flex">
+            <div class="col-auto sys-col-600-flex">
               <div class="custom-form-floating">
                 <input
                   type="text"
-                  class="form-control flex-grow-1 sys-input-912-flex"
+                  class="form-control flex-grow-1 sys-input-600-flex"
                   id="InputName"
                   placeholder="Должность"
                   v-model="vacancyData.position"
                 >
                 <label for="InputName">Должность</label>
+              </div>
+            </div>
+            <div class="col d-flex">
+              <div class="custom-form-floating">
+                <input
+                  type="text"
+                  class="form-control flex-grow-1 sys-input-288"
+                  id="InputCity"
+                  placeholder="Город"
+                >
+                <label for="InputCity">Город</label>
               </div>
             </div>
           </div>
@@ -256,20 +269,24 @@ onMounted(async () => {
               </div>
             </div>
             <div class="col-auto">
-              <select id="formMultiselect" class="form-select sys-input-288" aria-label="Рабочие часы">
-                <option selected>Рабочие часы</option>
-                <option value="1">5/2</option>
-                <option value="2">2/2</option>
-                <option value="3">4/2</option>
-              </select>
+              <div class="custom-form-floating">
+                <input
+                  type="text"
+                  class="form-control flex-grow-1 sys-input-600-flex"
+                  id="InputSpecialization"
+                  placeholder="Рабочие часы"
+                  v-model="vacancyData.hours"
+                >
+                <label for="InputSpecialization">Рабочие часы</label>
+              </div>
             </div>
-            <div class="col d-flex">
-              <select id="formMultiselect" class="form-select sys-input-288" aria-label="Навыки">
-                <option selected>Навыки</option>
-                <option value="1">SQL</option>
-                <option value="2">Python</option>
-                <option value="3">Git</option>
-              </select>
+            <div class="col-auto">
+              <div class="form-check" style="padding-top: 10px;">
+                <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkSalaryFrom" v-model="vacancyData.salaryFrom">
+                <label class="form-check-label sys-check-label" for="checkSalaryFrom">
+                    {{ vacancyData.salaryFrom ? "Нижняя граница" : "Верхняя граница" }} {{ "з/п" }}
+                </label>
+              </div>
             </div>
           </div>
           <div class="row">
