@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits } from 'vue';
+import { ref, defineEmits, watch } from 'vue';
 import { debounce } from '@/composables/useDebounce';
 
 const props = defineProps({
@@ -12,6 +12,14 @@ const props = defineProps({
     type: Object,
     default: () => null,
   },
+  placeholder: {
+    type: String,
+    default: () => 'Наименование ОУ',
+  },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -19,6 +27,14 @@ const emit = defineEmits(['update:modelValue']);
 const searchQuery = ref('');
 const objects = ref([]);
 const isLoading = ref(false);
+
+watch(
+  () => props.isLoading,
+  () => {
+    if(props.modelValue)
+      searchQuery.value = props.modelValue.name;
+  }
+);
 
 const debouncedSearch = debounce(async () => {
   if (searchQuery.value.length > 2) {
@@ -63,12 +79,13 @@ const selectObject = (item) => {
       class="form-control form-text-field sys-input-288"
       type="text form-text-field"
       style="margin: 0 auto;"
-      placeholder="Наименование ОУ"
-      aria-label="Наименование ОУ"
+      :placeholder="props.placeholder"
+      :aria-label="props.placeholder"
       data-bs-toggle="dropdown"
       id="edu-institution-input"
       v-model="searchQuery"
       @input="onSearchInput"
+      :title="searchQuery"
     >
     <ul class="dropdown-menu">
       <li
