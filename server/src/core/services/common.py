@@ -1,10 +1,18 @@
-from typing import TypeVar, Generic, Optional, List, Type
-from pydantic import BaseModel
+from typing import TypeVar, Generic, Type
 
-T = TypeVar('T')
-P = TypeVar('P', bound=BaseModel)
+from src.exceptions import NotFoundException
+from src.core.repositories.common import CommonRepository
+
+R = TypeVar('R', bound=CommonRepository)
 
 
-class CommonService(Generic[T, P]):
-    def __init__(self, model: Type[T]):
-        self.model = model
+class CommonService(Generic[R]):
+    def __init__(self, repository: Type[R]):
+        self.repository = repository
+
+    async def get_by_id(self, id: int):
+        result = await self.repository.get(id)
+        if not result:
+            raise NotFoundException()
+        
+        return result
