@@ -1,10 +1,10 @@
 from enum import Enum
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database import get_async_session
+from src.deps import get_user_service
 from src.exceptions import ForbiddenException
+from src.core.services.user import UserService
 from src.auth.manager import fastapi_users
 from src.users.models import User
 
@@ -27,7 +27,7 @@ class RoleManager:
     async def __call__(
             self,
             user: User = Depends(current_user),
-            session: AsyncSession = Depends(get_async_session)
+            user_service: UserService = Depends(get_user_service)
     ):
         roles_mapping = {
             SystemRole.ACTIVE: user.is_active,
@@ -45,6 +45,5 @@ class RoleManager:
         if missing_roles:
             raise ForbiddenException()
         
-        await session.refresh(user, ('applicant', 'employer', 'edu_worker', 'location'))
+        await user_service.refresh_fields(user)
         return user
-
