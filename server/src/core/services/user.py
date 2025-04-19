@@ -1,44 +1,45 @@
 from typing import Sequence
 
+from src.core.services.common import CommonService
 from src.core.repositories.user import UserRepository
 from src.core.schemas.common import SBaseQueryBody
 from src.users.models import User
 from src.users.schemas import SUserEdit
 
 
-class UserService:
+class UserService(CommonService[UserRepository]):
     def __init__(self, user_repo: UserRepository):
-        self.user_repo = user_repo
+        super().__init__(user_repo)
 
     async def refresh_fields(self, user: User) -> None:
-        await self.user_repo.refresh_fields(user)
+        await self.repository.refresh_fields(user)
 
     async def update_user(self, user: User, data: SUserEdit) -> None:
         user_data: dict = data.model_dump()
         applicant_data: dict = user_data.pop('applicant', None)
 
-        await self.user_repo.update_user(user, user_data)
+        await self.repository.update_user(user, user_data)
 
         if applicant_data and user.is_applicant:
             if data.applicant.edu_status:
                 applicant_data['edu_status'] = data.applicant.edu_status.value
 
-            await self.user_repo.update_applicant(user, applicant_data)
+            await self.repository.update_applicant(user, applicant_data)
 
     async def get_users(self, start: int, end: int) -> Sequence[User | None]:
-        data = await self.user_repo.get_users_by_fullname(start ,end)
+        data = await self.repository.get_users_by_fullname(start ,end)
         return data
     
     async def get_users_by_fullname(
             self, data: SBaseQueryBody
     ) -> Sequence[User | None]:
-        data = await self.user_repo.get_users_by_fullname(data.start, data.end, data.q)
+        data = await self.repository.get_users_by_fullname(data.start, data.end, data.q)
         return data
     
     async def get_applicants_by_fullname(
             self, user: User, data: SBaseQueryBody
     ) -> Sequence[User | None]:
-        data = await self.user_repo.get_applicants_by_fullname(
+        data = await self.repository.get_applicants_by_fullname(
             user, data.start, data.end, data.q
         )
         return data

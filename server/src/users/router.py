@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from src.deps import get_user_service
-from src.responses import openapi_401, openapi_400, openapi_403
+from src.responses import openapi_401, openapi_400, openapi_403, openapi_204, response_204
 from src.core.schemas.common import SBaseQueryBody
 from src.core.services.user import UserService
 from src.auth.roles import SystemRole, RoleManager
@@ -39,6 +39,15 @@ async def search_users(
 ) -> SUsersPreview:
     users = await user_service.get_users_by_fullname(data)
     return {'count': len(users), 'items': users}
+
+@router.delete('/{id}', responses={**openapi_204})
+async def delete_user_by_id(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.delete_by_id(int)
+    return response_204
 
 @router.get('/applicants', responses={**openapi_400, **openapi_401, **openapi_403})
 async def get_applicants(
