@@ -1,6 +1,8 @@
 from datetime import date
 from pydantic import BaseModel, Field
 
+from src.core.schemas.common import SBaseQueryCountResponse
+
 
 class SCompanyRead(BaseModel):
     id: int
@@ -10,6 +12,10 @@ class SCompanyRead(BaseModel):
     address: str | None
     description: str | None
     is_verified: bool
+
+
+class SCompaniesRead(SBaseQueryCountResponse):
+    items: list[SCompanyRead]
 
 
 class SCompanyEdit(BaseModel):

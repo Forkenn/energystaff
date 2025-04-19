@@ -19,3 +19,8 @@ class CommonRepository(Generic[T]):
     async def get_many(self, start: int, end: int) -> Sequence[T | None]:
         query = alch.select(self.model).slice(start, end)
         return (await self.session.execute(query)).scalars().all()
+    
+    async def delete(self, id: int) -> None:
+        query = alch.delete(self.model).where(self.model.id == id)
+        await self.session.execute(query)
+        await self.session.commit()

@@ -16,3 +16,6 @@ class CommonService(Generic[R]):
             raise NotFoundException()
         
         return result
+    
+    async def delete_by_id(self, id: int):
+        await self.repository.delete(id)
