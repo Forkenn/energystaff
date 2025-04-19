@@ -1,6 +1,6 @@
 import sqlalchemy as alch
 
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,3 +15,7 @@ class CommonRepository(Generic[T]):
     async def get(self, id: int) -> T | None:
         obj: T = await self.session.get(self.model, id)
         return obj
+    
+    async def get_many(self, start: int, end: int) -> Sequence[T | None]:
+        query = alch.select(self.model).slice(start, end)
+        return (await self.session.execute(query)).scalars().all()

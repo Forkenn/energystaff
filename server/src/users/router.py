@@ -1,12 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.database import get_async_session
+from src.deps import get_user_service
 from src.responses import openapi_401, openapi_400, openapi_403
-from src.core.dao.users import edit_user, fetch_applicants, fetch_users
-from src.core.dao.common import fetch_all
 from src.core.schemas.common import SBaseQueryBody
+from src.core.services.user import UserService
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.users.schemas import (
@@ -28,26 +25,26 @@ async def get_current_user(
 @router.post('/me', responses={**openapi_400, **openapi_401})
 async def edit_current_user(
         data: SUserEdit,
-        session: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_user)
+        user: User = Depends(current_user),
+        user_service: UserService = Depends(get_user_service)
 ) -> SUserReadFull:
-    user = await edit_user(session, user, data.model_dump())
+    await user_service.update_user(user, data)
     return user
 
 @router.get('', responses={**openapi_400, **openapi_401, **openapi_403})
-async def get_users(
+async def search_users(
         data: SBaseQueryBody = Depends(),
-        session: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_superuser)
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
 ) -> SUsersPreview:
-    users = await fetch_users(session, data.q, data.start, data.end)
+    users = await user_service.get_users_by_fullname(data)
     return {'count': len(users), 'items': users}
 
 @router.get('/applicants', responses={**openapi_400, **openapi_401, **openapi_403})
 async def get_applicants(
         data: SBaseQueryBody = Depends(),
-        session: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_edu)
+        user: User = Depends(current_edu),
+        user_service: UserService = Depends(get_user_service)
 ) -> SApplicantsPreview:
-    applicants = await fetch_applicants(session, user, data.q, data.start, data.end)
+    applicants = await user_service.get_applicants_by_fullname(user, data)
     return {'count': len(applicants), 'items': applicants}
