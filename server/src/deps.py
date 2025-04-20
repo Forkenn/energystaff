@@ -6,6 +6,8 @@ from src.core.repositories.user import UserRepository
 from src.core.services.user import UserService
 from src.core.repositories.company import CompanyRepository
 from src.core.services.company import CompanyService
+from src.core.repositories.vacancy import VacancyRepository
+from src.core.services.vacancy import VacancyService
 from src.core.repositories.catalog import CatalogRepository
 from src.core.services.catalog import CatalogService
 
@@ -24,6 +26,14 @@ async def get_company_repo(session: AsyncSession = Depends(get_async_session)) -
 
 async def get_company_service(repo: CompanyRepository = Depends(get_company_repo)) -> CompanyService:
     return CompanyService(repo)
+
+
+async def get_vacancy_repo(session: AsyncSession = Depends(get_async_session)) -> VacancyRepository:
+    return VacancyRepository(session)
+
+async def get_vacancy_service(repo: VacancyRepository = Depends(get_vacancy_repo)) -> VacancyService:
+    return VacancyService(repo)
+
 
 # Catalog-tools
 async def get_locations_repo(session: AsyncSession = Depends(get_async_session)) -> CatalogRepository:
@@ -45,6 +55,7 @@ async def get_levels_repo(session: AsyncSession = Depends(get_async_session)) ->
 
 async def get_levels_service(repo: CatalogRepository = Depends(get_levels_repo)) -> CatalogService:
     return CatalogService(EduLevel, repo)
+
 
 # Catalog-employment
 async def get_schedule_repo(session: AsyncSession = Depends(get_async_session)) -> CatalogRepository:

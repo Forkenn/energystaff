@@ -1,0 +1,87 @@
+from typing import Sequence
+
+from src.exceptions import NotFoundException, NotAllowedException
+from src.core.services.common import CommonService
+from src.core.repositories.vacancy import VacancyRepository
+from src.users.models import User
+from src.vacancies.models import Vacancy
+from src.vacancies.schemas import SVacancyCreate
+
+
+class VacancyService(CommonService[VacancyRepository]):
+    def __init__(self, vacancy_repo: VacancyRepository):
+        super().__init__(vacancy_repo)
+
+    async def get_full_vacancy(self, id) -> Vacancy:
+        vacancy = await self.repository.get_full(id)
+        if not vacancy:
+            raise NotFoundException()
+
+        return vacancy
+    
+    async def create_vacancy(self, user: User, data: SVacancyCreate):
+        data_dict = data.model_dump()
+        data_dict['company_id'] = user.employer.company_id
+        data_dict['author_id'] = user.id
+        vacancy_types_ids = data_dict.pop('vacancy_types_ids', [])
+        vacancy_formats_ids = data_dict.pop('vacancy_formats_ids', [])
+        vacancy_schedules_ids = data_dict.pop('vacancy_schedules_ids', [])
+        new_vacancy = await self.repository.create(
+            data_dict,
+            vacancy_schedules_ids,
+            vacancy_types_ids,
+            vacancy_formats_ids
+        )
+        return new_vacancy
+
+    async def update_vacancy(
+            self,
+            requester_id: int,
+            vacancy_id: int,
+            data: SVacancyCreate
+    ) -> Vacancy:
+        vacancy: Vacancy = await self.repository.get_full(vacancy_id)
+        if not vacancy:
+            raise NotFoundException()
+        
+        if vacancy.author_id != requester_id:
+            raise NotAllowedException()
+
+        vacancy_data: dict = data.model_dump()
+        vacancy_types_ids = vacancy_data.pop('vacancy_types_ids', [])
+        vacancy_formats_ids = vacancy_data.pop('vacancy_formats_ids', [])
+        vacancy_schedules_ids = vacancy_data.pop('vacancy_schedules_ids', [])
+        await self.repository.update(
+            vacancy,
+            vacancy_data,
+            vacancy_schedules_ids,
+            vacancy_types_ids,
+            vacancy_formats_ids
+        )
+        return vacancy
+
+    async def get_vacancies_cards(
+            self,
+            requester_id: int,
+            start: int,
+            end: int
+        ) -> Sequence[dict | None]:
+        data = await self.repository.get_vacancies_plain(
+            requester_id,
+            start,
+            end
+        )
+        return data
+    
+    async def count_vacancies(self) -> int:
+        return await self.repository.count_vacancies()
+    
+    async def delete_by_id(self, requester_id: int, id: int) -> None:
+        vacancy: Vacancy = await self.repository.get(id)
+        if not vacancy:
+            raise NotFoundException()
+        
+        if vacancy.author_id != requester_id:
+            raise NotAllowedException()
+        
+        await self.repository.delete_object(vacancy)
