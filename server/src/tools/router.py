@@ -1,19 +1,15 @@
 from fastapi import APIRouter, Depends
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.database import get_async_session
 from src.responses import response_204, openapi_404, openapi_204, openapi_400
-from src.exceptions import NotFoundException, AlreadyExistException
+from src.deps import (
+    get_locations_service, get_institutions_service, get_levels_service
+)
+from src.core.services.catalog import CatalogService
+from src.core.schemas.common import SBaseQueryBody
 from src.core.schemas.catalog import SBaseCatalogItemRead, SBaseCatalogRead
-from src.core.dao.common import search_catalog_multi, fetch_one
-from src.auth.manager import fastapi_users
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
-from src.tools.models import Location, EduInstitution, EduLevel
-from src.tools.schemas import (
-    SBaseToolsSearch, SEduInstitutionCreate, SEduLevelCreate, SLocationCreate
-)
+from src.tools.schemas import SEduInstitutionCreate, SEduLevelCreate, SLocationCreate
 
 router = APIRouter(prefix='/tools', tags=['Tools'])
 
@@ -22,209 +18,127 @@ current_superuser = RoleManager(SystemRole.SUPERUSER)
 
 @router.get('/locations')
 async def get_locations(
-    params: SBaseToolsSearch = Depends(),
-    session: AsyncSession = Depends(get_async_session)
+    params: SBaseQueryBody = Depends(),
+    location_service: CatalogService = Depends(get_locations_service)
 ) -> SBaseCatalogRead:
-    locations = await search_catalog_multi(
-        session, Location, params.q, params.start, params.end
-    )
+    locations = await location_service.search_catalog(params)
 
     return {'count': len(locations),'items': locations}
 
 @router.get('/locations/{id}', responses={**openapi_404})
 async def get_location_by_id(
     id: int,
-    session: AsyncSession = Depends(get_async_session)
+    location_service: CatalogService = Depends(get_locations_service)
 ) -> SBaseCatalogItemRead:
-    location = await session.get(Location, id)
-    if not location:
-        raise NotFoundException()
-
+    location = await location_service.get_by_id(id)
     return location
 
 @router.post('/locations', responses={**openapi_400})
 async def add_location(
     data: SLocationCreate,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    location_service: CatalogService = Depends(get_locations_service)
 ) -> SBaseCatalogItemRead:
-    location = await fetch_one(
-        session, Location, where=(Location.name == data.name,)
-    )
-    if location:
-        raise AlreadyExistException()
-
-    location = Location(name=data.name)
-    session.add(location)
-    await session.commit()
+    location = await location_service.add_item(data.name)
     return location
 
 @router.delete('/locations/{id}', responses={**openapi_204, **openapi_404})
 async def delete_location_by_id(
     id: int,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    location_service: CatalogService = Depends(get_locations_service)
 ):
-    location = await session.get(Location, id)
-    if not location:
-        raise NotFoundException()
-
-    await session.delete(location)
-    await session.commit()
+    await location_service.delete_by_id(id)
     return response_204
 
 @router.patch('/locations/{id}', responses={**openapi_404, **openapi_400})
 async def edit_location_by_id(
     id: int,
     data: SLocationCreate,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    location_service: CatalogService = Depends(get_locations_service)
 ) -> SBaseCatalogItemRead:
-    location = await fetch_one(
-        session, Location, where=(Location.name == data.name,)
-    )
-    if location:
-        raise AlreadyExistException()
-
-    location = await session.get(Location, id)
-    if not location:
-        raise NotFoundException()
-
-    location.name = data.name
-    await session.commit()
+    location = await location_service.edit_item(id, data.name)
     return location
+
 
 @router.get('/edu-institutions')
 async def get_edu_institutions(
-    params: SBaseToolsSearch = Depends(),
-    session: AsyncSession = Depends(get_async_session)
+    params: SBaseQueryBody = Depends(),
+    inst_service: CatalogService = Depends(get_institutions_service)
 ) -> SBaseCatalogRead:
-    response = await search_catalog_multi(
-        session, EduInstitution, params.q, params.start, params.end
-    )
+    institutions = await inst_service.search_catalog(params)
 
-    return {'count': len(response),'items': response}
+    return {'count': len(institutions),'items': institutions}
 
 @router.get('/edu-institutions/{id}', responses={**openapi_404})
 async def get_edu_institutions_by_id(
     id: int,
-    session: AsyncSession = Depends(get_async_session)
+    inst_service: CatalogService = Depends(get_institutions_service)
 ) -> SBaseCatalogItemRead:
-    response = await session.get(EduInstitution, id)
-    if not response:
-        raise NotFoundException()
-
-    return response
+    institutions = await inst_service.get_by_id(id)
+    return institutions
 
 @router.post('/edu-institutions', responses={**openapi_400})
 async def add_edu_institution(
     data: SEduInstitutionCreate,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    inst_service: CatalogService = Depends(get_institutions_service)
 ) -> SBaseCatalogItemRead:
-    edu_institution = await fetch_one(
-        session, EduInstitution, where=(EduInstitution.name == data.name,)
-    )
-    if edu_institution:
-        raise AlreadyExistException()
-
-    edu_institution = EduInstitution(name=data.name)
-    session.add(edu_institution)
-    await session.commit()
+    edu_institution = await inst_service.add_item(data.name)
     return edu_institution
 
 @router.delete('/edu-institutions/{id}', responses={**openapi_204, **openapi_404})
 async def delete_edu_institution_by_id(
     id: int,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    inst_service: CatalogService = Depends(get_institutions_service)
 ):
-    edu_institution = await session.get(EduInstitution, id)
-    if not edu_institution:
-        raise NotFoundException()
-
-    await session.delete(edu_institution)
-    await session.commit()
+    await inst_service.delete_by_id(id)
     return response_204
 
 @router.patch('/edu-institutions/{id}', responses={**openapi_404, **openapi_400})
 async def edit_edu_institution_by_id(
     id: int,
     data: SEduInstitutionCreate,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    inst_service: CatalogService = Depends(get_institutions_service)
 ) -> SBaseCatalogItemRead:
-    edu_institution = await fetch_one(
-        session, EduInstitution, where=(EduInstitution.name == data.name,)
-    )
-    if edu_institution:
-        raise AlreadyExistException()
-
-    edu_institution = await session.get(EduInstitution, id)
-    if not edu_institution:
-        raise NotFoundException()
-
-    edu_institution.name = data.name
-    await session.commit()
+    edu_institution = await inst_service.edit_item(id, data.name)
     return edu_institution
+
 
 @router.get('/edu-levels')
 async def get_edu_levels(
-    session: AsyncSession = Depends(get_async_session)
+    levels_service: CatalogService = Depends(get_levels_service)
 ) -> SBaseCatalogRead:
-    edu_levels = await search_catalog_multi(
-        session, EduLevel
-    )
+    edu_levels = await levels_service.get_all()
     return {'count': len(edu_levels),'items': edu_levels}
 
 @router.post('/edu-levels', responses={**openapi_400})
 async def add_edu_level(
     data: SEduLevelCreate,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    levels_service: CatalogService = Depends(get_levels_service)
 ) -> SBaseCatalogItemRead:
-    edu_level = await fetch_one(
-        session, EduLevel, where=(EduLevel.name == data.name,)
-    )
-    if edu_level:
-        raise AlreadyExistException()
-
-    edu_level = EduLevel(name=data.name)
-    session.add(edu_level)
-    await session.commit()
+    edu_level = await levels_service.add_item(data.name)
     return edu_level
 
 @router.delete('/edu-levels/{id}', responses={**openapi_204, **openapi_404})
 async def delete_edu_level_by_id(
     id: int,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    levels_service: CatalogService = Depends(get_levels_service)
 ):
-    edu_level = await session.get(EduLevel, id)
-    if not edu_level:
-        raise NotFoundException()
-
-    await session.delete(edu_level)
-    await session.commit()
+    await levels_service.delete_by_id(id)
     return response_204
 
 @router.patch('/edu-levels/{id}', responses={**openapi_404, **openapi_400})
 async def edit_edu_level_by_id(
     id: int,
     data: SEduLevelCreate,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_superuser)
+    user: User = Depends(current_superuser),
+    levels_service: CatalogService = Depends(get_levels_service)
 ) -> SBaseCatalogItemRead:
-    edu_level = await fetch_one(
-        session, EduLevel, where=(EduLevel.name == data.name,)
-    )
-    if edu_level:
-        raise AlreadyExistException()
-
-    edu_level = await session.get(EduLevel, id)
-    if not edu_level:
-        raise NotFoundException()
-
-    edu_level.name = data.name
-    await session.commit()
+    edu_level = await levels_service.edit_item(id, data.name)
     return edu_level

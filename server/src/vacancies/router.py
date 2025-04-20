@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from src.responses import openapi_404, openapi_403, openapi_204, response_204
 from src.exceptions import NotFoundException, NotAllowedException
+from src.deps import get_schedule_service, get_format_service, get_type_service
+from src.core.services.catalog import CatalogService
 from src.core.schemas.catalog import SBaseCatalogRead
 from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
 from src.core.dao.common import fetch_all, fetch_one
@@ -25,23 +27,23 @@ current_superuser = RoleManager(SystemRole.SUPERUSER)
 
 @router.get('/schedules')
 async def get_vacancies_schedules(
-        session: AsyncSession = Depends(get_async_session)
+        schedule_service: CatalogService = Depends(get_schedule_service)
 ) -> SBaseCatalogRead:
-    results = await fetch_all(session, EmploymentSchedule)
+    results = await schedule_service.get_all()
     return {'count': len(results), 'items': results}
 
 @router.get('/formats')
 async def get_vacancies_formats(
-        session: AsyncSession = Depends(get_async_session)
+        format_service: CatalogService = Depends(get_format_service)
 ) -> SBaseCatalogRead:
-    results = await fetch_all(session, EmploymentFormat)
+    results = await format_service.get_all()
     return {'count': len(results), 'items': results}
 
 @router.get('/types')
 async def get_vacancies_types(
-        session: AsyncSession = Depends(get_async_session)
+        type_service: CatalogService = Depends(get_type_service)
 ) -> SBaseCatalogRead:
-    results = await fetch_all(session, EmploymentType)
+    results = await type_service.get_all()
     return {'count': len(results), 'items': results}
 
 @router.get('')
