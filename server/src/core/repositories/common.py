@@ -24,3 +24,7 @@ class CommonRepository(Generic[T]):
         query = alch.delete(self.model).where(self.model.id == id)
         await self.session.execute(query)
         await self.session.commit()
+
+    async def delete_object(self, obj: T) -> None:
+        await self.session.delete(obj)
+        await self.session.commit()
