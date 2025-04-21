@@ -8,6 +8,8 @@ from src.core.repositories.company import CompanyRepository
 from src.core.services.company import CompanyService
 from src.core.repositories.vacancy import VacancyRepository
 from src.core.services.vacancy import VacancyService
+from src.core.repositories.resume import ResumeRepository
+from src.core.services.resume import ResumeService
 from src.core.repositories.catalog import CatalogRepository
 from src.core.services.catalog import CatalogService
 
@@ -33,6 +35,13 @@ async def get_vacancy_repo(session: AsyncSession = Depends(get_async_session)) -
 
 async def get_vacancy_service(repo: VacancyRepository = Depends(get_vacancy_repo)) -> VacancyService:
     return VacancyService(repo)
+
+
+async def get_resume_repo(session: AsyncSession = Depends(get_async_session)) -> ResumeRepository:
+    return ResumeRepository(session)
+
+async def get_resume_service(repo: ResumeRepository = Depends(get_resume_repo)) -> ResumeService:
+    return ResumeService(repo)
 
 
 # Catalog-tools
