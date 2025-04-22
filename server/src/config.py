@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -15,3 +16,5 @@ DB_NAME = os.environ.get('DB_NAME')
 SECRET_TOKEN = os.environ.get('SECRET_TOKEN')
 TOKEN_EXPIRE_SECONDS = 259200
 COOKIE_NAME = "energystaff_token"
+
+STORAGE_PATH = Path() / "storage"
