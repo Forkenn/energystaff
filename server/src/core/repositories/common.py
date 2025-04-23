@@ -20,6 +20,11 @@ class CommonRepository(Generic[T]):
         query = alch.select(self.model).slice(start, end)
         return (await self.session.execute(query)).scalars().all()
     
+    async def exists(self, id: int) -> bool:
+        query = alch.select(1).where(self.model.id == id)
+        result = await self.session.scalar(query)
+        return result is not None
+    
     async def delete(self, id: int) -> None:
         query = alch.delete(self.model).where(self.model.id == id)
         await self.session.execute(query)

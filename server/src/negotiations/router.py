@@ -1,23 +1,11 @@
 from fastapi import APIRouter, Depends, Body
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.database import get_async_session
+from src.deps import get_neg_service
 from src.responses import openapi_401, openapi_400, response_204
-from src.exceptions import (
-    NotFoundException, AlreadyExistException, WrongStateException,
-    NotAllowedException
-)
-from src.core.dao.common import fetch_one
-from src.core.dao.negotiations import (
-    fetch_negotiations_applicant, count_negotiations_applicant,
-    fetch_negotiations_employer, count_negotiations_employer,
-    set_negotiation_status
-)
+from src.core.services.negotiation import NegotiationService
 from src.core.schemas.common import SBaseQueryCountResponse
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
-from src.vacancies.models import Vacancy
 from src.negotiations.models import Negotiation, NegotiationStatus
 from src.negotiations.schemas import (
     SNegotiationResult, SNegotiationsFilter, SNegotiationAppPreviews,
@@ -34,10 +22,10 @@ current_employer = RoleManager(SystemRole.ACTIVE, SystemRole.EMPLOYER)
 async def get_applicant_negotiations_cards(
         data: SNegotiationsFilter = Depends(),
         user: User = Depends(current_applicant),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationAppPreviews:
-    negotiations = await fetch_negotiations_applicant(
-        session, user.id, data.start, data.end, data.status
+    negotiations = await service.get_negotiations_applicant(
+        user.id, data.start, data.end, data.status
     )
 
     return {'count': len(negotiations), 'items': negotiations}
@@ -46,22 +34,19 @@ async def get_applicant_negotiations_cards(
 async def get_applicant_negotiations_count(
         status: NegotiationStatus = None,
         user: User = Depends(current_applicant),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SBaseQueryCountResponse:
-    count = await count_negotiations_applicant(
-        session, user.id, status
-    )
-
+    count = await service.count_negotiations_applicant(user.id, status)
     return {'count': count}
 
 @router.get('/employer')
 async def get_employer_negotiations_cards(
         data: SNegotiationsFilter = Depends(),
         user: User = Depends(current_employer),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationEmpPreviews:
-    negotiations = await fetch_negotiations_employer(
-        session, user.id, data.start, data.end, data.status
+    negotiations = await service.get_negotiations_employer(
+        user.id, data.start, data.end, data.status
     )
 
     return {'count': len(negotiations), 'items': negotiations}
@@ -70,32 +55,19 @@ async def get_employer_negotiations_cards(
 async def get_employer_negotiations_count(
         status: NegotiationStatus = None,
         user: User = Depends(current_employer),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SBaseQueryCountResponse:
-    count = await count_negotiations_employer(
-        session, user.id, status
-    )
-
+    count = await service.count_negotiations_employer(user.id, status)
     return {'count': count}
 
 @router.post('/employer/accept')
 async def accept_negotiation(
         data: SNegotiationChangeStatus,
         user: User = Depends(current_employer),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationResult:
-    negotiation: Negotiation = await session.get(Negotiation, data.negotiation_id)
-    if not negotiation:
-        raise NotFoundException()
-    
-    if negotiation.employer_id != user.id:
-        raise NotAllowedException()
-    
-    await set_negotiation_status(
-        session,
-        negotiation,
-        NegotiationStatus.ACCEPTED.value,
-        description=data.desctiption
+    negotiation: Negotiation = await service.update_negotiation(
+        data.negotiation_id, user.id, NegotiationStatus.ACCEPTED, data.desctiption
     )
 
     return negotiation
@@ -104,17 +76,10 @@ async def accept_negotiation(
 async def reject_negotiation(
         data: SNegotiationChangeStatus,
         user: User = Depends(current_employer),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationResult:
-    negotiation: Negotiation = await session.get(Negotiation, data.negotiation_id)
-    if not negotiation:
-        raise NotFoundException()
-    
-    if negotiation.employer_id != user.id:
-        raise NotAllowedException()
-    
-    await set_negotiation_status(
-        session, negotiation, NegotiationStatus.REJECTED.value
+    negotiation: Negotiation = await service.update_negotiation(
+        data.negotiation_id, user.id, NegotiationStatus.REJECTED, data.desctiption
     )
 
     return negotiation
@@ -123,22 +88,10 @@ async def reject_negotiation(
 async def reset_negotiation(
         data: SNegotiationsIdBody,
         user: User = Depends(current_employer),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationResult:
-    negotiation: Negotiation = await session.get(Negotiation, data.negotiation_id)
-    if not negotiation:
-        raise NotFoundException()
-    
-    if negotiation.employer_id != user.id:
-        raise NotAllowedException()
-    
-    if negotiation.status not in (
-        NegotiationStatus.ACCEPTED.value, NegotiationStatus.REJECTED.value
-    ):
-        raise WrongStateException()
-    
-    await set_negotiation_status(
-        session, negotiation, NegotiationStatus.PENDING.value
+    negotiation: Negotiation = await service.update_negotiation(
+        data.negotiation_id, user.id, NegotiationStatus.PENDING, None
     )
 
     return negotiation
@@ -147,60 +100,16 @@ async def reset_negotiation(
 async def create_negotiation(
         vacancy_id: int,
         user: User = Depends(current_applicant),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationResult:
-    vacancy: Vacancy = await fetch_one(
-        session,
-        Vacancy,
-        where=(Vacancy.id == vacancy_id,)
-    )
-
-    if not vacancy:
-        raise NotFoundException()
-    
-    negotiation: Negotiation = await fetch_one(
-        session,
-        Negotiation,
-        where=(
-            Negotiation.vacancy_id == vacancy_id,
-            Negotiation.applicant_id == user.id
-        )
-    )
-
-    if negotiation:
-        raise AlreadyExistException()
-
-    negotiation = Negotiation()
-    negotiation.applicant = user
-    negotiation.vacancy = vacancy
-    negotiation.employer_id = vacancy.author_id
-    session.add(negotiation)
-    await session.commit()
+    negotiation = await service.create_negotiation(vacancy_id, user.id)
     return negotiation
 
 @router.delete('/{id}', responses={**openapi_400})
 async def delete_negotiation(
         id: int,
         user: User = Depends(current_applicant),
-        session: AsyncSession = Depends(get_async_session)
+        service: NegotiationService = Depends(get_neg_service)
 ):
-    negotiation: Negotiation = await fetch_one(
-        session,
-        Negotiation,
-        where=(
-            Negotiation.id == id,
-            Negotiation.applicant_id == user.id
-        )
-    )
-
-    if not negotiation:
-        raise NotFoundException()
-    
-    if negotiation.status not in (
-        NegotiationStatus.ACCEPTED.value, NegotiationStatus.PENDING.value
-    ):
-        raise WrongStateException()
-
-    await session.delete(negotiation)
-    await session.commit()
+    await service.delete_by_id(id)
     return response_204

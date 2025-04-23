@@ -14,6 +14,8 @@ from src.core.repositories.catalog import CatalogRepository
 from src.core.services.catalog import CatalogService
 from src.core.repositories.recommendation import RecommendationRepository
 from src.core.services.recommendation import RecommendationService
+from src.core.repositories.negotiation import NegotiationRepository
+from src.core.services.negotiation import NegotiationService
 from src.core.repositories.storage import StorageRepository
 from src.core.services.storage import StorageService
 
@@ -56,6 +58,16 @@ async def get_recomm_service(repo: RecommendationRepository = Depends(get_recomm
     storage_service = StorageService(storage_repo)
 
     return RecommendationService(repo, storage_service)
+
+
+async def get_neg_repo(session: AsyncSession = Depends(get_async_session)) -> NegotiationRepository:
+    return NegotiationRepository(session)
+
+async def get_neg_service(repo: NegotiationRepository = Depends(get_neg_repo)) -> NegotiationService:
+    vacancy_repo = VacancyRepository(repo.session)
+    vacancy_service = VacancyService(vacancy_repo)
+
+    return NegotiationService(repo, vacancy_service)
 
 
 # Catalog-tools
