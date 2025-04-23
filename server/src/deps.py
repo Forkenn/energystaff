@@ -12,6 +12,10 @@ from src.core.repositories.resume import ResumeRepository
 from src.core.services.resume import ResumeService
 from src.core.repositories.catalog import CatalogRepository
 from src.core.services.catalog import CatalogService
+from src.core.repositories.recommendation import RecommendationRepository
+from src.core.services.recommendation import RecommendationService
+from src.core.repositories.storage import StorageRepository
+from src.core.services.storage import StorageService
 
 from src.tools.models import Location, EduInstitution, EduLevel
 from src.vacancies.models import EmploymentFormat, EmploymentSchedule, EmploymentType
@@ -42,6 +46,16 @@ async def get_resume_repo(session: AsyncSession = Depends(get_async_session)) ->
 
 async def get_resume_service(repo: ResumeRepository = Depends(get_resume_repo)) -> ResumeService:
     return ResumeService(repo)
+
+
+async def get_recomm_repo(session: AsyncSession = Depends(get_async_session)) -> RecommendationRepository:
+    return RecommendationRepository(session)
+
+async def get_recomm_service(repo: RecommendationRepository = Depends(get_recomm_repo)) -> RecommendationService:
+    storage_repo = StorageRepository(repo.session)
+    storage_service = StorageService(storage_repo)
+
+    return RecommendationService(repo, storage_service)
 
 
 # Catalog-tools
