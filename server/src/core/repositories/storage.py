@@ -12,7 +12,7 @@ class StorageRepository(CommonRepository[ProofDocument]):
         registered = []
 
         for metadata in files_metadata:
-           registered.append(await self._register_file(metadata))
+           registered.append(await self.register_file(metadata))
 
         return registered
 

@@ -1,6 +1,7 @@
 import os
 import string
 import random
+import logging
 
 from pathlib import Path
 
@@ -18,7 +19,7 @@ class StorageService(CommonService[StorageRepository]):
     async def upload_files(self, dir_path: Path, files: list[FileDTO]) -> list[ProofDocument]:
         files_objects = []
         for file_metadata in files:
-            files_objects.append(self.upload_file(dir_path, file_metadata))
+            files_objects.append(await self.upload_file(dir_path, file_metadata))
 
         return files_objects
 
@@ -31,7 +32,7 @@ class StorageService(CommonService[StorageRepository]):
             ) for _ in range(30)
         )
 
-        file_metadata.real_name = '_'.join((prefix, *file_metadata.filename.split()))
+        file_metadata.real_name = '_'.join((prefix, *file_metadata.download_name.split()))
 
         save_to = STORAGE_PATH / dir_path / file_metadata.real_name
         os.makedirs(os.path.dirname(save_to), exist_ok=True)
@@ -39,7 +40,20 @@ class StorageService(CommonService[StorageRepository]):
         with open(save_to, "wb") as f:
             f.write(data)
 
-        return await self.repository.register_file(FileDTO.to_dict())
+        file_dict = file_metadata.to_dict()
+        file_dict.pop('file', None)
+        return await self.repository.register_file(file_dict)
+    
+    async def delete_files(self, dir_path: Path, filenames: list[str]) -> None:
+        for name in filenames:
+            await self.delete_file(name, STORAGE_PATH / dir_path)
+
+    async def delete_file(self, dir_path: Path, filename: str) -> None:
+        file = dir_path / filename
+        try:
+            file.unlink()
+        except FileNotFoundError:
+            logging.warning(f"File with name {filename} does not exists.")
     
     async def delete_by_ids(self, ids: list[int]):
         pass
