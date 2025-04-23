@@ -1,11 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from sqlalchemy.orm import joinedload
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.database import get_async_session
 from src.responses import openapi_404, openapi_403, openapi_204, response_204
-from src.exceptions import NotFoundException, NotAllowedException
 from src.deps import (
     get_schedule_service, get_format_service, get_type_service,
     get_vacancy_service
@@ -14,13 +9,9 @@ from src.core.services.catalog import CatalogService
 from src.core.services.vacancy import VacancyService
 from src.core.schemas.catalog import SBaseCatalogRead
 from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
-from src.core.dao.common import fetch_all, fetch_one
-from src.core.dao.vacancies import fetch_vacancies_cards, count_vacancies
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
-from src.vacancies.models import (
-    Vacancy, EmploymentFormat, EmploymentSchedule, EmploymentType
-)
+from src.vacancies.models import Vacancy
 from src.vacancies.schemas import SVacancyCreate, SVacancyRead, SVacanciesPreview
 
 router = APIRouter(prefix='/vacancies', tags=['Vacancies'])
