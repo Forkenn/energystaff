@@ -7,6 +7,7 @@ from sqlalchemy import DateTime
 from sqlalchemy.sql import func
 
 from src.database import Base
+from src.companies.models import Company
 
 vacancies_types = alch.Table(
     "vacancies_types",
@@ -78,6 +79,8 @@ class Vacancy(Base):
     company_id: orm.Mapped[int] = orm.mapped_column(
         alch.ForeignKey("companies.id", ondelete='CASCADE'), index=True
     )
+
+    company: orm.Mapped["Company"] = orm.relationship("Company")
 
     vacancy_types: orm.Mapped[list["EmploymentType"]] = orm.relationship(
         "EmploymentType", secondary=vacancies_types

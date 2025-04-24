@@ -4,6 +4,12 @@ from pydantic import BaseModel, Field
 from src.core.schemas.catalog import SBaseCatalogItemRead
 from src.negotiations.models import NegotiationStatus
 
+
+class SCompany(BaseModel):
+    id: int
+    name: str
+
+
 class SVacancyCreate(BaseModel):
     position: str = Field(
         default=...,
@@ -35,7 +41,7 @@ class SVacancyRead(BaseModel):
     specialization: str
     salary: int
     description: str
-    company_id: int
+    company: SCompany
     vacancy_types: list[SBaseCatalogItemRead]
     vacancy_formats: list[SBaseCatalogItemRead]
     vacancy_schedules: list[SBaseCatalogItemRead]

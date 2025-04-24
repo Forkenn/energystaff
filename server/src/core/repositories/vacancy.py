@@ -3,7 +3,7 @@ import sqlalchemy as alch
 from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from src.core.repositories.common import CommonRepository
 from src.vacancies.models import (
@@ -24,7 +24,8 @@ class VacancyRepository(CommonRepository[Vacancy]):
             .options(
                 joinedload(Vacancy.vacancy_formats),
                 joinedload(Vacancy.vacancy_schedules),
-                joinedload(Vacancy.vacancy_types)
+                joinedload(Vacancy.vacancy_types),
+                selectinload(Vacancy.company)
             )
         )
 
