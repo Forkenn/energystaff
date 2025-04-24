@@ -116,6 +116,13 @@ const revokeAndReject = async() => {
   border-radius: 10px;
   background-color: #FFFFFF;
   font-family: "Montserrat";
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.negotiation-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
 }
 
 .card-wrapper {
