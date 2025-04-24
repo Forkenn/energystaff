@@ -131,7 +131,7 @@ onMounted(async () => {
   if (vacancyId) {
     try {
       const response = await VacanciesService.getVacancy(vacancyId);
-      if(response.data.company_id != userStore.user.data.employer?.company_id) {
+      if(response.data.company.id != userStore.user.data.employer?.company_id) {
         router.push({ name: 'vacancy_editor' });
         return;
       }
