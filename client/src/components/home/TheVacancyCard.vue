@@ -14,6 +14,10 @@ const router = useRouter();
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
 
+const goToVacancy = () => {
+  router.push({ name: 'vacancy_page', params: { id: props.vacancy.id } })
+}
+
 const deleteVacancy = async() => {
     await VacanciesService.deleteVacancy(props.vacancy.id);
     router.go(0);
@@ -36,7 +40,7 @@ const deleteNegotiation = async() => {
 </script>
 
 <template>
-  <div class="vacancy-card">
+  <div class="vacancy-card" @click="goToVacancy">
     <div class="card-wrapper" style="align-items: center;">
         <h1>
             {{ vacancy.position }}
@@ -53,11 +57,11 @@ const deleteNegotiation = async() => {
         <div class="city">
             {{ vacancy.city }}
         </div>
-        <button v-if="user.data.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-200" @click="applyVacancy">Откликнуться</button>
-        <button v-else-if="user.data.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation.status)" class="btn btn-primary sys-btn-200" @click="deleteNegotiation">Отозвать отклик</button>
-        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click="editVacancy">Редактировать</button>
-        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
-        <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" @click="deleteVacancy">Удалить</button>
+        <button v-if="user.data.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-200" @click.stop="applyVacancy">Откликнуться</button>
+        <button v-else-if="user.data.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation.status)" class.stop="btn btn-primary sys-btn-200" @click="deleteNegotiation">Отозвать отклик</button>
+        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click.stop="editVacancy">Редактировать</button>
+        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click.stop="deleteVacancy">Удалить</button>
+        <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" @click.stop="deleteVacancy">Удалить</button>
     </div>
   </div>
 </template>
@@ -73,6 +77,13 @@ const deleteNegotiation = async() => {
   border-radius: 10px;
   background-color: #FFFFFF;
   font-family: "Montserrat";
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.vacancy-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
 }
 
 .card-wrapper {
