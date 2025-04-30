@@ -42,3 +42,11 @@ class CompanyService(CommonService[CompanyRepository]):
             raise NotFoundException()
 
         return data
+    
+    async def verify_company_by_id(self, id: int) -> None:
+        company: Company = await self.get_by_id(id)
+        await self.repository.update_company(company, data={"is_verified": True})
+
+    async def unverify_company_by_id(self, id: int) -> None:
+        company: Company = await self.get_by_id(id)
+        await self.repository.update_company(company, data={"is_verified": False})

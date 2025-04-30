@@ -52,6 +52,24 @@ async def edit_company_by_id(
     company: Company = await company_service.update_company(user, id, data)
     return company
 
+@router.post('/{id}/verify', responses={**openapi_204, **openapi_403})
+async def verify_company_by_id(
+    id: int,
+    user: User = Depends(current_superuser),
+    company_service: CompanyService = Depends(get_company_service)
+):
+    await company_service.verify_company_by_id(id)
+    return response_204
+
+@router.post('/{id}/unverify', responses={**openapi_204, **openapi_403})
+async def unverify_company_by_id(
+    id: int,
+    user: User = Depends(current_superuser),
+    company_service: CompanyService = Depends(get_company_service)
+):
+    await company_service.unverify_company_by_id(id)
+    return response_204
+
 @router.delete('/{id}', responses={**openapi_204})
 async def delete_company_by_id(
     id: int,
