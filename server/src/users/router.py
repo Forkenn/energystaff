@@ -49,6 +49,24 @@ async def delete_user_by_id(
     await user_service.delete_by_id(int)
     return response_204
 
+@router.post('/{id}/deactivate', responses={**openapi_204})
+async def deactivate_user_by_id(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.deactivate_user_by_id(id)
+    return response_204
+
+@router.post('/{id}/activate', responses={**openapi_204})
+async def activate_user_by_id(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.activate_user_by_id(id)
+    return response_204
+
 @router.get('/applicants', responses={**openapi_400, **openapi_401, **openapi_403})
 async def get_applicants(
         data: SBaseQueryBody = Depends(),
@@ -57,3 +75,57 @@ async def get_applicants(
 ) -> SApplicantsPreview:
     applicants = await user_service.get_applicants_by_fullname(user, data)
     return {'count': len(applicants), 'items': applicants}
+
+@router.post('/applicants/{id}/verify', responses={**openapi_204})
+async def verify_applicant(
+        id: int,
+        user: User = Depends(current_edu),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.verify_user_by_id(id)
+    return response_204
+
+@router.post('/applicants/{id}/unverify', responses={**openapi_204})
+async def unverify_applicant(
+        id: int,
+        user: User = Depends(current_edu),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.unverify_user_by_id(id)
+    return response_204
+
+@router.post('/edu-workers/{id}/verify', responses={**openapi_204})
+async def verify_edu(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.verify_user_by_id(id)
+    return response_204
+
+@router.post('/edu-workers/{id}/unverify', responses={**openapi_204})
+async def unverify_edu(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.unverify_user_by_id(id)
+    return response_204
+
+@router.post('/employers/{id}/verify', responses={**openapi_204})
+async def verify_employer(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.verify_user_by_id(id)
+    return response_204
+
+@router.post('/employers/{id}/unverify', responses={**openapi_204})
+async def unverify_employer(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+):
+    await user_service.unverify_user_by_id(id)
+    return response_204

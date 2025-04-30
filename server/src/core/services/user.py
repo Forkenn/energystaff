@@ -3,6 +3,7 @@ from typing import Sequence
 from src.core.services.common import CommonService
 from src.core.repositories.user import UserRepository
 from src.core.schemas.common import SBaseQueryBody
+from src.exceptions import NotFoundException
 from src.users.models import User
 from src.users.schemas import SUserEdit
 
@@ -43,3 +44,19 @@ class UserService(CommonService[UserRepository]):
             user, data.start, data.end, data.q
         )
         return data
+    
+    async def verify_user_by_id(self, id: int) -> None:
+        user: User = await self.get_by_id(id)
+        await self.repository.update_user(user, data={"is_verified": True})
+
+    async def unverify_user_by_id(self, id: int) -> None:
+        user: User = await self.get_by_id(id)
+        await self.repository.update_user(user, data={"is_verified": False})
+
+    async def activate_user_by_id(self, id: int) -> None:
+        user: User = await self.get_by_id(id)
+        await self.repository.update_user(user, data={"is_active": True})
+
+    async def deactivate_user_by_id(self, id: int) -> None:
+        user: User = await self.get_by_id(id)
+        await self.repository.update_user(user, data={"is_active": False})
