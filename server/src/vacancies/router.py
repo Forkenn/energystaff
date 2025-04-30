@@ -79,6 +79,15 @@ async def delete_vacancy_by_id(
     await vacancy_service.delete_by_id(user.id, id)
     return response_204
 
+@router.delete('/{id}/force', responses={**openapi_404, **openapi_403, **openapi_204})
+async def force_delete_vacancy_by_id(
+        id: int,
+        user: User = Depends(current_superuser),
+        vacancy_service: VacancyService = Depends(get_vacancy_service)
+):
+    await vacancy_service.force_delete_by_id(id)
+    return response_204
+
 @router.post('', responses={**openapi_403})
 async def add_vacancy(
         data: SVacancyCreate,

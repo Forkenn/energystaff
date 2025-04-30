@@ -77,11 +77,14 @@ class VacancyService(CommonService[VacancyRepository]):
         return await self.repository.count_vacancies()
     
     async def delete_by_id(self, requester_id: int, id: int) -> None:
-        vacancy: Vacancy = await self.repository.get(id)
-        if not vacancy:
-            raise NotFoundException()
-        
+        vacancy: Vacancy = await self.get_by_id(id)
+
         if vacancy.author_id != requester_id:
             raise NotAllowedException()
-        
+
+        await self.repository.delete_object(vacancy)
+
+    async def force_delete_by_id(self, id: int) -> None:
+        vacancy: Vacancy = await self.get_by_id(id)
+
         await self.repository.delete_object(vacancy)
