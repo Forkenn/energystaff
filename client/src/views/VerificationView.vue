@@ -6,14 +6,24 @@ import TheFooter from '@/components/global/TheFooter.vue'
 import TheUserCard from '@/components/verification/TheUserCard.vue';
 
 import UserService from '@/services/user.service';
+import ToolsService from '@/services/tools.service';
 
 const filters = ref({ "q": "", "start": 0, "end": 50 });
 const users = ref({
   count: 0,
   items: []
-})
+});
+
+const eduLevels = ref([]);
 
 const loadApplicants = async() => {
+  try {
+    const response = await ToolsService.getEduLevels();
+    eduLevels.value = response.data;
+  } catch(err) {
+    alert('Ошибка загрузки данных с сервера!');
+  }
+
   try {
     const response = await UserService.getApplicants(filters.value);
     users.value = response.data;
@@ -50,7 +60,7 @@ onMounted(loadApplicants);
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
               <div v-if="users.count" class="vacancy-wrapper">
-                <TheUserCard v-for="user in users.items" :key="user.id" :user="user"/>
+                <TheUserCard v-for="user in users.items" :key="user.id" :user="user" :edu_levels="eduLevels.items"/>
               </div>
               <nav aria-label="Навигация" style="margin: 0 auto;">
                 <ul class="pagination">

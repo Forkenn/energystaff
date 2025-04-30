@@ -1,8 +1,28 @@
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps({
-    user: Object,
+    user: {
+        type: Object,
+        default: () => null,
+    },
+    edu_levels: {
+        type: Array,
+        default: () => [],
+    },
+})
+
+const userEduInfo = computed(() => {
+    const userEduLevel = props.edu_levels.find(
+        obj => obj.id === props.user.applicant?.edu_level_id
+    );
+
+    if (props.user.applicant?.edu_status == "completed") {
+        return userEduLevel.name + " (завершено)"
+    }
+
+    return userEduLevel.name + " (в процессе)"
 })
 
 const router = useRouter()
@@ -29,8 +49,11 @@ const resetUser = async() => {
             <img v-if="user.is_verified" src="../../assets/icons/users/User_verified.svg">
             <img v-else src="../../assets/icons/users/User_unverified.svg">
         </h1>
-        <div class="city">
-            {{ user.location }}, {{ user.birthdate }}
+        <div class="user-info">
+            {{ "ID: " + user.id }}, {{ user.location?.name }}, {{ user.birthdate }}, {{ user.sex ? "Женский" : "Мужской" }}
+        </div>
+        <div class="user-info">
+            {{ "Зачётная книжка: " + user.applicant?.edu_number }}, {{ userEduInfo }}
         </div>
         <button v-if="user.is_verified" type="button" class="btn btn-danger sys-btn-288" @click="resetUser">Сбросить</button>
         <button v-else type="button" class="btn btn-success sys-btn-288" @click="verifyUser">Подтвердить</button>
@@ -78,13 +101,13 @@ const resetUser = async() => {
 
 .card-wrapper button {
     margin-right: 24px;
+    margin-top: 24px;
 }
 
-.card-wrapper .city {
+.card-wrapper .user-info {
     color: #343434;
     font-size: 20px;
     font-weight: 400;
-    margin-bottom: 34px;
 }
 
 </style>
