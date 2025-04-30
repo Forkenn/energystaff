@@ -4,6 +4,7 @@ import { onMounted, ref } from 'vue';
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import TheUserCard from '@/components/verification/TheUserCard.vue';
+import CatalogSearch from '@/components/global/CatalogSearch.vue';
 
 import UserService from '@/services/user.service';
 import ToolsService from '@/services/tools.service';
@@ -15,11 +16,13 @@ const users = ref({
 });
 
 const eduLevels = ref([]);
+const dataLoading = ref(true);
 
 const loadApplicants = async() => {
   try {
     const response = await ToolsService.getEduLevels();
     eduLevels.value = response.data;
+    dataLoading.value = false;
   } catch(err) {
     alert('Ошибка загрузки данных с сервера!');
   }
@@ -31,6 +34,11 @@ const loadApplicants = async() => {
     alert('Ошибка загрузки данных с сервера!');
   }
 }
+
+const fetchLocations = async(params) => {
+  const response = await ToolsService.getLocations(params);
+  return response;
+};
 
 onMounted(loadApplicants);
 
@@ -55,7 +63,43 @@ onMounted(loadApplicants);
           <div class="row">
             <div class="col-auto">
               <div class="filter-wrapper">
-
+                <div class="filters">
+                  <div class="parameters mb-2">
+                    Параметры поиска
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input sys-check-20" type="radio" name="radioDefault" value="" id="checkFIOSearch" checked="">
+                    <label class="form-check-label" for="checkFIOSearch">
+                        По ФИО
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input sys-check-20" type="radio" name="radioDefault" value="" id="checkEduNumSearch">
+                    <label class="form-check-label" for="checkEduNumSearch">
+                        По зачётной книжке
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input sys-check-20" type="radio" name="radioDefault" value="" id="checkIdSearch">
+                    <label class="form-check-label" for="checkIdSearch">
+                        По ID
+                    </label>
+                  </div>
+                  <div class="form-check mt-2">
+                    <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkVerification">
+                    <label class="form-check-label" for="checkVerification">
+                        Подтверждённые
+                    </label>
+                  </div>
+                  <div class="parameters mt-4 mb-3">
+                    Значения полей
+                  </div>
+                  <div class="custom-form-floating" style="margin-bottom: 24px;">
+                    <input type="date" class="form-control sys-input-288" id="InputBirthdate" placeholder="Дата рождения">
+                    <label for="InputBirthdate">Дата рождения</label>
+                  </div>
+                  <CatalogSearch :callback="fetchLocations" :isLoading="dataLoading" placeholder="Город"/>
+                </div>
               </div>
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
@@ -91,12 +135,26 @@ onMounted(loadApplicants);
 
 .filter-wrapper {
   width: 393px;
-  height: 600px;
   border-color: #DBE0E5;
   border-width: 1px;
   border-style: solid;
   border-radius: 10px;
   background-color: #FFFFFF;
+}
+
+.filters {
+  margin: 48px;
+}
+
+.filters .parameters {
+  font-family: "Montserrat";
+  font-size: 20px;
+  font-weight: 700;
+  color: #343434;
+}
+
+.form-check {
+  padding-left: 1.7em !important;
 }
 
 .vacancy-wrapper {

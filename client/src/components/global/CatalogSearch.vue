@@ -78,7 +78,6 @@ const selectObject = (item) => {
     <input
       class="form-control form-text-field sys-input-288"
       type="text form-text-field"
-      style="margin: 0 auto;"
       :placeholder="props.placeholder"
       :aria-label="props.placeholder"
       data-bs-toggle="dropdown"
