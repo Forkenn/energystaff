@@ -67,7 +67,10 @@ class UserRepository(CommonRepository[User]):
         query = (
             query
             .join(User.applicant)
-            .options(selectinload(User.applicant),)
+            .options(
+                selectinload(User.applicant),
+                selectinload(User.location)
+            )
         )
 
         query = query.order_by(User.id.desc()).slice(start, end)

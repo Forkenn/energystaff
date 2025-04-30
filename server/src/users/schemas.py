@@ -69,9 +69,10 @@ class SApplicantPreview(BaseModel):
     surname: str
     name: str
     last_name: str | None = None
+    sex: bool | None = None
+    birthdate: date | None = None
     is_verified: bool
-    birthdate: date
-    #location: str | None = "Тестовый город, заменить!"
+    location: SBaseCatalogItemRead | None = None
     applicant: SApplicantRead | None = None
 
 
