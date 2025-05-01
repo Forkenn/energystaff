@@ -24,6 +24,26 @@ class VacanciesService {
         throw err;
       })
   }
+  async countVacancies(data) {
+    return await instance
+      .get('/vacancies/count', {
+        params: {
+          q: data.q
+        },
+      })
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
   async editVacancy(id, data) {
     return await instance
       .post(`/vacancies/${id}`, {

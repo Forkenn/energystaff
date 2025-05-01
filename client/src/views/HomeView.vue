@@ -1,21 +1,58 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
+import ThePaginator from '@/components/global/ThePaginator.vue';
 import TheVacancyCard from '@/components/home/TheVacancyCard.vue';
 import VacanciesService from '@/services/vacancies.service';
+
+const route = useRoute();
+const router = useRouter();
 
 const filters = ref({ "q": "", "start": 0, "end": 50 });
 const vacancies = ref({ "count": 0, "items": [] });
 
+const totalVacanciesCount = ref(0)
+const perPage = 6
+
+// Pagination
+const currentPage = computed(() => {
+  const page = parseInt(route.query.page) || 1
+  return page > 0 ? page : 1
+});
+
+const onPageChange = (newPage) => {
+  router.push({ query: { ...route.query, page: newPage } })
+}
+
+const getVacanciesCount = async() => {
+  try {
+    const response = await VacanciesService.countVacancies(filters.value);
+    totalVacanciesCount.value = response.data.count;
+    //totalVacanciesCount.value = 60;
+  } catch(err) {
+    console.log(err)
+    alert('Ошибка загрузки данных с сервера!');
+  }
+}
+
 const getVacancies = async() => {
+  filters.value.start = (currentPage.value - 1) * perPage;
+  filters.value.end = filters.value.start + perPage
+
   const response = await VacanciesService.getVacancies(filters.value);
   vacancies.value = response.data;
   console.log(vacancies.value);
 }
 
-onMounted(getVacancies);
+watch(() => route.query.page, getVacancies)
+
+onMounted(async() => {
+  getVacanciesCount();
+  getVacancies();
+});
 
 </script>
 
@@ -45,13 +82,7 @@ onMounted(getVacancies);
               <div v-if="vacancies.count" class="vacancy-wrapper">
                 <TheVacancyCard v-for="vacancy in vacancies.items" :key="vacancy.id" :vacancy="vacancy"/>
               </div>
-              <nav aria-label="Навигация" style="margin: 0 auto;">
-                <ul class="pagination">
-                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                </ul>
-              </nav>
+              <ThePaginator :total="totalVacanciesCount" :per-page="6" :page="currentPage" @update:page="onPageChange" />
             </div>
         </div>
         </div>
