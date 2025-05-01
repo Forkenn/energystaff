@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import TheNegotiationCard from '@/components/negotiations/TheNegotiationCard.vue';
+import ThePaginator from '@/components/global/ThePaginator.vue';
 import NegotiationsService from '@/services/negotiations.service';
 
 import { useUserStore } from '@/stores/user';
@@ -24,8 +25,39 @@ const pagination = ref({
 
 const negotiations = ref({ "count": 0, "items": [] });
 
+const totalNegotiationsCount = ref(0)
+const perPage = 6
+
+// Pagination
+const currentPage = computed(() => {
+  const page = parseInt(route.query.page) || 1
+  return page > 0 ? page : 1
+});
+
+const onPageChange = (newPage) => {
+  router.push({ query: { ...route.query, page: newPage } })
+}
+
+const getNegotiationsCount = async() => {
+  const filters = {status: filterBy.value};
+  try {
+      let response;
+      if(userData.value.is_applicant) {
+        response = await NegotiationsService.countAppNegotiations(filters);
+      } else {
+        response = await NegotiationsService.countEmplNegotiations(filters);
+      }
+      totalNegotiationsCount.value = response.data.count;
+    } catch(err) {
+      alert('Ошибка загрузки данных с сервера!');
+  }
+}
+
 const getNegotiations = async() => {
+  pagination.value.start = (currentPage.value - 1) * perPage;
+  pagination.value.end = pagination.value.start + perPage
   const filters = {...{status: filterBy.value}, ...pagination.value};
+
   try {
       let response;
       if(userData.value.is_applicant) {
@@ -35,18 +67,21 @@ const getNegotiations = async() => {
       }
       negotiations.value = response.data;
     } catch(err) {
-      alert('Нет инфы от сервера!');
+      alert('Ошибка загрузки данных с сервера!');
   }
 }
 
 watch(
   () => filterBy.value,
   () => {
+    getNegotiationsCount();
     getNegotiations();
   }
 )
+watch(() => route.query.page, getNegotiations)
 
 onMounted(async () => {
+  getNegotiationsCount();
   getNegotiations();
 });
 
@@ -100,13 +135,7 @@ onMounted(async () => {
         <div v-if="negotiations.count" class="negotiations-wrapper">
           <TheNegotiationCard v-for="negotiation in negotiations.items" :key="negotiation.id" :negotiation="negotiation"/>
         </div>
-        <nav aria-label="Навигация" style="margin: 0 auto;">
-          <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-          </ul>
-        </nav>
+        <ThePaginator :total="totalNegotiationsCount" :per-page="perPage" :page="currentPage" @update:page="onPageChange" />
       </div>
     </div>
   </main>

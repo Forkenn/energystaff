@@ -24,6 +24,26 @@ class NegotiationsService {
         throw err;
       })
   }
+  async countAppNegotiations(data) {
+    return await instance
+      .get('/negotiations/applicant/count', {
+        params: {
+          status: data.status,
+        },
+      })
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
   async getEmplNegotiations(data) {
     return await instance
       .get('/negotiations/employer', {
@@ -31,6 +51,26 @@ class NegotiationsService {
           status: data.status,
           start: data.start,
           end: data.end 
+        },
+      })
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async countEmplNegotiations(data) {
+    return await instance
+      .get('/negotiations/employer/count', {
+        params: {
+          status: data.status,
         },
       })
       .then((response) => response)
