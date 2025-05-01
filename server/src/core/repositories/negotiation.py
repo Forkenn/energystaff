@@ -92,7 +92,7 @@ class NegotiationRepository(CommonRepository[Negotiation]):
         if status:
             query = query.where(Negotiation.status == status.value)
 
-        if start and end:
+        if start is not None and end is not None:
             query = query.slice(start, end)
 
         result = await self.session.execute(
