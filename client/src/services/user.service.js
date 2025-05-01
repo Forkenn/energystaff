@@ -62,6 +62,25 @@ class UserService {
           }
         })
     }
+    async countApplicants(data) {
+      return await instance
+        .get('/users/applicants/count', {
+          params: {
+            q: data.q
+          }
+        })
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+              console.log(err.response.data)
+              console.log(err.response.status)
+          } else if (err.request) {
+              console.log(err.request)
+          } else {
+              console.log('Error', err.message)
+          }
+        })
+    }
     async getUsers() {
       return await instance
         .get('/users', {

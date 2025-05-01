@@ -90,6 +90,9 @@ const router = createRouter({
       component: RecommendationEditorView,
     },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    return { top: 0, behavior: 'smooth' }
+  },
 })
 
 router.beforeEach(async (to, from, next) => {

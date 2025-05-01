@@ -1,24 +1,40 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
+import ThePaginator from '@/components/global/ThePaginator.vue';
 import TheUserCard from '@/components/verification/TheUserCard.vue';
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 
 import UserService from '@/services/user.service';
 import ToolsService from '@/services/tools.service';
 
+const route = useRoute();
+const router = useRouter();
+
 const filters = ref({ "q": "", "start": 0, "end": 50 });
 const users = ref({
   count: 0,
   items: []
 });
-
+const totalUsersCount = ref(0)
+const perPage = 6
 const eduLevels = ref([]);
 const dataLoading = ref(true);
 
-const loadApplicants = async() => {
+// Pagination
+const currentPage = computed(() => {
+  const page = parseInt(route.query.page) || 1
+  return page > 0 ? page : 1
+});
+
+const onPageChange = (newPage) => {
+  router.push({ query: { ...route.query, page: newPage } })
+}
+
+const loadEduLevels = async() => {
   try {
     const response = await ToolsService.getEduLevels();
     eduLevels.value = response.data;
@@ -26,21 +42,46 @@ const loadApplicants = async() => {
   } catch(err) {
     alert('Ошибка загрузки данных с сервера!');
   }
+}
 
+const loadApplicantsCount = async() => {
   try {
-    const response = await UserService.getApplicants(filters.value);
-    users.value = response.data;
+    const response = await UserService.countApplicants(filters.value);
+    totalUsersCount.value = response.data.count;
+    //totalUsersCount.value = 60;
   } catch(err) {
+    console.log(err)
     alert('Ошибка загрузки данных с сервера!');
   }
 }
+
+const loadApplicants = async() => {
+  try {
+    filters.value.start = (currentPage.value - 1) * perPage;
+    filters.value.end = filters.value.start + perPage
+    const response = await UserService.getApplicants(filters.value);
+    users.value = response.data;
+  } catch(err) {
+    console.log(err)
+    alert('Ошибка загрузки данных с сервера!');
+  }
+}
+
+watch(() => route.query.page, loadApplicants)
 
 const fetchLocations = async(params) => {
   const response = await ToolsService.getLocations(params);
   return response;
 };
 
-onMounted(loadApplicants);
+onMounted(async() => {
+  if(!currentPage) {
+    router.push({ name: 'edu_verification', query: {page: 1} });
+  }
+  loadEduLevels();
+  loadApplicantsCount();
+  loadApplicants();
+});
 
 </script>
 
@@ -106,13 +147,7 @@ onMounted(loadApplicants);
               <div v-if="users.count" class="vacancy-wrapper">
                 <TheUserCard v-for="user in users.items" :key="user.id" :user="user" :edu_levels="eduLevels.items"/>
               </div>
-              <nav aria-label="Навигация" style="margin: 0 auto;">
-                <ul class="pagination">
-                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                </ul>
-              </nav>
+              <ThePaginator :total="totalUsersCount" :per-page="6" :page="currentPage" @update:page="onPageChange" />
             </div>
         </div>
         </div>
