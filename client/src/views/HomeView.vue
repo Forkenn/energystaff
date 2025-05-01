@@ -82,7 +82,7 @@ onMounted(async() => {
               <div v-if="vacancies.count" class="vacancy-wrapper">
                 <TheVacancyCard v-for="vacancy in vacancies.items" :key="vacancy.id" :vacancy="vacancy"/>
               </div>
-              <ThePaginator :total="totalVacanciesCount" :per-page="6" :page="currentPage" @update:page="onPageChange" />
+              <ThePaginator :total="totalVacanciesCount" :per-page="perPage" :page="currentPage" @update:page="onPageChange" />
             </div>
         </div>
         </div>

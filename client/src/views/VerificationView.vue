@@ -147,7 +147,7 @@ onMounted(async() => {
               <div v-if="users.count" class="vacancy-wrapper">
                 <TheUserCard v-for="user in users.items" :key="user.id" :user="user" :edu_levels="eduLevels.items"/>
               </div>
-              <ThePaginator :total="totalUsersCount" :per-page="6" :page="currentPage" @update:page="onPageChange" />
+              <ThePaginator :total="totalUsersCount" :per-page="perPage" :page="currentPage" @update:page="onPageChange" />
             </div>
         </div>
         </div>
