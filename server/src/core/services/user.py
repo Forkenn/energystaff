@@ -45,6 +45,10 @@ class UserService(CommonService[UserRepository]):
         )
         return data
     
+    async def count_applicants_by_fullname(self, user: User, q: str = None) -> int:
+        data = await self.repository.count_applicants_by_fullname(user, q)
+        return data
+    
     async def verify_user_by_id(self, id: int) -> None:
         user: User = await self.get_by_id(id)
         await self.repository.update_user(user, data={"is_verified": True})

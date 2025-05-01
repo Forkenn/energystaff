@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from src.deps import get_user_service
 from src.responses import openapi_401, openapi_400, openapi_403, openapi_204, response_204
-from src.core.schemas.common import SBaseQueryBody
+from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
 from src.core.services.user import UserService
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
@@ -75,6 +75,15 @@ async def get_applicants(
 ) -> SApplicantsPreview:
     applicants = await user_service.get_applicants_by_fullname(user, data)
     return {'count': len(applicants), 'items': applicants}
+
+@router.get('/applicants/count', responses={**openapi_401, **openapi_403})
+async def get_applicants_count(
+        q: str | None = None,
+        user: User = Depends(current_edu),
+        user_service: UserService = Depends(get_user_service)
+) -> SBaseQueryCountResponse:
+    count = await user_service.count_applicants_by_fullname(user, q)
+    return {'count': count}
 
 @router.post('/applicants/{id}/verify', responses={**openapi_204})
 async def verify_applicant(

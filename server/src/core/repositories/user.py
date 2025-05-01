@@ -75,4 +75,20 @@ class UserRepository(CommonRepository[User]):
 
         query = query.order_by(User.id.desc()).slice(start, end)
         return (await self.session.execute(query)).scalars().all()
+    
+    async def count_applicants_by_fullname(self, user: User, q: str = None) -> int:
+        query = alch.select(alch.func.count()).select_from(User).where(
+            User.is_applicant,
+            Applicant.edu_institution_id == user.edu_worker.edu_institution_id
+        )
 
+        if q:
+            query = query.where(
+                alch.func.concat_ws(' ', User.surname, User.name, User.last_name)
+                .like(f"%{q}%")
+            )
+
+        query = query.join(User.applicant)
+
+        result = await self.session.execute(query)
+        return result.scalar()
