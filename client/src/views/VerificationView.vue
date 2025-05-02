@@ -75,7 +75,7 @@ const fetchLocations = async(params) => {
 };
 
 onMounted(async() => {
-  if(!currentPage) {
+  if(!currentPage.value) {
     router.push({ name: 'edu_verification', query: {page: 1} });
   }
   loadEduLevels();
