@@ -22,12 +22,12 @@ class CompanyRepository(CommonRepository[Company]):
     async def get_companies_by_name(
             self, name: str, start: int, end: int
     ) -> Sequence[Company | None]:
-        query = (
-            alch.select(Company)
-            .where(Company.name.like(f"%{name}%"))
-            .order_by(Company.id.desc())
-            .slice(start, end)
-        )
+        query = alch.select(Company)
+
+        if name:
+            query = query.where(Company.name.like(f"%{name}%"))
+
+        query = query.order_by(Company.id.desc()).slice(start, end)
 
         return (await self.session.execute(query)).scalars().all()
     
