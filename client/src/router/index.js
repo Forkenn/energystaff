@@ -7,6 +7,7 @@ import AccountView from '@/views/AccountView.vue'
 import NegotiationsView from '@/views/NegotiationsView.vue'
 import ResumeEditorView from '@/views/ResumeEditorView.vue'
 import CompanyEditorView from '@/views/CompanyEditorView.vue'
+import CompanyView from '@/views/CompanyView.vue'
 import VacancyEditorView from '@/views/VacancyEditorView.vue'
 import VacancyView from '@/views/VacancyView.vue'
 import VerificationView from '@/views/VerificationView.vue'
@@ -59,6 +60,12 @@ const router = createRouter({
       name: 'resume_editor',
       meta: { requiresAuth: true },
       component: ResumeEditorView,
+    },
+    {
+      path: '/company/:id',
+      name: 'company_page',
+      meta: { requiresAuth: true },
+      component: CompanyView,
     },
     {
       path: '/company/editor',

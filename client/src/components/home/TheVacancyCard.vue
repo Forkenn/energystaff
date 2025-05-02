@@ -51,17 +51,19 @@ const deleteNegotiation = async() => {
         <div class="salary">
             от {{ vacancy.salary }} ₽, до вычета налогов
         </div>
-        <div class="company">
-            {{ vacancy.company_name }}
-        </div>
+        <router-link @click.stop target="_blank" :to="{ name: 'company_page', params: { id: props.vacancy.company_id } }">
+            <div class="company">
+                {{ vacancy.company_name }}
+            </div>
+        </router-link>
         <div class="city">
             {{ vacancy.city }}
         </div>
-        <button v-if="user.data.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-200" @click.stop="applyVacancy">Откликнуться</button>
-        <button v-else-if="user.data.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation.status)" class.stop="btn btn-primary sys-btn-200" @click="deleteNegotiation">Отозвать отклик</button>
+        <button v-if="user.data.is_superuser" class="btn btn-danger sys-btn-200" @click.stop="deleteVacancy">Удалить</button>
+        <button v-else-if="user.data.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-200" @click.stop="applyVacancy">Откликнуться</button>
+        <button v-else-if="user.data.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation.status)" class="btn btn-danger sys-btn-200" @click.stop="deleteNegotiation">Отозвать отклик</button>
         <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click.stop="editVacancy">Редактировать</button>
-        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-primary sys-btn-200" @click.stop="deleteVacancy">Удалить</button>
-        <button v-else-if="user.data.is_superuser" class="btn btn-primary sys-btn-200" @click.stop="deleteVacancy">Удалить</button>
+        <button v-if="user.data.is_employer && vacancy.author_id == user.data.id" class="btn btn-danger sys-btn-200" @click.stop="deleteVacancy">Удалить</button>
     </div>
   </div>
 </template>
@@ -126,6 +128,15 @@ const deleteNegotiation = async() => {
     font-size: 20px;
     font-weight: 400;
     margin-bottom: 34px;
+}
+
+.card-wrapper a {
+    color: #343434;
+    text-decoration: none;
+}
+
+.card-wrapper a:hover {
+  color: #B0B3B8;
 }
 
 </style>

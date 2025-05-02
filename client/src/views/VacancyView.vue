@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/user';
 import TheHeader from '@/components/global/TheHeader.vue';
 import TheFooter from '@/components/global/TheFooter.vue';
 import VacanciesService from '@/services/vacancies.service';
+import userService from '@/services/user.service';
 
 const vacancy = ref({});
 const loading = ref(true);
@@ -93,14 +94,17 @@ onMounted(async() => {
 					<div class="col column">
 						<div class="vacancy-company">
 							<div class="vacancy-company-container">
-								<p class="mb-2">{{ vacancy.company?.name }}</p>
+								<router-link @click.stop target="_blank" :to="{ name: 'company_page', params: { id: vacancy.company?.id } }">
+									<p class="mb-2">{{ vacancy.company?.name }}</p>
+								</router-link>
 							</div>
 						</div>
 						<div class="vacancy-buttons">
-							<button class="btn btn-primary sys-btn-288">Откликнуться</button>
-							<button class="btn btn-danger sys-btn-288">Отозвать отклик</button>
-							<button class="btn btn-primary sys-btn-288">Редактировать</button>
-							<button class="btn btn-danger sys-btn-288">Удалить</button>
+							<button v-if="user.data.is_superuser" class="btn btn-danger sys-btn-288">Удалить</button>
+							<button v-else-if="user.data.employer?.id === vacancy.author_id" class="btn btn-primary sys-btn-288">Редактировать</button>
+							<button v-else-if="user.data.employer?.id === vacancy.author_id" class="btn btn-danger sys-btn-288">Удалить</button>
+							<button v-else-if="user.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-288">Откликнуться</button>
+							<button v-else-if="user.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation?.status)"class="btn btn-danger sys-btn-288">Отозвать отклик</button>
 						</div>
 					</div>
 				</div>
@@ -162,6 +166,15 @@ onMounted(async() => {
 	color: #343434;
   font-size: 20px;
   font-weight: 700;
+}
+
+.vacancy-company-container a {
+    color: #343434;
+    text-decoration: none;
+}
+
+.vacancy-company-container a:hover {
+  color: #B0B3B8;
 }
 
 .vacancy-info-container h1 {
