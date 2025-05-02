@@ -11,6 +11,7 @@ import VacancyEditorView from '@/views/VacancyEditorView.vue'
 import VacancyView from '@/views/VacancyView.vue'
 import VerificationView from '@/views/VerificationView.vue'
 import RecommendationEditorView from '@/views/RecommendationEditorView.vue'
+import AdminView from '@/views/AdminView.vue'
 
 import { useUserStore } from '@/stores/user';
 
@@ -88,6 +89,12 @@ const router = createRouter({
       name: 'edu_recommendation_editor',
       meta: { requiresAuth: true },
       component: RecommendationEditorView,
+    },
+    {
+      path: '/control',
+      name: 'control_page',
+      meta: { requiresAuth: true },
+      component: AdminView,
     },
   ],
   scrollBehavior(to, from, savedPosition) {

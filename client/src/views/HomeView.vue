@@ -9,6 +9,7 @@ import TheVacancyCard from '@/components/home/TheVacancyCard.vue';
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import MultiSelect from '@/components/global/MultiSelect.vue';
 import VacanciesService from '@/services/vacancies.service';
+import ToolsService from '@/services/tools.service';
 
 const route = useRoute();
 const router = useRouter();

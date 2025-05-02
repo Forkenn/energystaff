@@ -81,7 +81,7 @@ class UserService {
           }
         })
     }
-    async getUsers() {
+    async getUsers(data) {
       return await instance
         .get('/users', {
           params: {
