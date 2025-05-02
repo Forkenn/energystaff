@@ -5,7 +5,7 @@ import { useRouter, useRoute } from 'vue-router';
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import ThePaginator from '@/components/global/ThePaginator.vue';
-import TheUserCard from '@/components/verification/TheUserCard.vue';
+import TheApplicantCard from '@/components/verification/TheApplicantCard.vue';
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 
 import UserService from '@/services/user.service';
@@ -145,7 +145,7 @@ onMounted(async() => {
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
               <div v-if="users.count" class="vacancy-wrapper">
-                <TheUserCard v-for="user in users.items" :key="user.id" :user="user" :edu_levels="eduLevels.items"/>
+                <TheApplicantCard v-for="user in users.items" :key="user.id" :user="user" :edu_levels="eduLevels.items"/>
               </div>
               <ThePaginator :total="totalUsersCount" :per-page="perPage" :page="currentPage" @update:page="onPageChange" />
             </div>
