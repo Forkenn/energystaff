@@ -49,7 +49,7 @@ class SNegotiationEmpPreview(SNegotiationResult):
     user_name: str
     user_surname: str
     user_last_name: str
-    user_location: str | None = 'Тестовый город, заменить!'
+    user_location: str | None = 'Город не указан'
 
 
 class SNegotiationEmpPreviews(SBaseQueryCountResponse):

@@ -9,6 +9,7 @@ from src.users.models import User
 from src.vacancies.models import Vacancy
 from src.companies.models import Company
 from src.negotiations.models import Negotiation, NegotiationStatus
+from src.tools.models import Location
 
 
 class NegotiationRepository(CommonRepository[Negotiation]):
@@ -82,10 +83,12 @@ class NegotiationRepository(CommonRepository[Negotiation]):
                 Vacancy.salary.label("vacancy_salary"),
                 User.surname.label("user_surname"),
                 User.last_name.label("user_last_name"),
-                User.name.label("user_name")
+                User.name.label("user_name"),
+                Location.name.label("user_location")
             )
             .join(Vacancy, Negotiation.vacancy_id == Vacancy.id)
             .join(User, User.id == Negotiation.applicant_id)
+            .join(Location, Location.id == User.location_id)
             .where(Vacancy.author_id == employer_id)
         )
 
