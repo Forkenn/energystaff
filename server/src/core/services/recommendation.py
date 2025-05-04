@@ -1,9 +1,9 @@
-from src.exceptions import NotFoundException, NotAllowedException, AlreadyExistException
+from src.exceptions import NotFoundException, ForbiddenException, AlreadyExistException
 from src.core.services.common import CommonService
 from src.core.repositories.recommendation import RecommendationRepository
 from src.core.services.storage import StorageService
 from src.core.dto.file import FileDTO
-from src.users.models import EduWorker
+from src.users.models import User, EduWorker
 from src.recommendations.models import Recommendation
 from src.recommendations.schemas import (
     SRecommendationCreate, SRecommendationUpdate
@@ -36,11 +36,23 @@ class RecommendationService(CommonService[RecommendationRepository]):
         return recommendation
     
     async def get_full_by_uid_secured(
-            self, requester: EduWorker, uid: int
+            self, requester: User, uid: int
     ) -> Recommendation:
-        recommendation = await self.repository.get_full_by_uid_secured(
-            uid, requester.edu_institution_id
-        )
+        if (
+            requester.is_employer or
+            requester.is_superuser or
+            (requester.is_applicant and requester.id == uid)
+        ):
+            recommendation = await self.repository.get_full_by_uid(uid)
+
+        elif requester.is_edu:
+            recommendation = await self.repository.get_full_by_uid_secured_edu(
+                uid, requester.edu_worker.edu_institution_id
+            )
+
+        else:
+            raise ForbiddenException()
+
         if not recommendation:
             raise NotFoundException()
 

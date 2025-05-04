@@ -15,6 +15,7 @@ DOCUMENTS_PATH = 'proof_documents'
 
 router = APIRouter(prefix='/recommendations', tags=['Recommendations'])
 
+current_verified = RoleManager(SystemRole.VERIFIED, SystemRole.ACTIVE)
 current_user = RoleManager(SystemRole.VERIFIED, SystemRole.ACTIVE, SystemRole.APPLICANT)
 current_employer = RoleManager(SystemRole.VERIFIED, SystemRole.ACTIVE, SystemRole.EMPLOYER)
 current_edu = RoleManager(SystemRole.VERIFIED, SystemRole.ACTIVE, SystemRole.EDU_WORKER)
@@ -23,12 +24,10 @@ current_superuser = RoleManager(SystemRole.SUPERUSER)
 @router.get('')
 async def get_recommendation_by_user_id(
         applicant_id: int,
-        user: User = Depends(current_edu),
+        user: User = Depends(current_verified),
         service: RecommendationService = Depends(get_recomm_service)
 ) -> SRecommendationRead:
-    recommendation = await service.get_full_by_uid_secured(
-        user.edu_worker, applicant_id
-    )
+    recommendation = await service.get_full_by_uid_secured(user, applicant_id)
     return recommendation
 
 @router.post('')

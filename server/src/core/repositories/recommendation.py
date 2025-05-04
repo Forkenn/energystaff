@@ -54,7 +54,7 @@ class RecommendationRepository(CommonRepository[Recommendation]):
 
         return (await self.session.execute(query)).scalar()
     
-    async def get_full_by_uid_secured(
+    async def get_full_by_uid_secured_edu(
             self, uid: int, edu_institution_id: int
     ) -> Recommendation | None:
         query = (
