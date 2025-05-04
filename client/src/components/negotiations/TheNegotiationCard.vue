@@ -69,10 +69,14 @@ const revokeAndReject = async() => {
     }
 }
 
+const goToResume = () => {
+  router.push({ name: 'resume_page', query: {id: props.negotiation.applicant_id }})
+}
+
 </script>
 
 <template>
-  <div class="negotiation-card">
+  <div class="negotiation-card" @click="goToResume">
     <div class="card-wrapper" style="align-items: center;">
         <h1>
             {{ negotiation.vacancy_position }}

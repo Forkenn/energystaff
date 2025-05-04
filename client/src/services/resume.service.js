@@ -80,11 +80,12 @@ class ResumeService {
         throw err;
       })
   }
-  async getResumeByUserId(id) {
+  async getResumeByUserId(id, getFullData) {
     return await instance
       .get(`/resume`, {
 				params: {
-						applicant_id: id
+						applicant_id: id,
+            include_applicant: getFullData
 				}
       })
       .then((response) => response)
