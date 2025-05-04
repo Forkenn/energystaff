@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 
 from src.database import Base
 from src.companies.models import Company
+from src.tools.models import Location
 
 vacancies_types = alch.Table(
     "vacancies_types",
@@ -69,7 +70,8 @@ class Vacancy(Base):
         alch.String(120), nullable=False
     )
     salary: orm.Mapped[int] = orm.mapped_column(alch.Integer(), server_default='0')
-    description: orm.Mapped[str] = orm.mapped_column(alch.String(500))
+    description: orm.Mapped[str] = orm.mapped_column(alch.String(5000))
+    work_hours: orm.Mapped[str] = orm.mapped_column(alch.String(50), nullable=True)
     timestamp: orm.Mapped[datetime] = orm.mapped_column(
         DateTime(timezone=True), default=func.now()
     )
@@ -79,8 +81,12 @@ class Vacancy(Base):
     company_id: orm.Mapped[int] = orm.mapped_column(
         alch.ForeignKey("companies.id", ondelete='CASCADE'), index=True
     )
+    location_id: orm.Mapped[int] = orm.mapped_column(
+        alch.ForeignKey("locations.id", ondelete='SET NULL'), nullable=True, index=True
+    )
 
     company: orm.Mapped["Company"] = orm.relationship("Company")
+    location: orm.Mapped["Location"] = orm.relationship("Location")
 
     vacancy_types: orm.Mapped[list["EmploymentType"]] = orm.relationship(
         "EmploymentType", secondary=vacancies_types

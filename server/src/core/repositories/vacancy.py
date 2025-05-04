@@ -3,7 +3,7 @@ import sqlalchemy as alch
 from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import selectinload
 
 from src.core.repositories.common import CommonRepository
 from src.vacancies.models import (
@@ -11,6 +11,7 @@ from src.vacancies.models import (
 )
 from src.companies.models import Company
 from src.negotiations.models import Negotiation
+from src.tools.models import Location
 
 
 class VacancyRepository(CommonRepository[Vacancy]):
@@ -22,10 +23,11 @@ class VacancyRepository(CommonRepository[Vacancy]):
             alch.select(Vacancy)
             .where(Vacancy.id == id)
             .options(
-                joinedload(Vacancy.vacancy_formats),
-                joinedload(Vacancy.vacancy_schedules),
-                joinedload(Vacancy.vacancy_types),
-                selectinload(Vacancy.company)
+                selectinload(Vacancy.vacancy_formats),
+                selectinload(Vacancy.vacancy_schedules),
+                selectinload(Vacancy.vacancy_types),
+                selectinload(Vacancy.company),
+                selectinload(Vacancy.location)
             )
         )
 
@@ -33,7 +35,7 @@ class VacancyRepository(CommonRepository[Vacancy]):
     
     async def refresh_fields(self, obj: Vacancy):
         await self.session.refresh(
-            obj, ('vacancy_formats', 'vacancy_schedules', 'vacancy_types')
+            obj, ('location', 'vacancy_formats', 'vacancy_schedules', 'vacancy_types')
         )
     
     async def get_vacancy_fields(
@@ -110,14 +112,21 @@ class VacancyRepository(CommonRepository[Vacancy]):
             alch.select(
                 Vacancy.id,
                 Vacancy.position,
+                Vacancy.work_hours,
                 Vacancy.salary,
-                Vacancy.company_id,
                 Vacancy.author_id,
+                Vacancy.company_id,
+                Location.name.label("location_name"),
                 Company.name.label("company_name"),
                 Negotiation.id.label("negotiation_id"),
                 Negotiation.status.label("negotiation_status")
             )
             .join(Company, Vacancy.company_id == Company.id)
+            .join(
+                Location,
+                Vacancy.location_id == Location.id,
+                isouter=True
+            )
             .join(
                 Negotiation,
                 alch.and_(
