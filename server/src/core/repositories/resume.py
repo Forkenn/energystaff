@@ -1,12 +1,13 @@
 import sqlalchemy as alch
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload, defer
 
 from src.core.repositories.common import CommonRepository
 from src.vacancies.models import EmploymentFormat, EmploymentType
 from src.resume.models import Resume
 from src.negotiations.models import Negotiation
+from src.users.models import User
 
 
 class ResumeRepository(CommonRepository[Resume]):
@@ -36,7 +37,7 @@ class ResumeRepository(CommonRepository[Resume]):
     async def get_full_with_recommendation(self, id: int) -> dict | None:
         pass
 
-    async def get_full_by_uid(self, uid: int) -> Resume | None:
+    async def get_full_by_uid(self, uid: int, user_info: bool = False) -> Resume | None:
         query = (
             alch.select(Resume)
             .where(Resume.user_id == uid)
@@ -46,13 +47,19 @@ class ResumeRepository(CommonRepository[Resume]):
             )
         )
 
+        if user_info:
+            query = query.options(
+                joinedload(Resume.user).joinedload(User.applicant),
+                joinedload(Resume.user).joinedload(User.location)
+            )
+
         return (await self.session.execute(query)).scalar()
     
     async def get_full_with_recommendation_by_uid(self, uid: int) -> dict | None:
         pass
     
     async def get_resume_by_uid_secured(
-            self, employer_id: int, uid: int
+            self, employer_id: int, uid: int, user_info: bool = False
     ) -> Resume | None:
         exists_criteria = (
             alch.select(Negotiation)
@@ -74,6 +81,12 @@ class ResumeRepository(CommonRepository[Resume]):
                 joinedload(Resume.resume_types)
             )
         )
+
+        if user_info:
+            query = query.options(
+                joinedload(Resume.user).joinedload(User.applicant),
+                joinedload(Resume.user).joinedload(User.location)
+            )
 
         return (await self.session.execute(query)).scalar()
     

@@ -24,8 +24,15 @@ class ResumeService(CommonService[ResumeRepository]):
 
         return resume
     
-    async def get_full_resume_by_uid_secured(self, requester_id: int, uid: int) -> Resume:
-        resume = await self.repository.get_resume_by_uid_secured(requester_id, uid)
+    async def get_full_resume_by_uid_secured(
+            self, requester_id: int, uid: int, include_user: bool = False
+    ) -> Resume:
+        resume = await self.repository.get_resume_by_uid_secured(
+            requester_id, uid, include_user
+        )
+        if not resume:
+            raise NotFoundException()
+
         return resume
 
     async def create_resume(self, uid: int, data: SResumeCreate):

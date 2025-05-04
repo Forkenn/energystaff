@@ -52,12 +52,14 @@ async def delete_my_resume(
 @router.get('')
 async def get_resume_by_user_id(
         applicant_id: int,
+        include_applicant: bool = False,
         user: User = Depends(current_employer),
         resume_service: ResumeService = Depends(get_resume_service)
 ) -> SResumeRead:
     resume: Resume = await resume_service.get_full_resume_by_uid_secured(
         user.id,
-        applicant_id
+        applicant_id,
+        include_applicant
     )
 
     return resume

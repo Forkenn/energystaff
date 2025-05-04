@@ -3,6 +3,7 @@ import sqlalchemy.orm as orm
 
 from src.database import Base
 from src.vacancies.models import EmploymentFormat, EmploymentType
+from src.users.models import User
 
 resume_types = alch.Table(
     "resume_types",
@@ -58,4 +59,6 @@ class Resume(Base):
     resume_formats: orm.Mapped[list["EmploymentFormat"]] = orm.relationship(
         "EmploymentFormat", secondary=resume_formats
     )
+
+    user: orm.Mapped["User"] = orm.relationship("User", lazy="noload")
 
