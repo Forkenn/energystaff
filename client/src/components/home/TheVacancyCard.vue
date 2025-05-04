@@ -19,7 +19,11 @@ const goToVacancy = () => {
 }
 
 const deleteVacancy = async() => {
-    await VacanciesService.deleteVacancy(props.vacancy.id);
+    if (user.value.data.is_superuser)
+        await VacanciesService.forcedDeleteVacancy(props.vacancy.id);
+    else
+        await VacanciesService.deleteVacancy(props.vacancy.id);
+
     router.go(0);
 }
 
@@ -57,7 +61,7 @@ const deleteNegotiation = async() => {
             </div>
         </router-link>
         <div class="city">
-            {{ vacancy.city }}
+            {{ vacancy.location_name || "Любой регион" }}
         </div>
         <button v-if="user.data.is_superuser" class="btn btn-danger sys-btn-200" @click.stop="deleteVacancy">Удалить</button>
         <button v-else-if="user.data.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-200" @click.stop="applyVacancy">Откликнуться</button>

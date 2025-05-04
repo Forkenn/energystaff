@@ -50,7 +50,9 @@ class VacanciesService {
         position: data.position,
         specialization: data.specialization,
         salary: data.salary,
+        work_hours: data.work_hours,
         description: data.description,
+        location_id: data.location_id,
         vacancy_types_ids: data.vacancy_types_ids,
         vacancy_formats_ids: data.vacancy_formats_ids,
         vacancy_schedules_ids: data.vacancy_schedules_ids
@@ -95,6 +97,22 @@ class VacanciesService {
   async deleteVacancy(id) {
     return await instance
       .delete(`/vacancies/${id}`)
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async forcedDeleteVacancy(id) {
+    return await instance
+      .delete(`/vacancies/${id}/force`)
       .then((response) => response)
       .catch((err) => {
         if (err.response) {

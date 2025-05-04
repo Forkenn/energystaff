@@ -5,7 +5,6 @@ import { useUserStore } from '@/stores/user';
 import TheHeader from '@/components/global/TheHeader.vue';
 import TheFooter from '@/components/global/TheFooter.vue';
 import VacanciesService from '@/services/vacancies.service';
-import userService from '@/services/user.service';
 
 const vacancy = ref({});
 const loading = ref(true);
@@ -18,9 +17,9 @@ const userStore = useUserStore();
 const user = computed(() => userStore.user);
 
 const formattedSchedules = computed(() => {
-	const list = vacancy.value.vacancy_schedules
+const list = vacancy.value.vacancy_schedules
 
-	if (!list || list.length === 0) return 'не указано'
+if (!list || list.length === 0) return 'не указано'
   const names = list.map(item => item.name.toLowerCase())
 
   if (names.length === 1) return names[0]
@@ -62,6 +61,29 @@ const formattedFormats = computed(() => {
   return `${allButLast} или ${last}`
 })
 
+const deleteVacancy = async() => {
+	if (user.value.data.is_superuser)
+		await VacanciesService.forcedDeleteVacancy(vacancyId);
+	else
+		await VacanciesService.deleteVacancy(vacancyId);
+
+		router.push({ name: 'home' });
+}
+
+const editVacancy = async() => {
+    router.push({ name: 'vacancy_editor', query: { id: vacancyId } });
+}
+
+const applyVacancy = async() => {
+    await NegotiationsService.createNegotiation(vacancyId);
+    router.go(0);
+}
+
+const deleteNegotiation = async() => {
+    await NegotiationsService.deleteNegotiation(vacancy.negotiation?.id);
+    router.go(0);
+}
+
 onMounted(async() => {
   try {
 		const response = await VacanciesService.getVacancy(vacancyId);
@@ -84,9 +106,10 @@ onMounted(async() => {
 								<h1 class="mb-4">{{ vacancy.position }}</h1>
 								<p class="mb-2 salary">от {{ vacancy.salary }} ₽, до вычета налогов</p>
 								<p class="mb-2">{{ vacancy.specialization }}</p>
+								<p class="mb-2">Регион: {{ vacancy.location?.name || "любой" }}</p>
 								<p class="mb-2">Занятость: {{ formattedTypes }}</p>
 								<p class="mb-2">График: {{ formattedSchedules }}</p>
-								<p class="mb-2">Рабочие часы: {{ vacancy.hours }}</p>
+								<p class="mb-2">Рабочие часы: {{ vacancy.work_hours || "не указано" }}</p>
 								<p class="mb-4">Формат работы: {{ formattedFormats }}</p>
 							</div>
 						</div>
@@ -100,11 +123,11 @@ onMounted(async() => {
 							</div>
 						</div>
 						<div class="vacancy-buttons">
-							<button v-if="user.data.is_superuser" class="btn btn-danger sys-btn-288">Удалить</button>
-							<button v-else-if="user.data.employer?.id === vacancy.author_id" class="btn btn-primary sys-btn-288">Редактировать</button>
-							<button v-else-if="user.data.employer?.id === vacancy.author_id" class="btn btn-danger sys-btn-288">Удалить</button>
-							<button v-else-if="user.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-288">Откликнуться</button>
-							<button v-else-if="user.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation?.status)"class="btn btn-danger sys-btn-288">Отозвать отклик</button>
+							<button v-if="user.data.is_superuser" class="btn btn-danger sys-btn-288" @click="deleteVacancy">Удалить</button>
+							<button v-else-if="user.is_applicant && !vacancy.negotiation" class="btn btn-primary sys-btn-288" @click.stop="applyVacancy">Откликнуться</button>
+							<button v-else-if="user.is_applicant && ['accepted', 'pending'].includes(vacancy.negotiation?.status)"class="btn btn-danger sys-btn-288" @click.stop="deleteNegotiation">Отозвать отклик</button>
+							<button v-if="user.data.id === vacancy.author_id" class="btn btn-primary sys-btn-288" @click.stop="editVacancy">Редактировать</button>
+							<button v-if="user.data.id === vacancy.author_id" class="btn btn-danger sys-btn-288" @click="deleteVacancy">Удалить</button>
 						</div>
 					</div>
 				</div>

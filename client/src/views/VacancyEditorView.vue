@@ -5,7 +5,9 @@ import { useRoute, useRouter } from 'vue-router';
 import TheFooter from '@/components/global/TheFooter.vue';
 import TheHeader from '@/components/global/TheHeader.vue';
 import MultiSelect from '@/components/global/MultiSelect.vue';
+import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import VacanciesService from '@/services/vacancies.service';
+import ToolsService from '@/services/tools.service';
 import { useUserStore } from '@/stores/user';
 
 const route = useRoute();
@@ -27,7 +29,9 @@ const vacancyData = ref({
   description: "",
   salary: 0,
   salaryFrom: true,
-  hours: "",
+  work_hours: "",
+  location: null,
+  location_id: null,
   vacancy_types: [{
       id: 0,
       name: "string"
@@ -44,12 +48,19 @@ const vacancyData = ref({
   vacancy_formats_ids: [],
   vacancy_schedules_ids: []
 })
+const selectedLocation = ref(null);
+
+const fetchLocations = async(params) => {
+  const response = await ToolsService.getLocations(params);
+  return response;
+};
 
 const convertIds = (full=false) => {
   const vacancySchedulesObj = vacancyData.value.vacancy_schedules
   vacancyData.value.vacancy_schedules_ids = vacancySchedulesObj.map(
     vacancySchedulesObj => vacancySchedulesObj.id
   );
+  vacancyData.value.location_id = selectedLocation.value?.id;
 
   if(full) {
     const vacancyTypesObj = vacancyData.value.vacancy_types
@@ -136,6 +147,7 @@ onMounted(async () => {
         return;
       }
       vacancyData.value = response.data;
+      selectedLocation.value = response.data.location;
     } catch(err) {
       alert('Вакансия не найдена!')
       router.push({ name: 'vacancy_editor' });
@@ -184,15 +196,7 @@ onMounted(async () => {
               </div>
             </div>
             <div class="col d-flex">
-              <div class="custom-form-floating">
-                <input
-                  type="text"
-                  class="form-control flex-grow-1 sys-input-288"
-                  id="InputCity"
-                  placeholder="Город"
-                >
-                <label for="InputCity">Город</label>
-              </div>
+              <CatalogSearch :callback="fetchLocations" :isLoading="dataLoading" placeholder="Город" v-model="selectedLocation"/>
             </div>
           </div>
           <div class="row">
@@ -275,7 +279,7 @@ onMounted(async () => {
                   class="form-control flex-grow-1 sys-input-600-flex"
                   id="InputSpecialization"
                   placeholder="Рабочие часы"
-                  v-model="vacancyData.hours"
+                  v-model="vacancyData.work_hours"
                 >
                 <label for="InputSpecialization">Рабочие часы</label>
               </div>
