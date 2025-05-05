@@ -1,5 +1,6 @@
 import sqlalchemy as alch
 
+from datetime import date
 from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,19 +51,99 @@ class UserRepository(CommonRepository[User]):
         query = query.order_by(User.id.desc()).slice(start, end)
         return (await self.session.execute(query)).scalars().all()
     
-    async def get_applicants_by_fullname(
-            self, user: User, start: int, end: int, q: str = None
-    ) -> Sequence[User | None]:
+    async def get_applicant_by_id(
+            self,
+            edu_institution_id: int,
+            id: int
+    ) -> User:
         query = alch.select(User).where(
             User.is_applicant,
-            Applicant.edu_institution_id == user.edu_worker.edu_institution_id
+            User.id == id,
+            Applicant.edu_institution_id == edu_institution_id
         )
+
+        query = (
+            query
+            .join(User.applicant)
+            .options(
+                selectinload(User.applicant),
+                selectinload(User.location)
+            )
+        )
+
+        return (await self.session.execute(query)).scalar()
+
+    async def get_applicant_by_edu_num(
+            self,
+            edu_institution_id: int,
+            edu_number: str
+    ):
+        query = alch.select(User).where(
+            User.is_applicant,
+            Applicant.edu_number == edu_number,
+            Applicant.edu_institution_id == edu_institution_id
+        )
+
+        query = (
+            query
+            .join(User.applicant)
+            .options(
+                selectinload(User.applicant),
+                selectinload(User.location)
+            )
+        )
+
+        return (await self.session.execute(query)).scalar()
+
+    async def _get_applicants_by_fullname_query(
+            self,
+            query: alch.Select,
+            birthdate: date = None,
+            only_verified: bool = False,
+            location_id: int = None,
+            q: str = None,
+            start: int = None,
+            end: int = None
+    ) -> alch.Select:
+        if birthdate:
+            query = query.where(User.birthdate == birthdate)
+
+        if only_verified:
+            query = query.where(User.is_verified == True)
+
+        if location_id is not None:
+            query = query.where(User.location_id == location_id)
 
         if q:
             query = query.where(
                 alch.func.concat_ws(' ', User.surname, User.name, User.last_name)
                 .like(f"%{q}%")
             )
+
+        return query
+
+    async def get_applicants_by_fullname(
+            self,
+            edu_institution_id: int,
+            birthdate: date = None,
+            only_verified: bool = False,
+            location_id: int = None,
+            q: str = None,
+            start: int = None,
+            end: int = None
+    ) -> Sequence[User | None]:
+        query = alch.select(User).where(
+            User.is_applicant,
+            Applicant.edu_institution_id == edu_institution_id
+        )
+
+        query = await self._get_applicants_by_fullname_query(
+            query=query,
+            birthdate=birthdate,
+            only_verified=only_verified,
+            location_id=location_id,
+            q=q, start=start, end=end
+        )
 
         query = (
             query
@@ -76,17 +157,26 @@ class UserRepository(CommonRepository[User]):
         query = query.order_by(User.id.desc()).slice(start, end)
         return (await self.session.execute(query)).scalars().all()
     
-    async def count_applicants_by_fullname(self, user: User, q: str = None) -> int:
+    async def count_applicants_by_fullname(
+            self,
+            edu_institution_id: int,
+            birthdate: date = None,
+            only_verified: bool = False,
+            location_id: int = None,
+            q: str = None
+    ) -> int:
         query = alch.select(alch.func.count()).select_from(User).where(
             User.is_applicant,
-            Applicant.edu_institution_id == user.edu_worker.edu_institution_id
+            Applicant.edu_institution_id == edu_institution_id
         )
 
-        if q:
-            query = query.where(
-                alch.func.concat_ws(' ', User.surname, User.name, User.last_name)
-                .like(f"%{q}%")
-            )
+        query = await self._get_applicants_by_fullname_query(
+            query=query,
+            birthdate=birthdate,
+            only_verified=only_verified,
+            location_id=location_id,
+            q=q
+        )
 
         query = query.join(User.applicant)
 

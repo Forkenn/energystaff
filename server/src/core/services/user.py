@@ -5,7 +5,7 @@ from src.core.repositories.user import UserRepository
 from src.core.schemas.common import SBaseQueryBody
 from src.exceptions import NotFoundException
 from src.users.models import User
-from src.users.schemas import SUserEdit
+from src.users.schemas import SUserEdit, SApplicantsReadQuery
 
 
 class UserService(CommonService[UserRepository]):
@@ -37,16 +37,48 @@ class UserService(CommonService[UserRepository]):
         data = await self.repository.get_users_by_fullname(data.start, data.end, data.q)
         return data
     
-    async def get_applicants_by_fullname(
-            self, user: User, data: SBaseQueryBody
-    ) -> Sequence[User | None]:
-        data = await self.repository.get_applicants_by_fullname(
-            user, data.start, data.end, data.q
+    async def get_applicant_by_id(self, user: User, id: int) -> User:
+        data = await self.repository.get_applicant_by_id(
+            edu_institution_id=user.edu_worker.edu_institution_id,
+            id=id
         )
+        if not data:
+            raise NotFoundException()
+
         return data
     
-    async def count_applicants_by_fullname(self, user: User, q: str = None) -> int:
-        data = await self.repository.count_applicants_by_fullname(user, q)
+    async def get_applicant_by_edu_num(self, user: User, edu_number: int) -> User:
+        data = await self.repository.get_applicant_by_edu_num(
+            edu_institution_id=user.edu_worker.edu_institution_id,
+            edu_number=edu_number
+        )
+        if not data:
+            raise NotFoundException()
+
+        return data
+    
+    async def get_applicants_by_fullname(
+            self, user: User, data: SApplicantsReadQuery
+    ) -> Sequence[User | None]:
+        data = await self.repository.get_applicants_by_fullname(
+            edu_institution_id=user.edu_worker.edu_institution_id,
+            birthdate=data.birthdate,
+            only_verified=data.only_verified,
+            location_id=data.location_id,
+            q=data.q, start=data.start, end=data.end
+        )
+        return data
+
+    async def count_applicants_by_fullname(
+            self, user: User, data: SApplicantsReadQuery
+    ) -> int:
+        data = await self.repository.count_applicants_by_fullname(
+            edu_institution_id=user.edu_worker.edu_institution_id,
+            birthdate=data.birthdate,
+            only_verified=data.only_verified,
+            location_id=data.location_id,
+            q=data.q
+        )
         return data
     
     async def verify_user_by_id(self, id: int) -> None:

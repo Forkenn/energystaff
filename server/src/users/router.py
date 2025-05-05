@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends
 
 from src.deps import get_user_service
-from src.responses import openapi_401, openapi_400, openapi_403, openapi_204, response_204
+from src.responses import (
+    openapi_401, openapi_400, openapi_403, openapi_204, response_204, openapi_404
+)
 from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
 from src.core.services.user import UserService
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.users.schemas import (
-    SUserReadFull, SUserEdit, SUsersPreview, SApplicantsPreview
+    SUserReadFull, SUserEdit, SUsersPreview, SApplicantsPreview,
+    SApplicantsReadQuery, SApplicantsFilteredQuery, SApplicantPreview
 )
 
 router = APIRouter(prefix='/users', tags=['Users'])
@@ -69,7 +72,7 @@ async def activate_user_by_id(
 
 @router.get('/applicants', responses={**openapi_400, **openapi_401, **openapi_403})
 async def get_applicants(
-        data: SBaseQueryBody = Depends(),
+        data: SApplicantsReadQuery = Depends(),
         user: User = Depends(current_edu),
         user_service: UserService = Depends(get_user_service)
 ) -> SApplicantsPreview:
@@ -78,12 +81,34 @@ async def get_applicants(
 
 @router.get('/applicants/count', responses={**openapi_401, **openapi_403})
 async def get_applicants_count(
-        q: str | None = None,
+        data: SApplicantsFilteredQuery = Depends(),
         user: User = Depends(current_edu),
         user_service: UserService = Depends(get_user_service)
 ) -> SBaseQueryCountResponse:
-    count = await user_service.count_applicants_by_fullname(user, q)
+    count = await user_service.count_applicants_by_fullname(user, data)
     return {'count': count}
+
+@router.get('/applicants/{id}', responses={
+    **openapi_401, **openapi_403, **openapi_404
+})
+async def get_applicant_by_id(
+        id: int,
+        user: User = Depends(current_edu),
+        user_service: UserService = Depends(get_user_service)
+) -> SApplicantPreview:
+    user = await user_service.get_applicant_by_id(user, id)
+    return user
+
+@router.get('/applicants/by-edu-id/{edu_num}', responses={
+    **openapi_401, **openapi_403, **openapi_404
+})
+async def get_applicant_by_edu_number(
+        edu_num: str,
+        user: User = Depends(current_edu),
+        user_service: UserService = Depends(get_user_service)
+) -> SApplicantPreview:
+    user = await user_service.get_applicant_by_edu_num(user, edu_num)
+    return user
 
 @router.post('/applicants/{id}/verify', responses={**openapi_204})
 async def verify_applicant(

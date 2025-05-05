@@ -1,10 +1,22 @@
+from enum import Enum
 from datetime import date
 
 from pydantic import BaseModel, Field
 
-from src.core.schemas.common import SBaseQueryCountResponse
+from src.core.schemas.common import SBaseQueryCountResponse, SBaseQuerySliceBody
 from src.core.schemas.catalog import SBaseCatalogItemRead
 from src.tools.models import EduStatus
+
+
+class SApplicantsFilteredQuery(BaseModel):
+    q: str | None = None
+    birthdate: date | None = None
+    only_verified: bool | None = False
+    location_id: int | None = None
+
+
+class SApplicantsReadQuery(SApplicantsFilteredQuery, SBaseQuerySliceBody):
+    pass
 
 
 class SApplicantRead(BaseModel):
