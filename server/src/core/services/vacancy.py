@@ -5,7 +5,7 @@ from src.core.services.common import CommonService
 from src.core.repositories.vacancy import VacancyRepository
 from src.users.models import User
 from src.vacancies.models import Vacancy
-from src.vacancies.schemas import SVacancyCreate
+from src.vacancies.schemas import SVacancyCreate, SVacanciesPreviewsQuery, SortBy
 
 
 class VacancyService(CommonService[VacancyRepository]):
@@ -63,13 +63,21 @@ class VacancyService(CommonService[VacancyRepository]):
     async def get_vacancies_cards(
             self,
             requester_id: int,
-            start: int,
-            end: int
+            query_data: SVacanciesPreviewsQuery
         ) -> Sequence[dict | None]:
         data = await self.repository.get_vacancies_plain(
-            requester_id,
-            start,
-            end
+            requester_id=requester_id,
+            q=query_data.q,
+            location_id=query_data.location_id,
+            salary_from=query_data.salary_from,
+            salary_to=query_data.salary_to,
+            employment_formats_ids=query_data.employment_formats_ids,
+            employment_schedules_ids=query_data.employment_schedules_ids,
+            employment_types_ids=query_data.employment_types_ids,
+            sort_date=True if query_data.sort_by == SortBy.DATE else False,
+            desc=query_data.desc,
+            start=query_data.start,
+            end=query_data.end
         )
         return data
     

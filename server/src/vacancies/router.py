@@ -12,7 +12,9 @@ from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.vacancies.models import Vacancy
-from src.vacancies.schemas import SVacancyCreate, SVacancyRead, SVacanciesPreview
+from src.vacancies.schemas import (
+    SVacancyCreate, SVacancyRead, SVacanciesPreview, SVacanciesPreviewsQuery
+)
 
 router = APIRouter(prefix='/vacancies', tags=['Vacancies'])
 
@@ -43,13 +45,11 @@ async def get_vacancies_types(
 
 @router.get('')
 async def get_vacancies_cards(
-        data: SBaseQueryBody = Depends(),
+        data: SVacanciesPreviewsQuery = Depends(),
         user: User = Depends(current_user),
         vacancy_service: VacancyService = Depends(get_vacancy_service)
 ) -> SVacanciesPreview:
-    vacancies = await vacancy_service.get_vacancies_cards(
-        user.id, data.start, data.end
-    )
+    vacancies = await vacancy_service.get_vacancies_cards(user.id, data)
     return {'count': len(vacancies), 'items': vacancies}
 
 @router.get('/count')
