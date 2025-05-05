@@ -80,7 +80,7 @@ const applyVacancy = async() => {
 }
 
 const deleteNegotiation = async() => {
-    await NegotiationsService.deleteNegotiation(vacancy.negotiation?.id);
+    await NegotiationsService.deleteNegotiation(vacancy.value.negotiation?.id);
     router.go(0);
 }
 
