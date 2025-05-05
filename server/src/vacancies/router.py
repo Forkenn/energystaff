@@ -13,7 +13,8 @@ from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.vacancies.models import Vacancy
 from src.vacancies.schemas import (
-    SVacancyCreate, SVacancyRead, SVacanciesPreview, SVacanciesPreviewsQuery
+    SVacancyCreate, SVacancyRead, SVacanciesPreview, SVacanciesPreviewsQuery,
+    SVacanciesCountQuery
 )
 
 router = APIRouter(prefix='/vacancies', tags=['Vacancies'])
@@ -54,11 +55,11 @@ async def get_vacancies_cards(
 
 @router.get('/count')
 async def get_vacancies_count(
-        q: str,
+        data: SVacanciesCountQuery = Depends(),
         user: User = Depends(current_user),
         vacancy_service: VacancyService = Depends(get_vacancy_service)
 ) -> SBaseQueryCountResponse:
-    count = await vacancy_service.count_vacancies()
+    count = await vacancy_service.count_vacancies(data)
     return {'count': count}
 
 @router.get('/{id}', responses={**openapi_404, **openapi_403})

@@ -5,7 +5,9 @@ from src.core.services.common import CommonService
 from src.core.repositories.vacancy import VacancyRepository
 from src.users.models import User
 from src.vacancies.models import Vacancy
-from src.vacancies.schemas import SVacancyCreate, SVacanciesPreviewsQuery, SortBy
+from src.vacancies.schemas import (
+    SVacancyCreate, SVacanciesCountQuery, SVacanciesPreviewsQuery, SortBy
+)
 
 
 class VacancyService(CommonService[VacancyRepository]):
@@ -81,8 +83,16 @@ class VacancyService(CommonService[VacancyRepository]):
         )
         return data
     
-    async def count_vacancies(self) -> int:
-        return await self.repository.count_vacancies()
+    async def count_vacancies(self, query_data: SVacanciesCountQuery) -> int:
+        return await self.repository.count_vacancies(
+            q=query_data.q,
+            location_id=query_data.location_id,
+            salary_from=query_data.salary_from,
+            salary_to=query_data.salary_to,
+            employment_formats_ids=query_data.employment_formats_ids,
+            employment_schedules_ids=query_data.employment_schedules_ids,
+            employment_types_ids=query_data.employment_types_ids
+        )
     
     async def delete_by_id(self, requester_id: int, id: int) -> None:
         vacancy: Vacancy = await self.get_by_id(id)

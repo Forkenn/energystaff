@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from pydantic import BaseModel, Field
 
 from src.core.schemas.catalog import SBaseCatalogItemRead
-from src.core.schemas.common import SBaseQueryBody
+from src.core.schemas.common import SBaseQuerySliceBody
 from src.negotiations.models import NegotiationStatus
 
 
@@ -12,15 +12,19 @@ class SortBy(Enum):
     SALARY = 'salary'
 
 
-class SVacanciesPreviewsQuery(SBaseQueryBody):
-    sort_by: SortBy | None = SortBy.DATE.value
-    desc: bool | None = True
+class SVacanciesCountQuery(BaseModel):
+    q: str | None = None
     location_id: int | None = None
     salary_from: int | None = None
     salary_to: int | None = None
     employment_types_ids: list[int] | None = None
     employment_formats_ids: list[int] | None = None
     employment_schedules_ids: list[int] | None = None
+
+
+class SVacanciesPreviewsQuery(SVacanciesCountQuery, SBaseQuerySliceBody):
+    sort_by: SortBy | None = SortBy.DATE.value
+    desc: bool | None = True
 
 
 class SCompany(BaseModel):

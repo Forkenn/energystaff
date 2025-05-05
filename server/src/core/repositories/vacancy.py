@@ -237,11 +237,44 @@ class VacancyRepository(CommonRepository[Vacancy]):
         result = await self.session.execute(query)
         return result.mappings().all()
 
-    async def count_vacancies(self) -> int:
+    async def count_vacancies(
+            self,
+            q: str = None,
+            location_id: int = None,
+            salary_from: int = None,
+            salary_to: int = None,
+            employment_types_ids: list[int] = None,
+            employment_formats_ids: list[int] = None,
+            employment_schedules_ids: list[int] = None
+    ) -> int:
         query = (
             alch.select(alch.func.count())
             .select_from(Vacancy)
         )
+
+        if location_id is not None:
+            query = query.where(Vacancy.location_id == location_id)
+
+        if q:
+            query = query.where(Vacancy.position.like(f'%{q}%'))
+
+        if employment_types_ids:
+            query = query.where(Vacancy.vacancy_types.in_(employment_types_ids))
+
+        if employment_formats_ids:
+            query = query.where(Vacancy.vacancy_formats.in_(employment_formats_ids))
+
+        if employment_schedules_ids:
+            query = query.where(Vacancy.vacancy_schedules.in_(employment_schedules_ids))
+
+        if salary_from is not None and salary_to is not None:
+            query = query.where(Vacancy.salary.between(salary_from, salary_to))
+
+        elif salary_from is not None:
+            query = query.where(Vacancy.salary >= salary_from)
+
+        elif salary_to is not None:
+            query = query.where(Vacancy.salary <= salary_to)
 
         result = await self.session.execute(query)
         return result.scalar()
