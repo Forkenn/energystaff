@@ -73,9 +73,9 @@ class VacancyService(CommonService[VacancyRepository]):
             location_id=query_data.location_id,
             salary_from=query_data.salary_from,
             salary_to=query_data.salary_to,
-            employment_formats_ids=query_data.employment_formats_ids,
-            employment_schedules_ids=query_data.employment_schedules_ids,
-            employment_types_ids=query_data.employment_types_ids,
+            formats_ids=query_data.employment_formats_ids,
+            schedules_ids=query_data.employment_schedules_ids,
+            types_ids=query_data.employment_types_ids,
             sort_date=True if query_data.sort_by == SortBy.DATE else False,
             desc=query_data.desc,
             start=query_data.start,
@@ -89,9 +89,9 @@ class VacancyService(CommonService[VacancyRepository]):
             location_id=query_data.location_id,
             salary_from=query_data.salary_from,
             salary_to=query_data.salary_to,
-            employment_formats_ids=query_data.employment_formats_ids,
-            employment_schedules_ids=query_data.employment_schedules_ids,
-            employment_types_ids=query_data.employment_types_ids
+            formats_ids=query_data.employment_formats_ids,
+            schedules_ids=query_data.employment_schedules_ids,
+            types_ids=query_data.employment_types_ids
         )
     
     async def delete_by_id(self, requester_id: int, id: int) -> None:

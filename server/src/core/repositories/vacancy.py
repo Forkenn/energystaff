@@ -7,7 +7,8 @@ from sqlalchemy.orm import selectinload
 
 from src.core.repositories.common import CommonRepository
 from src.vacancies.models import (
-    Vacancy, EmploymentSchedule, EmploymentFormat, EmploymentType
+    Vacancy, EmploymentSchedule, EmploymentFormat, EmploymentType,
+    vacancies_formats, vacancies_schedules, vacancies_types
 )
 from src.companies.models import Company
 from src.negotiations.models import Negotiation
@@ -112,9 +113,9 @@ class VacancyRepository(CommonRepository[Vacancy]):
             location_id: int = None,
             salary_from: int = None,
             salary_to: int = None,
-            employment_types_ids: list[int] = None,
-            employment_formats_ids: list[int] = None,
-            employment_schedules_ids: list[int] = None
+            types_ids: list[int] = None,
+            formats_ids: list[int] = None,
+            schedules_ids: list[int] = None
     ) -> alch.Select:
         query = (
             alch.select(
@@ -124,6 +125,7 @@ class VacancyRepository(CommonRepository[Vacancy]):
                 Vacancy.salary,
                 Vacancy.author_id,
                 Vacancy.company_id,
+                Vacancy.timestamp,
                 Location.name.label("location_name"),
                 Company.name.label("company_name"),
                 Negotiation.id.label("negotiation_id"),
@@ -151,14 +153,17 @@ class VacancyRepository(CommonRepository[Vacancy]):
         if q:
             query = query.where(Vacancy.position.like(f'%{q}%'))
 
-        if employment_types_ids:
-            query = query.where(Vacancy.vacancy_types.in_(employment_types_ids))
+        if types_ids:
+            query = query.join(vacancies_types).where(vacancies_types.c.type_id.in_(types_ids))
 
-        if employment_formats_ids:
-            query = query.where(Vacancy.vacancy_formats.in_(employment_formats_ids))
+        if formats_ids:
+            query = query.join(vacancies_formats).where(vacancies_formats.c.format_id.in_(formats_ids))
 
-        if employment_schedules_ids:
-            query = query.where(Vacancy.vacancy_schedules.in_(employment_schedules_ids))
+        if schedules_ids:
+            query = query.join(vacancies_schedules).where(vacancies_schedules.c.schedule_id.in_(schedules_ids))
+
+        if types_ids or formats_ids or schedules_ids:
+            query = query.distinct()
 
         if salary_from is not None and salary_to is not None:
             query = query.where(Vacancy.salary.between(salary_from, salary_to))
@@ -210,9 +215,9 @@ class VacancyRepository(CommonRepository[Vacancy]):
             location_id: int = None,
             salary_from: int = None,
             salary_to: int = None,
-            employment_types_ids: list[int] = None,
-            employment_formats_ids: list[int] = None,
-            employment_schedules_ids: list[int] = None,
+            types_ids: list[int] = None,
+            formats_ids: list[int] = None,
+            schedules_ids: list[int] = None,
             sort_date: bool = True,
             desc: bool = True,
             start: int = None,
@@ -224,9 +229,9 @@ class VacancyRepository(CommonRepository[Vacancy]):
             location_id=location_id,
             salary_from=salary_from,
             salary_to=salary_to,
-            employment_types_ids=employment_types_ids,
-            employment_formats_ids=employment_formats_ids,
-            employment_schedules_ids=employment_schedules_ids
+            types_ids=types_ids,
+            formats_ids=formats_ids,
+            schedules_ids=schedules_ids
         )
 
         if sort_date:
@@ -243,9 +248,9 @@ class VacancyRepository(CommonRepository[Vacancy]):
             location_id: int = None,
             salary_from: int = None,
             salary_to: int = None,
-            employment_types_ids: list[int] = None,
-            employment_formats_ids: list[int] = None,
-            employment_schedules_ids: list[int] = None
+            types_ids: list[int] = None,
+            formats_ids: list[int] = None,
+            schedules_ids: list[int] = None
     ) -> int:
         query = (
             alch.select(alch.func.count())
@@ -258,14 +263,23 @@ class VacancyRepository(CommonRepository[Vacancy]):
         if q:
             query = query.where(Vacancy.position.like(f'%{q}%'))
 
-        if employment_types_ids:
-            query = query.where(Vacancy.vacancy_types.in_(employment_types_ids))
+        if types_ids:
+            query = query.join(vacancies_types).where(
+                vacancies_types.c.type_id.in_(types_ids)
+            )
 
-        if employment_formats_ids:
-            query = query.where(Vacancy.vacancy_formats.in_(employment_formats_ids))
+        if formats_ids:
+            query = query.join(vacancies_formats).where(
+                vacancies_formats.c.format_id.in_(formats_ids)
+            )
 
-        if employment_schedules_ids:
-            query = query.where(Vacancy.vacancy_schedules.in_(employment_schedules_ids))
+        if schedules_ids:
+            query = query.join(vacancies_schedules).where(
+                vacancies_schedules.c.schedule_id.in_(schedules_ids)
+            )
+
+        if types_ids or formats_ids or schedules_ids:
+            query = query.distinct()
 
         if salary_from is not None and salary_to is not None:
             query = query.where(Vacancy.salary.between(salary_from, salary_to))

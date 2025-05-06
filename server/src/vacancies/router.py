@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query
 
 from src.responses import openapi_404, openapi_403, openapi_204, response_204
 from src.deps import (
@@ -47,9 +49,16 @@ async def get_vacancies_types(
 @router.get('')
 async def get_vacancies_cards(
         data: SVacanciesPreviewsQuery = Depends(),
+        employment_types_ids: Optional[list[int]] = Query(None),
+        employment_formats_ids: Optional[list[int]] = Query(None),
+        employment_schedules_ids: Optional[list[int]] = Query(None),
         user: User = Depends(current_user),
         vacancy_service: VacancyService = Depends(get_vacancy_service)
 ) -> SVacanciesPreview:
+    data.employment_types_ids=employment_types_ids
+    data.employment_formats_ids=employment_formats_ids
+    data.employment_schedules_ids=employment_schedules_ids
+
     vacancies = await vacancy_service.get_vacancies_cards(user.id, data)
     return {'count': len(vacancies), 'items': vacancies}
 

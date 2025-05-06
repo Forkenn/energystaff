@@ -17,9 +17,9 @@ class SVacanciesCountQuery(BaseModel):
     location_id: int | None = None
     salary_from: int | None = None
     salary_to: int | None = None
-    employment_types_ids: list[int] | None = None
-    employment_formats_ids: list[int] | None = None
-    employment_schedules_ids: list[int] | None = None
+    employment_types_ids: list[int] | None = Field(None, exclude=True)
+    employment_formats_ids: list[int] | None = Field(None, exclude=True)
+    employment_schedules_ids: list[int] | None = Field(None, exclude=True)
 
 
 class SVacanciesPreviewsQuery(SVacanciesCountQuery, SBaseQuerySliceBody):
