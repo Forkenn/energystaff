@@ -53,17 +53,6 @@ async def get_users_count(
     count = await user_service.count_users_by_fullname(data)
     return {'count': count}
 
-@router.get('/{id}', responses={
-    **openapi_400, **openapi_401, **openapi_403, **openapi_404
-})
-async def get_user_by_id(
-        id: int,
-        user: User = Depends(current_superuser),
-        user_service: UserService = Depends(get_user_service)
-) -> SUserPreview:
-    data = await user_service.get_full_by_id(id)
-    return data
-
 @router.delete('/{id}', responses={**openapi_204})
 async def delete_user_by_id(
         id: int,
@@ -184,3 +173,15 @@ async def unverify_employer(
 ):
     await user_service.unverify_user_by_id(id)
     return response_204
+
+# This route position not wrong, it is a fix for the GET /users/applicants
+@router.get('/{id}', responses={
+    **openapi_400, **openapi_401, **openapi_403, **openapi_404
+})
+async def get_user_by_id(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+) -> SUserPreview:
+    data = await user_service.get_full_by_id(id)
+    return data
