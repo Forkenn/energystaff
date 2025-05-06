@@ -5,6 +5,7 @@ const API_URL = '/api'
 export default function getInstance(withCredentials) {
   return axios.create({
     withCredentials,
-    baseURL: API_URL 
+    baseURL: API_URL,
+    paramsSerializer: { indexes: null }
   }) 
 }

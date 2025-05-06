@@ -14,19 +14,37 @@ import ToolsService from '@/services/tools.service';
 const route = useRoute();
 const router = useRouter();
 
-const filters = ref({ "q": "", "start": 0, "end": 50 });
+const perPage = 6
+const filters = ref({
+  q: null,
+  start: 0,
+  end: perPage,
+  desc: true,
+  sortType: "dateDesc",
+  location_id: null,
+  salary_from: null,
+  salary_to: null,
+  sort_by: "date",
+  employment_types_ids: null,
+  employment_formats_ids: null,
+  employment_schedules_ids: null
+});
 const vacancies = ref({ "count": 0, "items": [] });
 
 const serverTypes = ref([]);
 const selectedTypes = ref([]);
+
 const serverFormats = ref([]);
 const selectedFormats= ref([]);
+
 const serverSchedules = ref([]);
 const selectedSchedules = ref([]);
+
+const selectedLocation = ref(null);
+
 const dataLoading = ref(true);
 
 const totalVacanciesCount = ref(0)
-const perPage = 6
 
 // Pagination
 const currentPage = computed(() => {
@@ -67,10 +85,60 @@ const getVacanciesCount = async() => {
   }
 }
 
+const convertIds = () => {
+  const schedulesObj = selectedSchedules.value;
+  const typesObj = selectedTypes.value;
+  const formatsObj = selectedFormats.value;
+
+  filters.value.employment_schedules_ids = schedulesObj.map(
+    schedulesObj => schedulesObj.id
+  );
+  filters.value.employment_types_ids = typesObj.map(
+    typesObj => typesObj.id
+  );
+  filters.value.employment_formats_ids = formatsObj.map(
+    formatsObj => formatsObj.id
+  );
+}
+
+const prepareFilters = async() => {
+  switch(filters.value.sortType) {
+    case 'dateDesc':
+      filters.value.sort_by = 'date'
+      filters.value.desc = true
+      break;
+
+    case 'dateAsc':
+      filters.value.sort_by = 'date'
+      filters.value.desc = false
+      break;
+
+    case 'salaryDesc':
+      filters.value.sort_by = 'salary'
+      filters.value.desc = true
+      break;
+
+    case 'salaryAsc':
+      filters.value.sort_by = 'salary'
+      filters.value.desc = false
+      break;
+
+    default:
+      break;
+  }
+
+  filters.value.location_id = selectedLocation.value?.id || null;
+  filters.value.salary_from = parseInt(filters.value.salary_from) || null
+  filters.value.salary_to = parseInt(filters.value.salary_to) || null
+  convertIds();
+}
+
 const getVacancies = async() => {
   filters.value.start = (currentPage.value - 1) * perPage;
-  filters.value.end = filters.value.start + perPage
+  filters.value.end = filters.value.start + perPage;
 
+  prepareFilters();
+  getVacanciesCount();
   const response = await VacanciesService.getVacancies(filters.value);
   vacancies.value = response.data;
   console.log(vacancies.value);
@@ -80,7 +148,6 @@ watch(() => route.query.page, getVacancies)
 
 onMounted(async() => {
   getVacanciesRelations();
-  getVacanciesCount();
   getVacancies();
 });
 
@@ -94,10 +161,10 @@ onMounted(async() => {
         <div class="search-wrapper">
           <div class="row">
             <div class="col d-flex">
-              <input type="text" class="form-control flex-grow-1 sys-input-flex" id="InputSearch" placeholder="Профессия, должность или компания">
+              <input type="text" class="form-control flex-grow-1 sys-input-flex" id="InputSearch" placeholder="Профессия, должность или компания" v-model="filters.q">
             </div>
             <div class="col-auto">
-              <button type="button" class="btn btn-primary sys-btn-150">Поиск</button>
+              <button type="button" class="btn btn-primary sys-btn-150" @click="getVacancies">Поиск</button>
             </div>
           </div>
         </div>
@@ -110,25 +177,54 @@ onMounted(async() => {
                     Сортировать
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input sys-check-20" type="radio" name="radioDefault" value="" id="checkDateDescSort" checked="">
+                    <input
+                      class="form-check-input sys-check-20"
+                      type="radio"
+                      name="radioDefault"
+                      id="checkDateDescSort"
+                      checked=""
+                      value="dateDesc"
+                      v-model="filters.sortType"
+                    >
                     <label class="form-check-label" for="checkDateDescSort">
                       По убыванию даты
                     </label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input sys-check-20" type="radio" name="radioDefault" value="" id="checkDateAscSort">
+                    <input
+                      class="form-check-input sys-check-20"
+                      type="radio"
+                      name="radioDefault"
+                      id="checkDateAscSort"
+                      value="dateAsc"
+                      v-model="filters.sortType"
+                    >
                     <label class="form-check-label" for="checkDateAscSort">
                       По возрастанию даты
                     </label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input sys-check-20" type="radio" name="radioDefault" value="" id="checkSalaryDescSort">
+                    <input
+                      class="form-check-input sys-check-20"
+                      type="radio"
+                      name="radioDefault"
+                      id="checkSalaryDescSort"
+                      value="salaryDesc"
+                      v-model="filters.sortType"
+                    >
                     <label class="form-check-label" for="checkSalaryDescSort">
                         По убыванию зарплат
                     </label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input sys-check-20" type="radio" name="radioDefault" value="" id="checkSalaryAscSort">
+                    <input
+                      class="form-check-input sys-check-20"
+                      type="radio"
+                      name="radioDefault"
+                      id="checkSalaryAscSort"
+                      value="salaryAsc"
+                      v-model="filters.sortType"
+                    >
                     <label class="form-check-label" for="checkSalaryAscSort">
                         По возрастанию зарплат
                     </label>
@@ -136,16 +232,16 @@ onMounted(async() => {
                   <div class="filter-header mt-4 mb-2">
                     Регион
                   </div>
-                  <CatalogSearch :callback="fetchLocations" :isLoading="dataLoading" placeholder="Город"/>
+                  <CatalogSearch :callback="fetchLocations" :isLoading="dataLoading" placeholder="Город" v-model="selectedLocation" />
                   <div class="filter-header mt-4 mb-2">
                     Уровень дохода
                   </div>
                   <div class="form-floating sys-form-floating" style="margin-bottom: 24px;">
-                    <input type="text" class="form-control sys-input-288" id="floatingSalaryFrom" placeholder="От">
+                    <input type="text" class="form-control sys-input-288" id="floatingSalaryFrom" placeholder="От" v-model="filters.salary_from">
                     <label for="floatingSalaryFrom">От</label>
                   </div>
                   <div class="form-floating sys-form-floating">
-                    <input type="text" class="form-control sys-input-288" id="floatingSalaryFrom" placeholder="До">
+                    <input type="text" class="form-control sys-input-288" id="floatingSalaryFrom" placeholder="До" v-model="filters.salary_to">
                     <label for="floatingSalaryFrom">До</label>
                   </div>
                   <div class="filter-header mt-4 mb-2">

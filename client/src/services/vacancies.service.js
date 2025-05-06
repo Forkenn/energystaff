@@ -8,7 +8,15 @@ class VacanciesService {
         params: {
           q: data.q,
           start: data.start,
-          end: data.end 
+          end: data.end,
+          desc: data.desc,
+          location_id: data.location_id,
+          salary_from: data.salary_from,
+          salary_to: data.salary_to,
+          sort_by: data.sort_by,
+          employment_types_ids: data.employment_types_ids,
+          employment_formats_ids: data.employment_formats_ids,
+          employment_schedules_ids: data.employment_schedules_ids
         },
       })
       .then((response) => response)
@@ -28,7 +36,13 @@ class VacanciesService {
     return await instance
       .get('/vacancies/count', {
         params: {
-          q: data.q
+          q: data.q,
+          location_id: data.location_id,
+          salary_from: data.salary_from,
+          salary_to: data.salary_to,
+          employment_types_ids: data.employment_types_ids,
+          employment_formats_ids: data.employment_formats_ids,
+          employment_schedules_ids: data.employment_schedules_ids
         },
       })
       .then((response) => response)
