@@ -65,9 +65,16 @@ async def get_vacancies_cards(
 @router.get('/count')
 async def get_vacancies_count(
         data: SVacanciesCountQuery = Depends(),
+        employment_types_ids: Optional[list[int]] = Query(None),
+        employment_formats_ids: Optional[list[int]] = Query(None),
+        employment_schedules_ids: Optional[list[int]] = Query(None),
         user: User = Depends(current_user),
         vacancy_service: VacancyService = Depends(get_vacancy_service)
 ) -> SBaseQueryCountResponse:
+    data.employment_types_ids=employment_types_ids
+    data.employment_formats_ids=employment_formats_ids
+    data.employment_schedules_ids=employment_schedules_ids
+
     count = await vacancy_service.count_vacancies(data)
     return {'count': count}
 
