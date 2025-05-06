@@ -7,12 +7,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.core.repositories.common import CommonRepository
-from src.users.models import User, Applicant
+from src.users.models import User, Applicant, Employer, EduWorker
 
 
 class UserRepository(CommonRepository[User]):
     def __init__(self, session: AsyncSession):
         super().__init__(User, session)
+
+    async def create_applicant(self, user: User) -> None:
+        user.applicant = Applicant(user_id=user.id)
+        await self.session.commit()
+
+    async def create_employer(self, user: User, company_id: int) -> None:
+        user.employer = Employer(company_id=company_id)
+        await self.session.commit()
+
+    async def create_edu_worker(self, user: User, edu_institution_id: int) -> None:
+        user.edu_worker = EduWorker(edu_institution_id=edu_institution_id)
+        await self.session.commit()
 
     async def refresh_fields(self, user: User) -> None:
         await self.session.refresh(

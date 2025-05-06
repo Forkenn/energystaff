@@ -3,7 +3,6 @@ from typing import Sequence
 from src.exceptions import NotFoundException, NotAllowedException
 from src.core.services.common import CommonService
 from src.core.repositories.company import CompanyRepository
-from src.core.schemas.common import SBaseQueryBody
 from src.users.models import User
 from src.companies.models import Company
 from src.companies.schemas import SCompanyEdit, SComaniesReadQuery, SComaniesFilteredQuery
@@ -12,6 +11,17 @@ from src.companies.schemas import SCompanyEdit, SComaniesReadQuery, SComaniesFil
 class CompanyService(CommonService[CompanyRepository]):
     def __init__(self, company_repo: CompanyRepository):
         super().__init__(company_repo)
+
+    async def get_company_or_create(self, name: str) -> Company:
+        company: Company = await self.repository.get_company_by_name(name)
+
+        if not company:
+            company = await self.repository.create_company(name)
+
+        return company
+    
+    async def exists_company_by_name(self, name: str) -> bool:
+        return await self.repository.exists_company_by_name(name)
 
     async def update_company(self, user: User, company_id: int, data: SCompanyEdit) -> Company:
         company: Company = await self.repository.get(company_id)

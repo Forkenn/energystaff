@@ -5,13 +5,22 @@ from src.core.repositories.user import UserRepository
 from src.exceptions import NotFoundException
 from src.users.models import User
 from src.users.schemas import (
-    SUserEdit, SApplicantsReadQuery, SUsersReadQuery, SUsersFilteredQuery
+    SUserEdit, SApplicantsReadQuery, SUsersReadQuery, SUsersFilteredQuery,
 )
 
 
 class UserService(CommonService[UserRepository]):
     def __init__(self, user_repo: UserRepository):
         super().__init__(user_repo)
+
+    async def create_applicant(self, user: User) -> None:
+        await self.repository.create_applicant(user)
+
+    async def create_employer(self, user: User, company_id: int) -> None:
+        await self.repository.create_employer(user, company_id)
+
+    async def create_edu_worker(self, user: User, edu_institution_id: int) -> None:
+        await self.repository.create_edu_worker(user, edu_institution_id)
 
     async def get_full_by_id(self, id: int) -> User:
         user = await self.repository.get(id)

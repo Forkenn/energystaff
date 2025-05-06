@@ -32,11 +32,11 @@ app.include_router(
     fastapi_users.get_auth_router(auth_backend), tags=["Auth"]
 )
 
-app.include_router(
+"""app.include_router(
     fastapi_users.get_reset_password_router(),
     prefix="/auth",
     tags=["Auth"],
-)
+)"""
 
 app.include_router(router_auth)
 app.include_router(router_users)

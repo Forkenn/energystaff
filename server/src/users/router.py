@@ -4,7 +4,7 @@ from src.deps import get_user_service
 from src.responses import (
     openapi_401, openapi_400, openapi_403, openapi_204, response_204, openapi_404
 )
-from src.core.schemas.common import SBaseQueryBody, SBaseQueryCountResponse
+from src.core.schemas.common import SBaseQueryCountResponse
 from src.core.services.user import UserService
 from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User

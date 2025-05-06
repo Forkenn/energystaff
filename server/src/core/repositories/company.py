@@ -13,6 +13,22 @@ class CompanyRepository(CommonRepository[Company]):
     def __init__(self, session: AsyncSession):
         super().__init__(Company, session)
 
+    async def create_company(self, name: str) -> Company:
+        company = self.model(name=name)
+
+        self.session.add(company)
+        await self.session.commit()
+        return company
+
+    async def get_company_by_name(self, name: str) -> Company:
+        query = alch.select(Company).where(Company.name == name)
+        return (await self.session.execute(query)).scalar()
+
+    async def exists_company_by_name(self, name: str) -> bool:
+        query = alch.select(1).where(Company.name == name)
+        result = await self.session.scalar(query)
+        return result is not None
+
     async def update_company(self, company: Company, data: dict) -> Company:
         for field, value in data.items():
             setattr(company, field, value)
