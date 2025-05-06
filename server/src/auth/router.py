@@ -19,7 +19,7 @@ router = APIRouter(prefix='/auth', tags=['Auth'])
 
 current_user = RoleManager(SystemRole.ACTIVE)
 
-@router.post('/change-password', responses={**openapi_400})
+@router.post('/change-password', responses={**openapi_400, **openapi_204})
 async def change_password(
     data: SUserPasswordChange,
     user: User = Depends(current_user),
@@ -28,7 +28,7 @@ async def change_password(
     await user_manager.update_password(user, data.old_password, data.new_password)
     return response_204
 
-@router.post('/change-email', responses={**openapi_400})
+@router.post('/change-email', responses={**openapi_400, **openapi_204})
 async def change_email(
     data: SUserEmailChange,
     user: User = Depends(current_user),
