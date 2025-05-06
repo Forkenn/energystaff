@@ -1,6 +1,16 @@
 from pydantic import BaseModel, EmailStr, model_validator
 from fastapi_users import schemas
 
+
+class SUserPasswordChange(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class SUserEmailChange(BaseModel):
+    password: str
+    new_email: EmailStr
+
 class SUserCreateBase(BaseModel):
     surname: str
     name: str

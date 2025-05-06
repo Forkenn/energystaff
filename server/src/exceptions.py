@@ -50,6 +50,10 @@ class AlreadyExistException(BadRequestException):
     detail = 'OBJECT_ALREADY_EXIST'
 
 
+class LoginBadCredentials(BadRequestException):
+    detail = 'LOGIN_BAD_CREDENTIALS'
+
+
 class YourselfException(BadRequestException):
     detail = 'CAN_NOT_DONE_ON_YOURSELF'
 

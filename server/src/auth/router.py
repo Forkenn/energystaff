@@ -1,27 +1,41 @@
 from fastapi import APIRouter, Request, Depends
 
 from src.deps import get_user_service, get_institutions_service
-from src.responses import openapi_400, openapi_404
+from src.responses import openapi_400, openapi_404, openapi_204, response_204
 from src.core.services.user import UserService
 from src.core.services.company import CompanyService
 from src.core.repositories.company import CompanyRepository
 from src.core.services.catalog import CatalogService
+from src.auth.roles import SystemRole, RoleManager
 from src.auth.manager import fastapi_users, UserManager
 from src.auth.schemas import (
-    SUserRead, SUserCreateBase, SUserCreate, SEmployerCreate, SEduCreate
+    SUserRead, SUserCreateBase, SUserCreate, SEmployerCreate, SEduCreate,
+    SUserPasswordChange, SUserEmailChange
 )
 from src.auth.tools import create_user_role
 from src.users.models import User
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
-responses ={
-    404: {"description": "Item not found"},
-    401: {"description": "Missing token or inactive/unverified user."},
-    400: {"description": "Bad Request"},
-    204: {"description": "Successful Response"},
-    202: {"description": "Successful Response"}
-}
+current_user = RoleManager(SystemRole.ACTIVE)
+
+@router.post('/change-password', responses={**openapi_400})
+async def change_password(
+    data: SUserPasswordChange,
+    user: User = Depends(current_user),
+    user_manager: UserManager = Depends(fastapi_users.get_user_manager)
+):
+    await user_manager.update_password(user, data.old_password, data.new_password)
+    return response_204
+
+@router.post('/change-email', responses={**openapi_400})
+async def change_email(
+    data: SUserEmailChange,
+    user: User = Depends(current_user),
+    user_manager: UserManager = Depends(fastapi_users.get_user_manager)
+):
+    await user_manager.update_email(user, data.new_email, data.password)
+    return response_204
 
 @router.post('/applicant/register', responses={**openapi_400})
 async def register_applicant(
