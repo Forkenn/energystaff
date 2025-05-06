@@ -6,7 +6,7 @@ from src.core.repositories.company import CompanyRepository
 from src.core.schemas.common import SBaseQueryBody
 from src.users.models import User
 from src.companies.models import Company
-from src.companies.schemas import SCompanyEdit
+from src.companies.schemas import SCompanyEdit, SComaniesReadQuery, SComaniesFilteredQuery
 
 
 class CompanyService(CommonService[CompanyRepository]):
@@ -30,10 +30,27 @@ class CompanyService(CommonService[CompanyRepository]):
         data = await self.repository.get_many(start ,end)
         return data
 
-    async def search_companies_by_name(
-            self, data: SBaseQueryBody
+    async def get_companies_by_name(
+            self, data: SComaniesReadQuery
     ) -> Sequence[Company | None]:
-        data = await self.repository.get_companies_by_name(data.q, data.start, data.end)
+        data = await self.repository.get_companies_by_name(
+            registration_date=data.registration_date,
+            only_verified=data.only_verified,
+            q=data.q,
+            start=data.start,
+            end=data.end,
+            desc=data.desc
+        )
+        return data
+    
+    async def count_companies_by_name(
+            self, data: SComaniesFilteredQuery
+    ) -> int:
+        data = await self.repository.count_companies_by_name(
+            registration_date=data.registration_date,
+            only_verified=data.only_verified,
+            q=data.q
+        )
         return data
 
     async def get_company_by_inn(self, inn: str) -> Company | None:

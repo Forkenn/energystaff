@@ -1,5 +1,6 @@
 import sqlalchemy as alch
 
+from datetime import date
 from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,17 +20,65 @@ class CompanyRepository(CommonRepository[Company]):
         await self.session.commit()
         return company
     
+    async def _get_companies_by_name_query(
+            self,
+            query: alch.Select,
+            registration_date: date  = None,
+            only_verified: bool = False,
+            q: str = None
+    ) -> alch.Select:
+        if registration_date:
+            query = query.where(Company.registration_date == registration_date)
+
+        if only_verified:
+            query = query.where(Company.is_verified == True)
+
+        if q:
+            query = query.where(Company.name.like(f"%{q}%"))
+
+        return query
+    
     async def get_companies_by_name(
-            self, name: str, start: int, end: int
+            self,
+            registration_date: date  = None,
+            only_verified: bool = False,
+            q: str = None,
+            start: int = None,
+            end: int = None,
+            desc: bool = True
     ) -> Sequence[Company | None]:
         query = alch.select(Company)
+        query = await self._get_companies_by_name_query(
+            query=query,
+            registration_date=registration_date,
+            only_verified=only_verified,
+            q=q
+        )
 
-        if name:
-            query = query.where(Company.name.like(f"%{name}%"))
+        if desc:
+            query = query.order_by(Company.id.desc())
+        else:
+            query = query.order_by(Company.id.asc())
 
-        query = query.order_by(Company.id.desc()).slice(start, end)
-
+        query = query.slice(start, end)
         return (await self.session.execute(query)).scalars().all()
+    
+    async def count_companies_by_name(
+            self,
+            registration_date: date  = None,
+            only_verified: bool = False,
+            q: str = None
+    ) -> int:
+        query = alch.select(alch.func.count()).select_from(Company)
+        query = await self._get_companies_by_name_query(
+            query=query,
+            registration_date=registration_date,
+            only_verified=only_verified,
+            q=q
+        )
+
+        result = await self.session.execute(query)
+        return result.scalar()
     
     async def get_company_by_inn(self, inn: str) -> Company | None:
         query = alch.select(Company).where(Company.inn == inn)

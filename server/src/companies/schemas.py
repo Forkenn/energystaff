@@ -1,14 +1,24 @@
 from datetime import date
 from pydantic import BaseModel, Field
 
-from src.core.schemas.common import SBaseQueryCountResponse
+from src.core.schemas.common import SBaseQueryCountResponse, SBaseQuerySliceBody
+
+
+class SComaniesFilteredQuery(BaseModel):
+    q: str | None = None
+    registration_date: date | None = None
+    only_verified: bool | None = False
+
+
+class SComaniesReadQuery(SComaniesFilteredQuery, SBaseQuerySliceBody):
+    desc: bool | None = True
 
 
 class SCompanyRead(BaseModel):
     id: int
     name: str
     registration_date: date | None
-    inn: int | None
+    inn: str | None
     address: str | None
     description: str | None
     is_verified: bool
