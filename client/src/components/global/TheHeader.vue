@@ -96,6 +96,7 @@ onBeforeUnmount(() => {
                         <router-link class="dropdown-item" :to="{ name: 'account_page' }">
                             Личный кабинет
                         </router-link>
+                        <a v-if="user.data.is_superuser" target="_blank" href="/api/docs" class="dropdown-item">API</a>
                         <a href="#" class="dropdown-item text-danger" @click.prevent="logout">Выход</a>
                     </div>
                 </transition>
