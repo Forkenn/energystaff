@@ -33,14 +33,22 @@ class UserRepository(CommonRepository[User]):
         await self.session.commit()
         return user
     
-    async def get_users_by_fullname(
-            self, start: int, end: int, q: str = None
-    ) -> Sequence[User | None]:
-        query = alch.select(User).options(
-            selectinload(User.applicant),
-            selectinload(User.employer),
-            selectinload(User.edu_worker)
-        )
+    async def _get_users_by_fullname_query(
+            self,
+            query: alch.Select,
+            birthdate: date = None,
+            only_verified: bool = False,
+            location_id: int = None,
+            q: str = None
+    ) -> alch.Select:
+        if birthdate:
+            query = query.where(User.birthdate == birthdate)
+
+        if only_verified:
+            query = query.where(User.is_verified == True)
+
+        if location_id is not None:
+            query = query.where(User.location_id == location_id)
 
         if q:
             query = query.where(
@@ -48,9 +56,59 @@ class UserRepository(CommonRepository[User]):
                 .like(f"%{q}%")
             )
 
-        query = query.order_by(User.id.desc()).slice(start, end)
-        return (await self.session.execute(query)).scalars().all()
+        return query
     
+    async def get_users_by_fullname(
+            self,
+            birthdate: date = None,
+            only_verified: bool = False,
+            location_id: int = None,
+            q: str = None,
+            start: int = None,
+            end: int = None,
+            desc: bool = True
+    ) -> Sequence[User | None]:
+        query = alch.select(User).options(
+            selectinload(User.applicant),
+            selectinload(User.employer),
+            selectinload(User.edu_worker)
+        )
+
+        query = await self._get_users_by_fullname_query(
+            query=query,
+            birthdate=birthdate,
+            only_verified=only_verified,
+            location_id=location_id,
+            q=q
+        )
+
+        if desc:
+            query = query.order_by(User.id.desc())
+        else:
+            query = query.order_by(User.id.asc())
+
+        query = query.slice(start, end)
+        return (await self.session.execute(query)).scalars().all()
+
+    async def count_users_by_fullname(
+            self,
+            birthdate: date = None,
+            only_verified: bool = False,
+            location_id: int = None,
+            q: str = None
+    ) -> int:
+        query = alch.select(alch.func.count()).select_from(User)
+        query = await self._get_users_by_fullname_query(
+            query=query,
+            birthdate=birthdate,
+            only_verified=only_verified,
+            location_id=location_id,
+            q=q
+        )
+
+        result = await self.session.execute(query)
+        return result.scalar()
+
     async def get_applicant_by_id(
             self,
             edu_institution_id: int,
@@ -95,33 +153,6 @@ class UserRepository(CommonRepository[User]):
 
         return (await self.session.execute(query)).scalar()
 
-    async def _get_applicants_by_fullname_query(
-            self,
-            query: alch.Select,
-            birthdate: date = None,
-            only_verified: bool = False,
-            location_id: int = None,
-            q: str = None,
-            start: int = None,
-            end: int = None
-    ) -> alch.Select:
-        if birthdate:
-            query = query.where(User.birthdate == birthdate)
-
-        if only_verified:
-            query = query.where(User.is_verified == True)
-
-        if location_id is not None:
-            query = query.where(User.location_id == location_id)
-
-        if q:
-            query = query.where(
-                alch.func.concat_ws(' ', User.surname, User.name, User.last_name)
-                .like(f"%{q}%")
-            )
-
-        return query
-
     async def get_applicants_by_fullname(
             self,
             edu_institution_id: int,
@@ -137,12 +168,12 @@ class UserRepository(CommonRepository[User]):
             Applicant.edu_institution_id == edu_institution_id
         )
 
-        query = await self._get_applicants_by_fullname_query(
+        query = await self._get_users_by_fullname_query(
             query=query,
             birthdate=birthdate,
             only_verified=only_verified,
             location_id=location_id,
-            q=q, start=start, end=end
+            q=q
         )
 
         query = (
@@ -170,7 +201,7 @@ class UserRepository(CommonRepository[User]):
             Applicant.edu_institution_id == edu_institution_id
         )
 
-        query = await self._get_applicants_by_fullname_query(
+        query = await self._get_users_by_fullname_query(
             query=query,
             birthdate=birthdate,
             only_verified=only_verified,

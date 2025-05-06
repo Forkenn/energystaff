@@ -2,15 +2,21 @@ from typing import Sequence
 
 from src.core.services.common import CommonService
 from src.core.repositories.user import UserRepository
-from src.core.schemas.common import SBaseQueryBody
 from src.exceptions import NotFoundException
 from src.users.models import User
-from src.users.schemas import SUserEdit, SApplicantsReadQuery
+from src.users.schemas import (
+    SUserEdit, SApplicantsReadQuery, SUsersReadQuery, SUsersFilteredQuery
+)
 
 
 class UserService(CommonService[UserRepository]):
     def __init__(self, user_repo: UserRepository):
         super().__init__(user_repo)
+
+    async def get_full_by_id(self, id: int) -> User:
+        user = await self.repository.get(id)
+        await self.repository.refresh_fields(user)
+        return user
 
     async def refresh_fields(self, user: User) -> None:
         await self.repository.refresh_fields(user)
@@ -32,9 +38,29 @@ class UserService(CommonService[UserRepository]):
         return data
     
     async def get_users_by_fullname(
-            self, data: SBaseQueryBody
+            self, data: SUsersReadQuery
     ) -> Sequence[User | None]:
-        data = await self.repository.get_users_by_fullname(data.start, data.end, data.q)
+        data = await self.repository.get_users_by_fullname(
+            birthdate=data.birthdate,
+            only_verified=data.only_verified,
+            location_id=data.location_id,
+            q=data.q,
+            start=data.start,
+            end=data.end,
+            desc=data.desc
+        )
+        return data
+    
+    async def count_users_by_fullname(
+            self, data: SUsersFilteredQuery
+    ) -> int:
+        data = await self.repository.count_users_by_fullname(
+            birthdate=data.birthdate,
+            only_verified=data.only_verified,
+            location_id=data.location_id,
+            q=data.q
+        )
+
         return data
     
     async def get_applicant_by_id(self, user: User, id: int) -> User:

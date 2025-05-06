@@ -10,7 +10,8 @@ from src.auth.roles import SystemRole, RoleManager
 from src.users.models import User
 from src.users.schemas import (
     SUserReadFull, SUserEdit, SUsersPreview, SApplicantsPreview,
-    SApplicantsReadQuery, SApplicantsFilteredQuery, SApplicantPreview
+    SApplicantsReadQuery, SApplicantsFilteredQuery, SApplicantPreview,
+    SUsersFilteredQuery, SUsersReadQuery, SUserPreview
 )
 
 router = APIRouter(prefix='/users', tags=['Users'])
@@ -35,13 +36,33 @@ async def edit_current_user(
     return user
 
 @router.get('', responses={**openapi_400, **openapi_401, **openapi_403})
-async def search_users(
-        data: SBaseQueryBody = Depends(),
+async def get_users(
+        data: SUsersReadQuery = Depends(),
         user: User = Depends(current_superuser),
         user_service: UserService = Depends(get_user_service)
 ) -> SUsersPreview:
     users = await user_service.get_users_by_fullname(data)
     return {'count': len(users), 'items': users}
+
+@router.get('/count', responses={**openapi_400, **openapi_401, **openapi_403})
+async def get_users_count(
+        data: SUsersFilteredQuery = Depends(),
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+) -> SBaseQueryCountResponse:
+    count = await user_service.count_users_by_fullname(data)
+    return {'count': count}
+
+@router.get('/{id}', responses={
+    **openapi_400, **openapi_401, **openapi_403, **openapi_404
+})
+async def get_user_by_id(
+        id: int,
+        user: User = Depends(current_superuser),
+        user_service: UserService = Depends(get_user_service)
+) -> SUserPreview:
+    data = await user_service.get_full_by_id(id)
+    return data
 
 @router.delete('/{id}', responses={**openapi_204})
 async def delete_user_by_id(
