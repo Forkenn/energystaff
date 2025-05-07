@@ -20,6 +20,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  disabled: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -85,6 +89,7 @@ const selectObject = (item) => {
       v-model="searchQuery"
       @input="onSearchInput"
       :title="searchQuery"
+      :disabled="disabled"
     >
     <ul class="dropdown-menu">
       <li
