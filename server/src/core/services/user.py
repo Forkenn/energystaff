@@ -24,6 +24,9 @@ class UserService(CommonService[UserRepository]):
 
     async def get_full_by_id(self, id: int) -> User:
         user = await self.repository.get(id)
+        if not user:
+            raise NotFoundException()
+
         await self.repository.refresh_fields(user)
         return user
 
