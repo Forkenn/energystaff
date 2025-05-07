@@ -297,6 +297,7 @@ onMounted(async() => {
                     v-model="selectedLocation"
                     :disabled="filters.searchBy != 'name'"
                   />
+                  <button type="button" class="btn btn-primary sys-btn-288" @click="beginSearch" style="margin-bottom: 0; margin-top: 24px;">Применить</button>
                 </div>
               </div>
             </div>
