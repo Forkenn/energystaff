@@ -1,5 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
+import CompaniesService from '@/services/companies.service';
 
 const props = defineProps({
     company: {
@@ -10,11 +11,21 @@ const props = defineProps({
 
 const router = useRouter()
 
+const goToCompany = () => {
+    router.push({ name: 'company_page', params: { id: props.company.id } })
+}
+
 const verifyCompany = async() => {
+    try {
+        await CompaniesService.verifyCompany(props.company.id);
+    } catch(err) {}
     router.go(0);
 }
 
 const resetCompany = async() => {
+    try {
+        await CompaniesService.unverifyCompany(props.company.id);
+    } catch(err) {}
     router.go(0);
 }
 
@@ -22,7 +33,7 @@ const resetCompany = async() => {
 
 <template>
   <div class="company-card">
-    <div class="card-wrapper" style="align-items: center;">
+    <div class="card-wrapper" style="align-items: center;" @click="goToCompany">
         <h1>
             {{ company.name }}
             <img v-if="company.is_verified" src="../../assets/icons/users/User_verified.svg">
@@ -31,9 +42,18 @@ const resetCompany = async() => {
         <div class="company-info">
             {{ "ID: " + company.id }}
         </div>
+        <div class="company-info">
+            {{ "Дата регистрации: " + (company.registration_date || "не указано") }}
+        </div>
+        <div class="company-info">
+            {{ "Адрес регистрации: " + (company.address || "не указано") }}
+        </div>
+        <div class="company-info">
+            {{ "ИНН: " + (company.inn || "не указано") }}
+        </div>
 
-        <button v-if="company.is_verified" type="button" class="btn btn-danger sys-btn-288" @click="resetCompany">Сбросить</button>
-        <button v-else type="button" class="btn btn-success sys-btn-288" @click="verifyCompany">Подтвердить</button>
+        <button v-if="company.is_verified" type="button" class="btn btn-danger sys-btn-288" @click.stop="resetCompany">Сбросить</button>
+        <button v-else type="button" class="btn btn-success sys-btn-288" @click.stop="verifyCompany">Подтвердить</button>
     </div>
   </div>
 </template>
@@ -53,7 +73,7 @@ const resetCompany = async() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.user-card:hover {
+.company-card:hover {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
   transform: translateY(-4px);
 }
@@ -78,9 +98,10 @@ const resetCompany = async() => {
 .card-wrapper button {
     margin-right: 24px;
     margin-top: 24px;
+    margin-bottom: 0;
 }
 
-.card-wrapper .user-info {
+.card-wrapper .company-info {
     color: #343434;
     font-size: 20px;
     font-weight: 400;

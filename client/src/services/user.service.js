@@ -180,6 +180,134 @@ class UserService {
           }
         })
     }
+    async activateUser(id) {
+      return await instance
+        .post(`/users/${id}/activate`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+    async deactivateUser(id) {
+      return await instance
+        .post(`/users/${id}/deactivate`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+    async verifyApplicant(id) {
+      return await instance
+        .post(`/users/applicants/${id}/verify`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+    async unverifyApplicant(id) {
+      return await instance
+        .post(`/users/applicants/${id}/unverify`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+    async verifyEmployer(id) {
+      return await instance
+        .post(`/users/employers/${id}/verify`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+    async unverifyEmployer(id) {
+      return await instance
+        .post(`/users/employers/${id}/unverify`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+    async verifyEduWorker(id) {
+      return await instance
+        .post(`/users/edu-workers/${id}/verify`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+    async unverifyEduWorker(id) {
+      return await instance
+        .post(`/users/edu-workers/${id}/unverify`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
   }
 
   export default new UserService()

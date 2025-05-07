@@ -105,6 +105,38 @@ class CompaniesService {
         throw err;
       })
   }
+  async verifyCompany(id) {
+    return await instance
+      .post(`/companies/${id}/verify`)
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async unverifyCompany(id) {
+    return await instance
+      .post(`/companies/${id}/unverify`)
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
 }
   
   export default new CompaniesService()

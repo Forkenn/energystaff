@@ -1,5 +1,7 @@
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import UserService from '@/services/user.service';
 
 const props = defineProps({
     user: {
@@ -10,19 +12,52 @@ const props = defineProps({
 
 const router = useRouter()
 
+const userRole = computed(() => {
+    if(props.user.is_superuser)
+        return 'Администратор'
+    if(props.user.is_applicant)
+        return 'Соискатель'
+    if(props.user.is_employer)
+        return 'Работодатель'
+    if(props.user.is_edu)
+        return 'Работник ОУ'
+})
+
 const verifyUser = async() => {
+    try {
+        if(props.user.is_applicant)
+            await UserService.verifyApplicant(props.user.id)
+        else if(props.user.is_employer)
+            await UserService.verifyEmployer(props.user.id)
+        else if(props.user.is_edu)
+            await UserService.verifyEduWorker(props.user.id)
+    } catch(err) {}
     router.go(0);
 }
 
 const resetUser = async() => {
+    try {
+        if(props.user.is_applicant)
+            await UserService.unverifyApplicant(props.user.id);
+        else if(props.user.is_employer)
+            await UserService.unverifyEmployer(props.user.id);
+        else if(props.user.is_edu)
+            await UserService.unverifyEduWorker(props.user.id);
+    } catch(err) {}
     router.go(0);
 }
 
 const activateUser = async() => {
+    try {
+        await UserService.activateUser(props.user.id);
+    } catch(err) {}
     router.go(0);
 }
 
 const deactivateUser = async() => {
+    try {
+        await UserService.deactivateUser(props.user.id);
+    } catch(err) {}
     router.go(0);
 }
 
@@ -37,7 +72,10 @@ const deactivateUser = async() => {
             <img v-else src="../../assets/icons/users/User_unverified.svg">
         </h1>
         <div class="user-info">
-            {{ "ID: " + user.id }}, {{ user.location?.name }}, {{ user.birthdate }}, {{ user.sex ? "Женский" : "Мужской" }}
+            {{ "ID: " + user.id + " | " + (user.location?.name || 'без города') + " | " + (user.birthdate || 'без д.р.') + " | " + (user.sex ? "Женский" : "Мужской") }}
+        </div>
+        <div class="user-info">
+            {{ userRole }}
         </div>
 
         <button v-if="user.is_verified" type="button" class="btn btn-danger sys-btn-288" @click="resetUser">Сбросить</button>
@@ -88,6 +126,7 @@ const deactivateUser = async() => {
 .card-wrapper button {
     margin-right: 24px;
     margin-top: 24px;
+    margin-bottom: 0;
 }
 
 .card-wrapper .user-info {
