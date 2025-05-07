@@ -18,15 +18,15 @@ const goToCompany = () => {
 const verifyCompany = async() => {
     try {
         await CompaniesService.verifyCompany(props.company.id);
+        props.company.is_verified = true;
     } catch(err) {}
-    router.go(0);
 }
 
 const resetCompany = async() => {
     try {
         await CompaniesService.unverifyCompany(props.company.id);
+        props.company.is_verified = false;
     } catch(err) {}
-    router.go(0);
 }
 
 </script>

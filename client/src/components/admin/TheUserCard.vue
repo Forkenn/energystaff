@@ -31,8 +31,8 @@ const verifyUser = async() => {
             await UserService.verifyEmployer(props.user.id)
         else if(props.user.is_edu)
             await UserService.verifyEduWorker(props.user.id)
+        props.user.is_verified = true;
     } catch(err) {}
-    router.go(0);
 }
 
 const resetUser = async() => {
@@ -43,22 +43,22 @@ const resetUser = async() => {
             await UserService.unverifyEmployer(props.user.id);
         else if(props.user.is_edu)
             await UserService.unverifyEduWorker(props.user.id);
+        props.user.is_verified = false;
     } catch(err) {}
-    router.go(0);
 }
 
 const activateUser = async() => {
     try {
         await UserService.activateUser(props.user.id);
+        props.user.is_active = true;
     } catch(err) {}
-    router.go(0);
 }
 
 const deactivateUser = async() => {
     try {
         await UserService.deactivateUser(props.user.id);
+        props.user.is_active = false;
     } catch(err) {}
-    router.go(0);
 }
 
 </script>
