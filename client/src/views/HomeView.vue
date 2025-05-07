@@ -69,7 +69,6 @@ const getVacanciesRelations = async() => {
       serverFormats.value = response.data.items;
       response = await VacanciesService.getVacanciesTypes();
       serverTypes.value = response.data.items;
-      dataLoading.value = false;
     } catch(err) {
     }
 }
@@ -99,6 +98,15 @@ const convertIds = () => {
   filters.value.employment_formats_ids = formatsObj.map(
     formatsObj => formatsObj.id
   );
+}
+
+const convertIdsToObjects = (ids) => {
+  if(ids === null) return []
+
+  return ids.map(id => ({
+    id: parseInt(id),
+    name: ""
+  }));
 }
 
 const prepareFilters = async() => {
@@ -137,18 +145,85 @@ const getVacancies = async() => {
   filters.value.start = (currentPage.value - 1) * perPage;
   filters.value.end = filters.value.start + perPage;
 
-  prepareFilters();
   getVacanciesCount();
   const response = await VacanciesService.getVacancies(filters.value);
   vacancies.value = response.data;
-  console.log(vacancies.value);
 }
 
-watch(() => route.query.page, getVacancies)
+const beginSearch = () => {
+  prepareFilters();
+
+  const query = {
+    q: filters.value.q,
+    sortType: filters.value.sortType,
+    location_id: filters.value.location_id,
+    salary_from: filters.value.salary_from,
+    salary_to: filters.value.salary_to,
+    page: currentPage.value,
+    employment_types_ids: filters.value.employment_types_ids,
+    employment_formats_ids: filters.value.employment_formats_ids,
+    employment_schedules_ids: filters.value.employment_schedules_ids
+  }
+
+  const cleanedQuery = Object.fromEntries(
+    Object.entries(query).filter(([_, v]) => v != null)
+  );
+
+  router.push({ name: 'home', query: cleanedQuery })
+  getVacancies();
+}
+
+const parseFilters = async() => {
+  filters.value.q = route.query.q || null;
+  filters.value.sortType = route.query.sortType || "dateDesc";
+  filters.value.salary_from = route.query.salary_from || null;
+  filters.value.salary_to = route.query.salary_to || null;
+  filters.value.employment_types_ids = route.query.employment_types_ids || null;
+  filters.value.employment_formats_ids = route.query.employment_formats_ids || null;
+  filters.value.employment_schedules_ids = route.query.employment_schedules_ids || null;
+
+  selectedTypes.value = convertIdsToObjects(filters.value.employment_types_ids);
+  selectedFormats.value = convertIdsToObjects(filters.value.employment_formats_ids);
+  selectedSchedules.value = convertIdsToObjects(filters.value.employment_schedules_ids);
+
+  const location_id = route.query.location_id || null;
+  if(location_id && parseInt(location_id) != selectedLocation.value?.id) {
+    try {
+      const response = await ToolsService.getLocationById(location_id)
+      selectedLocation.value = response.data;
+      filters.value.location_id = location_id;
+    } catch(err) {}
+  }
+
+  if(location_id === null) {
+    selectedLocation.value = null;
+    filters.value.location_id = null;
+  }
+  setTimeout(() => {
+    dataLoading.value = false;
+  }, 0);
+}
+
+watch(() => route.query, async() => {
+  dataLoading.value = true;
+  await parseFilters();
+  //prepareFilters();
+  //getVacancies();
+});
+
+//watch(() => route.query.page, getVacancies)
+watch(dataLoading, (newVal) => {
+  if (!newVal) {
+    prepareFilters();
+    getVacancies();
+  }
+});
 
 onMounted(async() => {
-  getVacanciesRelations();
-  getVacancies();
+  await getVacanciesRelations();
+  await parseFilters();
+  //prepareFilters();
+  //getVacancies();
 });
 
 </script>
@@ -164,7 +239,7 @@ onMounted(async() => {
               <input type="text" class="form-control flex-grow-1 sys-input-flex" id="InputSearch" placeholder="Профессия, должность или компания" v-model="filters.q">
             </div>
             <div class="col-auto">
-              <button type="button" class="btn btn-primary sys-btn-150" @click="getVacancies">Поиск</button>
+              <button type="button" class="btn btn-primary sys-btn-150" @click="beginSearch">Поиск</button>
             </div>
           </div>
         </div>
@@ -271,6 +346,7 @@ onMounted(async() => {
                     :isLoading="dataLoading"
                     placeholder="График работы"
                   />
+                  <button type="button" class="btn btn-primary sys-btn-288" @click="beginSearch" style="margin-bottom: 0;">Применить</button>
                 </div>
               </div>
             </div>
