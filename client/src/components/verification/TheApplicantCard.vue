@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
+import UserService from '@/services/user.service';
+
 const props = defineProps({
     user: {
         type: Object,
@@ -22,7 +24,11 @@ const userEduInfo = computed(() => {
         return userEduLevel.name + " (завершено)"
     }
 
-    return userEduLevel.name + " (в процессе)"
+    if (props.user.applicant?.edu_status == "progress") {
+        return userEduLevel.name + " (в процессе)"
+    }
+
+    return "без образования"
 })
 
 const router = useRouter()
@@ -32,11 +38,17 @@ const editRecommendation = () => {
 }
 
 const verifyUser = async() => {
-    router.go(0);
+    try {
+        await UserService.verifyApplicant(props.user.id);
+        props.user.is_verified = true;
+    } catch(err) {}
 }
 
 const resetUser = async() => {
-    router.go(0);
+    try {
+        await UserService.unverifyApplicant(props.user.id);
+        props.user.is_verified = false;
+    } catch(err) {}
 }
 
 </script>
@@ -50,10 +62,10 @@ const resetUser = async() => {
             <img v-else src="../../assets/icons/users/User_unverified.svg">
         </h1>
         <div class="user-info">
-            {{ "ID: " + user.id }}, {{ user.location?.name }}, {{ user.birthdate }}, {{ user.sex ? "Женский" : "Мужской" }}
+            {{ "ID: " + user.id + " | " + (user.location?.name || 'без города') + " | " + (user.birthdate || 'без д.р.') + " | " + (user.sex ? "Женский" : "Мужской") }}
         </div>
         <div class="user-info">
-            {{ "Зачётная книжка: " + user.applicant?.edu_number }}, {{ userEduInfo }}
+            {{ "Зачётная книжка: " + (user.applicant?.edu_number || 'не указано') + " | " + userEduInfo }}
         </div>
         <button v-if="user.is_verified" type="button" class="btn btn-danger sys-btn-288" @click="resetUser">Сбросить</button>
         <button v-else type="button" class="btn btn-success sys-btn-288" @click="verifyUser">Подтвердить</button>
@@ -102,6 +114,7 @@ const resetUser = async() => {
 .card-wrapper button {
     margin-right: 24px;
     margin-top: 24px;
+    margin-bottom: 0;
 }
 
 .card-wrapper .user-info {
