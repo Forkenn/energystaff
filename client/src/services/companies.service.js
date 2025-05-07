@@ -40,13 +40,56 @@ class CompaniesService {
         throw err;
       })
   }
+  async getCompanyByInn(inn) {
+    return await instance
+      .get(`/companies/by-inn/${inn}`)
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
   async getCompanies(data) {
     return await instance
-      .get(`/companies/search`, {
+      .get(`/companies`, {
         params: {
           q: data.q,
           start: data.start,
-          end: data.end 
+          end: data.end,
+          registration_date: data.registration_date,
+          location_id: data.location_id,
+          only_verified: data.only_verified,
+          desc: data.desc
+        }
+      })
+      .then((response) => response)
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data)
+          console.log(err.response.status)
+        } else if (err.request) {
+          console.log(err.request)
+        } else {
+          console.log('Error', err.message)
+        }
+        throw err;
+      })
+  }
+  async getCompaniesCount(data) {
+    return await instance
+      .get(`/companies/count`, {
+        params: {
+          q: data.q,
+          registration_date: data.registration_date,
+          location_id: data.location_id,
+          only_verified: data.only_verified
         }
       })
       .then((response) => response)
