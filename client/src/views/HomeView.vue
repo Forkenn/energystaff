@@ -169,8 +169,7 @@ const beginSearch = () => {
     Object.entries(query).filter(([_, v]) => v != null)
   );
 
-  router.push({ name: 'home', query: cleanedQuery })
-  getVacancies();
+  router.push({ name: 'home', query: cleanedQuery });
 }
 
 const parseFilters = async() => {
