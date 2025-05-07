@@ -19,6 +19,7 @@ services:
       context: ./server/
     volumes:
       - ./server/:/src/app
+      - ./client/src/assets/storage:/src/app/storage
     command: sh -c "sleep 15 && alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --reload"
     links:
       - energystaff_postgres
