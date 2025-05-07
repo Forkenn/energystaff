@@ -47,7 +47,11 @@ class UserService {
           params: {
             q: data.q,
             start: data.start,
-            end: data.end 
+            end: data.end,
+            birthdate: data.birthdate,
+            location_id: data.location_id,
+            only_verified: data.only_verified,
+            desc: data.desc
           }
         })
         .then((response) => response)
@@ -66,9 +70,42 @@ class UserService {
       return await instance
         .get('/users/applicants/count', {
           params: {
-            q: data.q
+            q: data.q,
+            birthdate: data.birthdate,
+            location_id: data.location_id,
+            only_verified: data.only_verified,
           }
         })
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+              console.log(err.response.data)
+              console.log(err.response.status)
+          } else if (err.request) {
+              console.log(err.request)
+          } else {
+              console.log('Error', err.message)
+          }
+        })
+    }
+    async getApplicantById(id) {
+      return await instance
+        .get(`/users/applicants/${id}`)
+        .then((response) => response)
+        .catch((err) => {
+          if (err.response) {
+              console.log(err.response.data)
+              console.log(err.response.status)
+          } else if (err.request) {
+              console.log(err.request)
+          } else {
+              console.log('Error', err.message)
+          }
+        })
+    }
+    async getApplicantByEdu(edu_num) {
+      return await instance
+        .get(`/users/applicants/by-edu-id/${edu_num}`)
         .then((response) => response)
         .catch((err) => {
           if (err.response) {
