@@ -34,6 +34,18 @@ function getIconComponent(filename) {
 function formatSize(bytes) {
 	return `${(bytes / 1024 / 1024).toFixed(2)} MB`
 }
+
+const downloadFile = (realName, downloadName) => {
+  const fileUrl = `${import.meta.env.BASE_URL}src/assets/storage/proof_documents/${realName}`
+
+  const link = document.createElement('a');
+  link.href = fileUrl;
+  link.download = downloadName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 </script>
 
 <template>
@@ -56,10 +68,11 @@ function formatSize(bytes) {
 			</div>
 
 			<a
-				:href="`/src/assets/uploads/${file.real_name}`"
+				href="#"
 				download
 				class="text-decoration-none"
 				title="Скачать"
+				@click.prevent="downloadFile(file.real_name, file.download_name)"
 			>
 				<DownloadIcon style="width: 20px; height: 20px; fill: #7e7e7e;" />
 			</a>
