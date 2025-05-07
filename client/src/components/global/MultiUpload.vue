@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineEmits } from 'vue';
+import { ref, watch, defineEmits, defineAsyncComponent } from 'vue';
 
 const props = defineProps({
   isLoading: {
@@ -12,8 +12,10 @@ const props = defineProps({
   },
 });
 
+const DownloadIcon = defineAsyncComponent(() => import('../icons/DownloadIcon.vue'))
+
 const emit = defineEmits(['update:modelValue']);
-const accept = '.rar,.zip,.doc,.docx,.pdf,.jpg';
+const accept = '.doc,.docx,.pdf,.jpg';
 const maxSize = 10 * 1024 * 1024; // 10 MB
 const fileInput = ref(null);
 const files = ref([]);
@@ -93,6 +95,18 @@ function retryUpload(file) {
 function removeFile(index) {
   files.value.splice(index, 1);
 }
+
+const downloadFile = (realName, downloadName) => {
+  const fileUrl = `${import.meta.env.BASE_URL}src/assets/storage/proof_documents/${realName}`
+
+  const link = document.createElement('a');
+  link.href = fileUrl;
+  link.download = downloadName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 </script>
 
 <template>
@@ -109,7 +123,7 @@ function removeFile(index) {
       <p>
         Нажмите или перетащите файлы в эту область.<br />
         <span class="hint">
-          .rar .zip .doc .docx .pdf .jpg не более 10 мб
+          .doc .docx .pdf .jpg не более 10 мб
         </span>
       </p>
     </div>
@@ -121,7 +135,17 @@ function removeFile(index) {
         class="file-item"
       >
         <div class="file-info">
-          <p class="file-name">{{ file.download_name }}</p>
+          <p
+            v-if="file.real_name"
+            class="file-name downloadble"
+            @click="downloadFile(file.real_name, file.download_name)"
+          >
+            {{ file.download_name }}
+            <DownloadIcon style="width: 16px; height: 16px; fill: #7e7e7e;" />
+          </p>
+          <p v-else class="file-name">
+            {{ file.download_name }}
+          </p>
           <div class="progress-bar">
             <div
               class="progress"
@@ -147,7 +171,7 @@ function removeFile(index) {
 .upload-container {
   max-width: 900px;
   margin-bottom: 24px;
-  font-family: sans-serif;
+  font-family: "Montserrat";
 }
 
 .upload-dropzone {
@@ -194,6 +218,15 @@ function removeFile(index) {
 .file-name {
   font-weight: 500;
   margin-bottom: 0.25rem;
+}
+
+.downloadble {
+  cursor: pointer;
+  color: gray;
+}
+
+.downloadble:hover {
+  color: black;
 }
 
 .progress-bar {
