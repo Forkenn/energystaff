@@ -15,6 +15,31 @@ const companyId = route.params.id;
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
 
+const verifyCompany = async() => {
+  try {
+      await CompaniesService.verifyCompany(companyId);
+  } catch(err) {}
+  router.go(0);
+}
+
+const resetCompany = async() => {
+  try {
+      await CompaniesService.unverifyCompany(companyId);
+  } catch(err) {}
+  router.go(-1);
+}
+
+const deleteCompany = async() => {
+  try {
+      await CompaniesService.deleteCompany(companyId);
+  } catch(err) {}
+  router.go(0);
+}
+
+const goToEditor = async() => {
+  router.push({ name: 'company_editor', query: { id: companyId } })
+}
+
 onMounted(async() => {
   try {
 		const response = await CompaniesService.getCompany(companyId);
@@ -38,27 +63,27 @@ onMounted(async() => {
           </h1>
           <p>
             Дата регистрации: 
-            <span>{{ company.registration_date }}</span>
+            <span>{{ company.registration_date || "не указано" }}</span>
           </p>
           <p>
             Адрес регистрации: 
-            <span>{{ company.address }}</span>
+            <span>{{ company.address || "не указано" }}</span>
           </p>
           <p>
-            ИНН: 
-            <span>{{ company.inn }}</span>
+            ИНН:
+            <span>{{ company.inn || "не указано" }}</span>
           </p>
           <div class="company-description">
             <h1 class="mt-5 mb-4">Описание</h1>
             <p>
-              {{ company.description }}
+              {{ company.description || "Не указано" }}
             </p>
           </div>
           <div class="control-buttons mt-5">
-            <button v-if="user.data.is_superuser && !company.is_verified" class="btn btn-primary sys-btn-288">Подтвердить</button>
-            <button v-if="user.data.is_superuser && company.is_verified" class="btn btn-primary sys-btn-288">Сбросить</button>
-            <button v-if="user.data.is_superuser" class="btn btn-danger sys-btn-288">Удалить</button>
-					  <button v-else-if="user.data.employer?.company_id == company.id" class="btn btn-primary sys-btn-288">Редактировать</button>
+            <button v-if="user.data.is_superuser && !company.is_verified" class="btn btn-primary sys-btn-288" @click="verifyCompany">Подтвердить</button>
+            <button v-if="user.data.is_superuser && company.is_verified" class="btn btn-primary sys-btn-288" @click="resetCompany">Сбросить</button>
+            <button v-if="user.data.is_superuser" class="btn btn-danger sys-btn-288" @click="deleteCompany">Удалить</button>
+					  <button v-else-if="user.data.employer?.company_id == company.id" class="btn btn-primary sys-btn-288" @click="goToEditor">Редактировать</button>
           </div>
         </div>
 			</div>
