@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 
+import TheModal from '../global/TheModal.vue';
+
 import NegotiationsService from '@/services/negotiations.service';
 
 const props = defineProps({
@@ -13,6 +15,8 @@ const router = useRouter();
 
 const userStore = useUserStore();
 const user = computed(() => userStore.user.data);
+
+const showModalContacts = ref(false)
 
 const negotiationData = ref({
     negotiation_id: props.negotiation.id,
@@ -70,7 +74,10 @@ const revokeAndReject = async() => {
 }
 
 const goToResume = () => {
-  router.push({ name: 'resume_page', query: {id: props.negotiation.applicant_id }})
+  if(user.value.is_employer)
+    router.push({ name: 'resume_page', query: {id: props.negotiation.applicant_id }})
+  else
+  router.push({ name: 'vacancy_page', params: { id: props.negotiation.vacancy_id } })
 }
 
 </script>
@@ -99,14 +106,26 @@ const goToResume = () => {
         <div v-if="user.is_employer" class="city">
             {{ negotiation.user_location }}
         </div>
-        <button v-if="user.is_applicant && negotiation.status === 'accepted'" class="btn btn-primary sys-btn-288" @click="showContacts">Контакты</button>
+        <button v-if="user.is_applicant && negotiation.status === 'accepted'" class="btn btn-primary sys-btn-288" @click.stop="showModalContacts = true">Контакты</button>
         <button v-if="user.is_applicant && ['accepted', 'pending'].includes(negotiation.status)" class="btn btn-primary sys-btn-288" @click="deleteNegotiation">Отозвать и удалить</button>
-        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click="invite">Пригласить</button>
-        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click="reject">Отказать</button>
-        <button v-if="user.is_employer && negotiation.status === 'accepted'" class="btn btn-primary sys-btn-288" @click="revokeAndReject">Отозвать и отказать</button>
-        <button v-if="user.is_employer && negotiation.status === 'rejected'" class="btn btn-primary sys-btn-288" @click="revokeAndInvite">Отозвать и пригласить</button>
+        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click.stop="invite">Пригласить</button>
+        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click.stop="reject">Отказать</button>
+        <button v-if="user.is_employer && negotiation.status === 'accepted'" class="btn btn-primary sys-btn-288" @click.stop="revokeAndReject">Отозвать и отказать</button>
+        <button v-if="user.is_employer && negotiation.status === 'rejected'" class="btn btn-primary sys-btn-288" @click,stop="revokeAndInvite">Отозвать и пригласить</button>
     </div>
   </div>
+
+  <TheModal v-if="showModalContacts" @close="showModalContacts = false">
+    <template #header>
+      <h5 class="modal-title">Сообщение от работодателя</h5>
+    </template>
+
+    <p>{{ negotiationData.desctiption }}</p>
+
+    <template #footer>
+      <button class="btn btn-secondary" @click="showModalContacts = false">Закрыть</button>
+    </template>
+  </TheModal>
 </template>
 
 <style scoped>
@@ -169,6 +188,11 @@ const goToResume = () => {
     font-size: 20px;
     font-weight: 400;
     margin-bottom: 34px;
+}
+
+.modal-title {
+  font-weight: 700 !important;
+  color: #343434 !important;
 }
 
 </style>
