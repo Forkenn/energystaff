@@ -8,6 +8,9 @@ from sqlalchemy.ext.asyncio import (
 
 from src.database import Base
 
+from src.core.repositories.user import UserRepository
+from src.core.services.user import UserService
+
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 engine = create_async_engine(
@@ -28,3 +31,11 @@ async def db_session():
         yield session
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest_asyncio.fixture
+async def user_service(db_session: AsyncSession):
+    user_repo = UserRepository(session=db_session)
+    user_service = UserService(user_repo=user_repo)
+
+    yield user_service
