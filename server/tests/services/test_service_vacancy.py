@@ -3,7 +3,7 @@ import pytest_asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.exceptions import NotAllowedException
+from src.exceptions import NotAllowedException, NotFoundException
 from src.users.models import User, Employer
 from src.vacancies.models import Vacancy, EmploymentFormat, EmploymentSchedule, EmploymentType
 from src.vacancies.schemas import SVacancyCreate
@@ -227,3 +227,24 @@ async def test_update_vacancy_user(db_session: AsyncSession, employer: User, vac
 
     with pytest.raises(NotAllowedException):
         await vacancy_service.update_vacancy(2, vacancy.id, data)
+
+
+@pytest.mark.asyncio
+async def test_update_vacancy_not_found(db_session: AsyncSession, employer: User, vacancy_service: VacancyService):
+    location = Location(name='Talmberg')
+    db_session.add(location)
+    await db_session.commit()
+    vacancy = await create_vacancy(db_session, employer, location)
+
+    data = SVacancyCreate(
+        position='position_test_new',
+        specialization='position_test_new',
+        description='position_test_new',
+        vacancy_formats_ids=[vacancy.vacancy_formats[0].id],
+        vacancy_types_ids=[vacancy.vacancy_types[0].id],
+        vacancy_schedules_ids=[vacancy.vacancy_schedules[0].id],
+        work_hours='work_hours_test_new',
+    )
+
+    with pytest.raises(NotFoundException):
+        await vacancy_service.update_vacancy(2, 52, data)
