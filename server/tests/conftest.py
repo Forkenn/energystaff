@@ -25,6 +25,8 @@ from src.core.repositories.recommendation import RecommendationRepository
 from src.core.services.recommendation import RecommendationService
 from src.core.repositories.storage import StorageRepository
 from src.core.services.storage import StorageService
+from src.core.repositories.resume import ResumeRepository
+from src.core.services.resume import ResumeService
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -180,3 +182,11 @@ async def recommendation_service(storage_service: StorageService):
     )
 
     yield recommendation_service
+
+
+@pytest_asyncio.fixture
+async def resume_service(db_session: AsyncSession):
+    resume_repo = ResumeRepository(session=db_session)
+    resume_service = ResumeService(resume_repo=resume_repo)
+
+    yield resume_service
