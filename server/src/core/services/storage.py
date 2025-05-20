@@ -46,10 +46,10 @@ class StorageService(CommonService[StorageRepository]):
     
     async def delete_files(self, dir_path: Path, filenames: list[str]) -> None:
         for name in filenames:
-            await self.delete_file(STORAGE_PATH / dir_path, name)
+            await self.delete_file(dir_path, name)
 
     async def delete_file(self, dir_path: Path, filename: str) -> None:
-        file = dir_path / filename
+        file = STORAGE_PATH / dir_path / filename
         try:
             file.unlink()
         except FileNotFoundError:
