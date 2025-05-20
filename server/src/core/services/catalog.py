@@ -29,14 +29,14 @@ class CatalogService(CommonService[CatalogRepository], Generic[T]):
         new_item = await self.repository.create(name)
         return new_item
     
-    async def edit_item(self, id: int, name: str):
+    async def edit_item(self, id: int, name: str) -> T:
         if await self.repository.exists_by_name(name):
             raise AlreadyExistException()
         
         item = await self.repository.get(id)
 
         if not item:
-            raise AlreadyExistException()
+            raise NotFoundException()
         
         await self.repository.edit(item, name)
         return item
