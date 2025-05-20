@@ -1,8 +1,6 @@
 import pytest
 import pytest_asyncio
 
-from datetime import date
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.exceptions import NotAllowedException
