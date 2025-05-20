@@ -12,6 +12,8 @@ from src.core.repositories.user import UserRepository
 from src.core.services.user import UserService
 from src.core.repositories.vacancy import VacancyRepository
 from src.core.services.vacancy import VacancyService
+from src.core.repositories.company import CompanyRepository
+from src.core.services.company import CompanyService
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -49,3 +51,11 @@ async def vacancy_service(db_session: AsyncSession):
     vacancy_service = VacancyService(vacancy_repo=vacancy_repo)
 
     yield vacancy_service
+
+
+@pytest_asyncio.fixture
+async def company_service(db_session: AsyncSession):
+    company_repo = CompanyRepository(session=db_session)
+    company_service = CompanyService(company_repo=company_repo)
+
+    yield company_service
