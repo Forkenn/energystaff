@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import (
 from src.database import Base
 from src.users.models import User, Applicant, Employer, EduWorker
 from src.companies.models import Company
-from src.tools.models import EduInstitution
+from src.tools.models import EduInstitution, Location
 
 from src.core.repositories.user import UserRepository
 from src.core.services.user import UserService
@@ -27,6 +27,8 @@ from src.core.repositories.storage import StorageRepository
 from src.core.services.storage import StorageService
 from src.core.repositories.resume import ResumeRepository
 from src.core.services.resume import ResumeService
+from src.core.repositories.catalog import CatalogRepository
+from src.core.services.catalog import CatalogService
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -190,3 +192,12 @@ async def resume_service(db_session: AsyncSession):
     resume_service = ResumeService(resume_repo=resume_repo)
 
     yield resume_service
+
+
+@pytest_asyncio.fixture
+async def location_service(db_session: AsyncSession):
+    catalog_repo = CatalogRepository(model=Location, session=db_session)
+    location_service = CatalogService(model=Location, catalog_repo=catalog_repo)
+
+    yield location_service
+
