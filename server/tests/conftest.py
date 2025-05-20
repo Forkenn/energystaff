@@ -16,6 +16,10 @@ from src.core.repositories.company import CompanyRepository
 from src.core.services.company import CompanyService
 from src.core.repositories.negotiation import NegotiationRepository
 from src.core.services.negotiation import NegotiationService
+from src.core.repositories.recommendation import RecommendationRepository
+from src.core.services.recommendation import RecommendationService
+from src.core.repositories.storage import StorageRepository
+from src.core.services.storage import StorageService
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -64,11 +68,30 @@ async def company_service(db_session: AsyncSession):
 
 
 @pytest_asyncio.fixture
-async def negotiation_service(db_session: AsyncSession, vacancy_service: VacancyService):
-    negotiation_repo = NegotiationRepository(session=db_session)
+async def negotiation_service(vacancy_service: VacancyService):
+    negotiation_repo = NegotiationRepository(session=vacancy_service.repository.session)
     negotiation_service = NegotiationService(
         negotiation_repo=negotiation_repo,
         vacancy_service=vacancy_service
     )
 
     yield negotiation_service
+
+
+@pytest_asyncio.fixture
+async def storage_service(db_session: AsyncSession):
+    storage_repo = StorageRepository(session=db_session)
+    storage_service = StorageService(storage_repo=storage_repo)
+
+    yield storage_service
+
+
+@pytest_asyncio.fixture
+async def recommendation_service(storage_service: StorageService):
+    recommendation_repo = RecommendationRepository(session=storage_service.repository.session)
+    recommendation_service = RecommendationService(
+        recommendation_repo=recommendation_repo,
+        storage_service=storage_service
+    )
+
+    yield recommendation_service
