@@ -36,7 +36,7 @@ class ResumeService(CommonService[ResumeRepository]):
         return resume
 
     async def create_resume(self, uid: int, data: SResumeCreate):
-        if self.repository.exists_by_uid(uid):
+        if await self.repository.exists_by_uid(uid):
             raise AlreadyExistException()
 
         data_dict = data.model_dump()
