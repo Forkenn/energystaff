@@ -2,11 +2,16 @@ import pytest_asyncio
 
 import sqlalchemy as alch
 
+from datetime import date
+
 from sqlalchemy.ext.asyncio import (
     AsyncSession, create_async_engine, async_sessionmaker
 )
 
 from src.database import Base
+from src.users.models import User, Applicant, Employer, EduWorker
+from src.companies.models import Company
+from src.tools.models import EduInstitution
 
 from src.core.repositories.user import UserRepository
 from src.core.services.user import UserService
@@ -41,6 +46,86 @@ async def db_session():
         yield session
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest_asyncio.fixture
+async def company(db_session: AsyncSession):
+    company = Company(
+        name='CompanyX',
+        registration_date=date(1993, 10, 2),
+        inn='123456789123',
+        address='Test Street, 5',
+        description='Test_description'
+    )
+    db_session.add(company)
+    await db_session.commit()
+
+    yield company
+
+
+@pytest_asyncio.fixture
+async def edu_institution(db_session: AsyncSession):
+    edu = EduInstitution(
+        name='Test University'
+    )
+    db_session.add(edu)
+    await db_session.commit()
+
+    yield edu
+
+
+@pytest_asyncio.fixture
+async def employer(db_session: AsyncSession, company: Company):
+    user = User(
+        email="employer@example.com",
+        surname="Doe",
+        name="John",
+        hashed_password="pwd",
+        is_active=True,
+        is_employer=True
+    )
+
+    user.employer = Employer(company_id=company.id)
+    db_session.add(user)
+    await db_session.commit()
+
+    yield user
+
+
+@pytest_asyncio.fixture
+async def applicant(db_session: AsyncSession):
+    user = User(
+        email="applicant@example.com",
+        surname="Doe",
+        name="John",
+        hashed_password="pwd",
+        is_active=True,
+        is_applicant=True
+    )
+
+    user.applicant = Applicant()
+    db_session.add(user)
+    await db_session.commit()
+
+    yield user
+
+
+@pytest_asyncio.fixture
+async def edu_worker(db_session: AsyncSession, edu_institution: EduInstitution):
+    user = User(
+        email="edu@example.com",
+        surname="Doe",
+        name="John",
+        hashed_password="pwd",
+        is_active=True,
+        is_edu=True
+    )
+
+    user.edu_worker = EduWorker(edu_institution_id=edu_institution.id)
+    db_session.add(user)
+    await db_session.commit()
+
+    yield user
 
 
 @pytest_asyncio.fixture

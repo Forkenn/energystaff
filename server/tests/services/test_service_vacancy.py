@@ -1,39 +1,15 @@
 import pytest
-import pytest_asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.exceptions import NotAllowedException, NotFoundException
-from src.users.models import User, Employer
+from src.users.models import User
 from src.vacancies.models import Vacancy, EmploymentFormat, EmploymentSchedule, EmploymentType
 from src.vacancies.schemas import SVacancyCreate
 from src.companies.models import Company
 from src.tools.models import Location
 
 from src.core.services.vacancy import VacancyService
-
-@pytest_asyncio.fixture
-async def employer(db_session: AsyncSession):
-    company = Company(name='CompanyX')
-    db_session.add(company)
-    await db_session.commit()
-
-    user = User(
-        email="test@example.com",
-        surname="Doe",
-        name="John",
-        hashed_password="pwd",
-        is_active=True,
-        is_superuser=True,
-        is_employer=True
-    )
-
-    user.employer = Employer(company_id=company.id)
-    db_session.add(user)
-    await db_session.commit()
-
-    yield user
-
 
 async def create_vacancies_fields(session: AsyncSession):
     format = EmploymentFormat(name='test')

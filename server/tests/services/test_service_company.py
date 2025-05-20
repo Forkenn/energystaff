@@ -13,40 +13,6 @@ from src.companies.models import Company
 from src.core.services.company import CompanyService
 
 
-@pytest_asyncio.fixture
-async def company(db_session: AsyncSession):
-    company = Company(
-        name='CompanyX',
-        registration_date=date(1993, 10, 2),
-        inn='123456789123',
-        address='Test Street, 5',
-        description='Test_description'
-    )
-    db_session.add(company)
-    await db_session.commit()
-
-    yield company
-
-
-@pytest_asyncio.fixture
-async def employer(db_session: AsyncSession, company: Company):
-    user = User(
-        email="test@example.com",
-        surname="Doe",
-        name="John",
-        hashed_password="pwd",
-        is_active=True,
-        is_superuser=True,
-        is_employer=True
-    )
-
-    user.employer = Employer(company_id=company.id)
-    db_session.add(user)
-    await db_session.commit()
-
-    yield user
-
-
 @pytest.mark.asyncio
 async def test_get_or_create_company(company: Company, company_service: CompanyService):
     new_company = await company_service.get_company_or_create(company.name)
