@@ -8,17 +8,19 @@ import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import AuthService from '@/services/auth.service'
 import ToolsService from '@/services/tools.service';
 import { useAuthRedirect } from '@/composables/useAuthRedirect';
-import { debounce } from '@/composables/useDebounce';
 
 useAuthRedirect();
 const router = useRouter();
+let errorMsg = '';
 
 const userData= ref({
-  surname: "",
-  name: "",
-  email: "",
-  password: "",
+  surname: null,
+  name: null,
+  email: null,
+  password: null,
 })
+
+const confirmPassword = ref(null);
 
 const employerData = ref({
   company_id: null,
@@ -30,21 +32,100 @@ const eduData = ref({
   edu_institution_id: null
 })
 
+const validateFields = () => {
+  errorMsg = '';
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(userData.value.password != confirmPassword.value)
+    errorMsg += '• Несовпадение паролей\n';
+
+  if(!userData.value.password || userData.value.password?.length < 8)
+    errorMsg += '• Пароль меньше 8 символов\n';
+
+  if(!userData.value.surname || userData.value.surname?.length < 2)
+    errorMsg += '• Недопустимая фамилия\n';
+
+  if(!userData.value.name || userData.value.name?.length < 2)
+    errorMsg += '• Недопустимое имя\n';
+
+  if(userData.value.email?.length < 5 || !emailPattern.test(userData.value.email))
+    errorMsg += '• Недопустимая электронная почта\n';
+}
+
+const validateFieldsEDU = () => {
+  if(!selectedInstitution.value) {
+    errorMsg += '• Не выбрано ОУ или выбрано несуществующее\n';
+  }
+}
+
+const validateFieldsEmployer = () => {
+  if(employerData.value.company_name && flexSwitchCompany.value) {
+    employerData.value.company_name = null
+  }
+
+  if(employerData.value.company_id && !flexSwitchCompany.value) {
+    employerData.value.company_id = null
+  }
+
+  if(!employerData.value.company_id && flexSwitchCompany.value) {
+    errorMsg += '• Не указан идентификатор компании\n';
+  }
+
+  if(!employerData.value.company_name && !flexSwitchCompany.value) {
+    errorMsg += '• Не указано наименование компании\n';
+  }
+}
+
+const showErr = (err) => {
+  if (
+    err.response?.status == 400 &&
+    err.response?.data.detail == 'REGISTER_USER_ALREADY_EXISTS'
+  ) {
+    alert("Данный E-mail уже занят");
+    return;
+  }
+  
+  if (
+    err.response?.status == 404 
+  ) {
+    alert("Компании или образовательного учреждения не существует");
+    return;
+  }
+
+  if (err.response?.status == 422) {
+    alert("Недопустмые данные регистрации");
+    return;
+  }
+  alert(`Ошибка сервера (${err.response?.status || '500'})`);
+}
+
 const registerApplicant = async() => {
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка регистрации:\n${errorMsg}`);
+    return;
+  }
+
   try {
     await AuthService.registerApplicant(userData.value)
     router.push({ name: 'login_page' });
   } catch(err) {
-    if (err.response?.status == 400) {
-      alert("Данный E-mail уже занят");
-    }
+    showErr(err);
   }
 }
 
 const registerEmployer = async() => {
+  validateFields();
+  validateFieldsEmployer();
+  if(errorMsg != '') {
+    alert(`Ошибка регистрации:\n${errorMsg}`);
+    return;
+  }
+
   if (employerData.value.company_id) {
     employerData.value.company_id = Number(employerData.value.company_id)
   }
+
   const userEmployerData = reactive({
     ...userData.value,
     ...employerData.value
@@ -54,16 +135,16 @@ const registerEmployer = async() => {
     await AuthService.registerEmployer(userEmployerData)
     router.push({ name: 'login_page' });
   } catch(err) {
-    if (err.response?.status == 400) {
-      alert("Данный E-mail уже занят");
-    }
+    showErr(err);
   }
 }
 
 const registerEdu = async() => {
-  if (!selectedInstitution.value) {
-    alert("Не выбрано образовательное учреждение!");
-    return
+  validateFields();
+  validateFieldsEDU();
+  if(errorMsg != '') {
+    alert(`Ошибка регистрации:\n${errorMsg}`);
+    return;
   }
 
   eduData.value.edu_institution_id = selectedInstitution.value.id
@@ -76,9 +157,7 @@ const registerEdu = async() => {
     await AuthService.registerEDU(userEduData)
     router.push({ name: 'login_page' });
   } catch(err) {
-    if (err.response?.status == 400) {
-      alert("Данный E-mail уже занят");
-    }
+    showErr(err);
   }
 }
 
@@ -161,6 +240,7 @@ const fetchInstitutions = async(params) => {
             id="SignInInputPassword"
             class="form-control form-text-field sys-input-288"
             placeholder="Подтверждение пароля"
+            v-model="confirmPassword"
           >
           <div class="form-check form-switch">
             <input
@@ -298,6 +378,9 @@ const fetchInstitutions = async(params) => {
 }
 
 .institutions-search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 0 auto;
   margin-bottom: 24px;
 }
