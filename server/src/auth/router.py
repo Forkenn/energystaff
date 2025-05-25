@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request, Depends
+from fastapi_users.exceptions import UserAlreadyExists
 
 from src.deps import get_user_service, get_institutions_service
+from src.exceptions import AlreadyExistException
 from src.responses import openapi_400, openapi_404, openapi_204, response_204
 from src.core.services.user import UserService
 from src.core.services.company import CompanyService
@@ -34,7 +36,11 @@ async def change_email(
     user: User = Depends(current_user),
     user_manager: UserManager = Depends(fastapi_users.get_user_manager)
 ):
-    await user_manager.update_email(user, data.new_email, data.password)
+    try:
+        await user_manager.update_email(user, data.new_email, data.password)
+    except UserAlreadyExists:
+        raise AlreadyExistException()
+
     return response_204
 
 @router.post('/applicant/register', responses={**openapi_400})
