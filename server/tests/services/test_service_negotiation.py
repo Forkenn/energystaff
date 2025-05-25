@@ -9,6 +9,7 @@ from src.exceptions import (
 from src.users.models import User, Employer
 from src.companies.models import Company
 from src.negotiations.models import Negotiation, NegotiationStatus
+from src.resume.models import Resume
 from src.tools.models import Location
 from src.vacancies.models import (
     Vacancy, EmploymentFormat, EmploymentSchedule, EmploymentType
@@ -113,7 +114,12 @@ async def test_count_negotiations_applicant(db_session: AsyncSession, applicant:
 @pytest.mark.asyncio
 async def test_get_negotiations_employer(db_session: AsyncSession, applicant: User, employer: User, negotiation_service: NegotiationService):
     location = Location(name='Talmberg')
-    db_session.add(location)
+    resume = Resume(
+        position='test',
+        user_id = applicant.id,
+        description='Test'
+    )
+    db_session.add_all([location, resume])
     await db_session.commit()
 
     applicant.location = location

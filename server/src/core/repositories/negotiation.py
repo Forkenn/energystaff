@@ -9,6 +9,7 @@ from src.users.models import User
 from src.vacancies.models import Vacancy
 from src.companies.models import Company
 from src.negotiations.models import Negotiation, NegotiationStatus
+from src.resume.models import Resume
 from src.tools.models import Location
 
 
@@ -89,6 +90,7 @@ class NegotiationRepository(CommonRepository[Negotiation]):
             .join(Vacancy, Negotiation.vacancy_id == Vacancy.id)
             .join(User, User.id == Negotiation.applicant_id)
             .join(Location, Location.id == User.location_id)
+            .join(Resume, Resume.user_id == User.id)
             .where(Vacancy.author_id == employer_id)
         )
 
