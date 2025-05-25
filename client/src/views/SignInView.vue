@@ -17,7 +17,9 @@ const login = async() => {
     router.push({ name: 'home' });
   } catch(err) {
     if (err.response?.status == 400) {
-      alert("Неверный логин или пароль!");
+      alert("Неверный логин или пароль");
+    } else {
+      alert(`Ошибка сервера (${err.response?.status || '500'})`);
     }
   }
 }
