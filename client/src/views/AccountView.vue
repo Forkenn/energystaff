@@ -5,8 +5,10 @@ import TheHeader from '../components/global/TheHeader.vue'
 import TheFooter from '../components/global/TheFooter.vue'
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import UserService from '@/services/user.service';
+import AuthService from '@/services/auth.service';
 import ToolsService from '@/services/tools.service';
 import { useUserStore } from '@/stores/user';
+import router from '@/router';
 
 const userStore = useUserStore();
 const userData = computed(() => userStore.user.data);
@@ -30,16 +32,54 @@ const selectedInstitution = ref(null);
 const selectedLocation = ref(userData.value.location);
 const eduLevels = ref([]);
 
+const oldPassword = ref(null);
+const newPassword = ref(null);
+const newPassword2 = ref(null);
+const oldPasswordEmail = ref(null);
+
 const saveChanges = async() => {
-  if (userData.value.is_applicant)
+  if (userData.value.is_applicant && !userData.value.is_superuser)
     userData.value.applicant.edu_institution_id = selectedInstitution.value?.id;
 
   userData.value.location_id = selectedLocation.value?.id;
   try{
-    await UserService.editCurrent(userData.value)
-    alert("Изменения сохранены!")
+    await UserService.editCurrent(userData.value);
+    alert("Изменения сохранены");
   } catch(err) {
-    alert("Ошибка сохранения данных!")
+    alert("Ошибка сохранения данных");
+  }
+}
+
+const changePassword = async() => {
+  if(newPassword.value != newPassword2.value) {
+    alert("Новые пароли не совпадают");
+    return;
+  }
+
+  try{
+    await AuthService.changePassword({
+      oldPassword: oldPassword.value,
+      newPassword: newPassword.value
+    })
+
+    alert("Изменения сохранены");
+    router.go(0);
+  } catch(err) {
+    alert("Ошибка смены пароля: неверный пароль");
+  }
+}
+
+const changeEmail = async() => {
+  try{
+    await AuthService.changeEmail({
+      password: oldPasswordEmail.value,
+      newEmail: userData.value.email
+    })
+
+    alert("Изменения сохранены");
+    router.go(0);
+  } catch(err) {
+    alert("Ошибка смены почты: неверный пароль");
   }
 }
 
@@ -198,21 +238,21 @@ onMounted(async () => {
         <div class="row form-row-security">
           <div class="col">
             <div class="custom-form">
-              <input type="password" class="form-control" id="InputPassword" placeholder="Текущий пароль">
+              <input type="password" class="form-control" id="InputPassword" placeholder="Текущий пароль" v-model="oldPassword">
             </div>
           </div>
           <div class="col">
             <div class="custom-form">
-              <input type="password" class="form-control" id="InputNewPassword" placeholder="Новый пароль">
+              <input type="password" class="form-control" id="InputNewPassword" placeholder="Новый пароль" v-model="newPassword">
             </div>
           </div>
           <div class="col">
             <div class="custom-form">
-              <input type="password" class="form-control" id="InputNewPassword2" placeholder="Подтверждение пароля">
+              <input type="password" class="form-control" id="InputNewPassword2" placeholder="Подтверждение пароля" v-model="newPassword2">
             </div>
           </div>
           <div class="col">
-            <button type="button" class="btn btn-primary sys-btn-264 btn-account">
+            <button type="button" class="btn btn-primary sys-btn-264 btn-account" @click="changePassword">
               Сменить пароль
             </button>
           </div>
@@ -220,12 +260,12 @@ onMounted(async () => {
         <div class="row form-row-security">
           <div class="col">
             <div class="custom-form">
-              <input type="text" class="form-control" id="InputEmail" placeholder="Электронная почта">
+              <input type="password" class="form-control" id="InputPasswordEmail" placeholder="Текущий пароль"v-model="oldPasswordEmail">
             </div>
           </div>
           <div class="col">
-            <div class="custom-form" style="visibility: hidden;">
-              <input type="text" class="form-control" id="InputEmail2" placeholder="Электронная почта">
+            <div class="custom-form">
+              <input type="text" class="form-control" id="InputEmail" placeholder="Электронная почта" v-model="userData.email">
             </div>
           </div>
           <div class="col">
@@ -234,7 +274,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="col">
-            <button type="button" class="btn btn-primary sys-btn-264 btn-account">
+            <button type="button" class="btn btn-primary sys-btn-264 btn-account" @click="changeEmail">
               Сменить почту
             </button>
           </div>

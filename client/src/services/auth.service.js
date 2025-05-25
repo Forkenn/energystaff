@@ -45,6 +45,50 @@ class AuthService {
           }
         })
     }
+
+    async changeEmail(data) {
+      return await instance
+        .post('/auth/change-email', {
+          password: data.password,
+          new_email: data.newEmail
+        })
+        .then((response) => {
+          return response
+        })
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
+
+    async changePassword(data) {
+      return await instance
+        .post('/auth/change-password', {
+          old_password: data.oldPassword,
+          new_password: data.newPassword
+        })
+        .then((response) => {
+          return response
+        })
+        .catch((err) => {
+          if (err.response) {
+            console.log(err.response.data)
+            console.log(err.response.status)
+          } else if (err.request) {
+            console.log(err.request)
+          } else {
+            console.log('Error', err.message)
+          }
+          throw err;
+        })
+    }
   
     async registerApplicant(user) {
       return await instance
