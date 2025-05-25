@@ -50,18 +50,28 @@ const convertIds = () => {
 const editResume = async() => {
   try {
     await ResumeService.editMyResume(resumeData.value);
-    alert('Данные сохранены!');
+    alert('Данные сохранены');
   } catch(err) {
-    alert('Ошибка публикации резюме!')
+    alert('Ошибка публикации резюме')
   }
 }
 
 const createResume = async() => {
   try {
     await ResumeService.addResume(resumeData.value);
-    alert('Данные сохранены!');
+    alert('Данные сохранены');
   } catch(err) {
-    alert('Ошибка публикации резюме!')
+    alert('Ошибка публикации резюме')
+  }
+}
+
+const deleteResume = async() => {
+  try {
+    await ResumeService.deleteMyResume();
+    alert('Данные сохранены');
+    router.go(0);
+  } catch(err) {
+    alert('Ошибка удаления резюме');
   }
 }
 
@@ -258,8 +268,8 @@ onMounted(async () => {
             <div class="row">
                 <div class="col d-flex">
                     <div class="editor-buttons">
-                        <button type="button" class="btn btn-primary sys-btn-288">
-                            Скрыть резюме
+                        <button v-if="!creatorMode" type="button" class="btn btn-danger sys-btn-288" @click="deleteResume">
+                            Удалить резюме
                         </button>
                         <button v-if="creatorMode" type="button" class="btn btn-primary sys-btn-288" @click="createResume">
                             Сохранить

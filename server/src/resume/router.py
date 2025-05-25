@@ -46,7 +46,7 @@ async def delete_my_resume(
         user: User = Depends(current_user),
         resume_service: ResumeService = Depends(get_resume_service)
 ):
-    resume_service.delete_by_uid(user.id)
+    await resume_service.delete_by_uid(user.id)
     return response_204
 
 @router.get('')
