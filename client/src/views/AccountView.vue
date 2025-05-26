@@ -13,6 +13,7 @@ import router from '@/router';
 const userStore = useUserStore();
 const userData = computed(() => userStore.user.data);
 const dataLoading = ref(true);
+let errorMsg = '';
 const systemStatus = computed(() => {
   if(userData.value.is_superuser) {
     return "Администратор"
@@ -26,7 +27,7 @@ const systemStatus = computed(() => {
   if(userData.value.is_applicant) {
     return "Соискатель"
   }
-  return "Загрузка..."
+  return "Не определён"
 })
 const selectedInstitution = ref(null);
 const selectedLocation = ref(userData.value.location);
@@ -37,7 +38,25 @@ const newPassword = ref(null);
 const newPassword2 = ref(null);
 const oldPasswordEmail = ref(null);
 
+const validateFields = () => {
+  errorMsg = '';
+  if(!userData.value.surname || userData.value.surname?.length < 2)
+    errorMsg += '• Недопустимая фамилия\n';
+
+  if(!userData.value.name || userData.value.name?.length < 2)
+    errorMsg += '• Недопустимое имя\n';
+
+  if(userData.value.birthdate == '')
+    errorMsg += '• Недопустимая дата рождения\n';
+}
+
 const saveChanges = async() => {
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка сохранения изменений:\n${errorMsg}`);
+    return;
+  }
+
   if (userData.value.is_applicant && !userData.value.is_superuser)
     userData.value.applicant.edu_institution_id = selectedInstitution.value?.id;
 
@@ -52,24 +71,32 @@ const saveChanges = async() => {
 
 const changePassword = async() => {
   if(newPassword.value != newPassword2.value) {
-    alert("Новые пароли не совпадают");
+    alert("Ошибка смены пароля\n• Новые пароли не совпадают");
     return;
   }
+
+  if(!newPassword.value || newPassword.value.length < 8)
+    errorMsg += 'Ошибка смены пароля\n• Пароль меньше 8 символов';
 
   try{
     await AuthService.changePassword({
       oldPassword: oldPassword.value,
       newPassword: newPassword.value
     })
-
     alert("Изменения сохранены");
     router.go(0);
   } catch(err) {
-    alert("Ошибка смены пароля: неверный пароль");
+    alert("Ошибка смены пароля\n• Неверный пароль");
   }
 }
 
 const changeEmail = async() => {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(userData.value.email?.length < 5 || !emailPattern.test(userData.value.email)) {
+    alert("Ошибка смены почты:\n• Недопустимая электронная почта");
+    return;
+  }
+
   try{
     await AuthService.changeEmail({
       password: oldPasswordEmail.value,
@@ -79,7 +106,12 @@ const changeEmail = async() => {
     alert("Изменения сохранены");
     router.go(0);
   } catch(err) {
-    alert("Ошибка смены почты: неверный пароль");
+    if(err.response?.status == 400 && err.response?.data.detail == 'OBJECT_ALREADY_EXIST') {
+      alert("Ошибка смены почты:\n• E-mail уже занят");
+      return;
+    }
+
+    alert("Ошибка смены почты:\n• Неверный пароль");
   }
 }
 
@@ -121,7 +153,7 @@ onMounted(async () => {
         const response = await ToolsService.getEduInstitutionbyId(edu_institution_id);
         selectedInstitution.value = response.data;
       } catch(err) {
-        alert('Ошибка загрузки данных с сервера!');
+        alert('Ошибка загрузки данных с сервера');
       }
     }
   
@@ -129,7 +161,7 @@ onMounted(async () => {
       const response = await ToolsService.getEduLevels();
       eduLevels.value = response.data;
     } catch(err) {
-      alert('Ошибка загрузки данных с сервера!');
+      alert('Ошибка загрузки данных с сервера');
     }
   }
   dataLoading.value = false;
