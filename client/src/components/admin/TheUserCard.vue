@@ -23,6 +23,16 @@ const userRole = computed(() => {
         return 'Работник ОУ'
 })
 
+const userGender = computed(() => {
+    if(props.user.sex == null)
+        return 'пол не указан'
+
+    if(props.user.sex)
+        return 'Женский'
+
+    return 'Мужской'
+})
+
 const verifyUser = async() => {
     try {
         if(props.user.is_applicant)
@@ -72,7 +82,7 @@ const deactivateUser = async() => {
             <img v-else src="../../assets/icons/users/User_unverified.svg">
         </h1>
         <div class="user-info">
-            {{ "ID: " + user.id + " | " + (user.location?.name || 'без города') + " | " + (user.birthdate || 'без д.р.') + " | " + (user.sex ? "Женский" : "Мужской") }}
+            {{ "ID: " + user.id + " | " + (user.location?.name || 'без города') + " | " + (user.birthdate || 'без д.р.') + " | " + userGender }}
         </div>
         <div class="user-info">
             {{ userRole }}
