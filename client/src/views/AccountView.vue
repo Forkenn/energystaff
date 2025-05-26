@@ -254,8 +254,20 @@ onMounted(async () => {
             <div class="col-auto">
               <select class="form-select sys-input-288" aria-label="Статус обучения">
                 <option v-if="!userData.applicant.edu_status" @click="setStatus(null)" selected>Статус обучения</option>
-                <option :value="'progress'" @click="setStatus('progress')">Студент</option>
-                <option :value="'completed'" @click="setStatus('completed')">Выпускник</option>
+                <option
+                  :value="'progress'"
+                  @click="setStatus('progress')"
+                  :selected="userData.applicant.edu_status && userData.applicant.edu_status == 'progress'"
+                >
+                  Студент
+                </option>
+                <option
+                  :value="'completed'"
+                  @click="setStatus('completed')"
+                  :selected="userData.applicant.edu_status && userData.applicant.edu_status == 'completed'"
+                >
+                  Выпускник
+                </option>
               </select>
             </div>
         </div>
