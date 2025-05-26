@@ -20,8 +20,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="modal-backdrop fade show"></div>
-  <div class="modal fade show d-block" tabindex="-1" @click.self="close">
+  <div class="modal-backdrop fade show "></div>
+  <div class="modal fade show d-block modal-blur" tabindex="-1" @click.self="close">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -55,6 +55,10 @@ onBeforeUnmount(() => {
 .modal-title {
   font-weight: 700 !important;
   color: #343434 !important;
+}
+
+.modal-blur {
+  backdrop-filter: blur(3px);
 }
 
 </style>
