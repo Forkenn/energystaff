@@ -6,13 +6,20 @@ import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import ThePaginator from '@/components/global/ThePaginator.vue';
 import TheVacancyCard from '@/components/home/TheVacancyCard.vue';
+import TheWarningSign from '@/components/global/TheWarningSign.vue';
+import TheNotFoundSign from '@/components/global/TheNotFoundSign.vue';
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import MultiSelect from '@/components/global/MultiSelect.vue';
 import VacanciesService from '@/services/vacancies.service';
 import ToolsService from '@/services/tools.service';
 
+import { useUserStore } from '@/stores/user';
+
 const route = useRoute();
 const router = useRouter();
+
+const userStore = useUserStore();
+const userData = computed(() => userStore.user.data);
 
 const perPage = 6
 const filters = ref({
@@ -145,9 +152,11 @@ const getVacancies = async() => {
   filters.value.start = (currentPage.value - 1) * perPage;
   filters.value.end = filters.value.start + perPage;
 
-  getVacanciesCount();
-  const response = await VacanciesService.getVacancies(filters.value);
-  vacancies.value = response.data;
+  if(userData.value.is_verified) {
+    getVacanciesCount();
+    const response = await VacanciesService.getVacancies(filters.value);
+    vacancies.value = response.data;
+  }
 }
 
 const beginSearch = () => {
@@ -350,6 +359,8 @@ onMounted(async() => {
               </div>
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
+              <TheWarningSign v-if="!userData.is_verified" />
+              <TheNotFoundSign v-else-if="!vacancies.count" />
               <div v-if="vacancies.count" class="vacancy-wrapper">
                 <TheVacancyCard v-for="vacancy in vacancies.items" :key="vacancy.id" :vacancy="vacancy"/>
               </div>
