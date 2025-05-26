@@ -7,6 +7,7 @@ import TheFooter from '@/components/global/TheFooter.vue'
 import ThePaginator from '@/components/global/ThePaginator.vue';
 import TheUserCard from '@/components/admin/TheUserCard.vue';
 import TheCompanyCard from '@/components/admin/TheCompanyCard.vue';
+import TheNotFoundSign from '@/components/global/TheNotFoundSign.vue';
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 
 import UserService from '@/services/user.service';
@@ -413,9 +414,11 @@ onMounted(async() => {
               </div>
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
+              <TheNotFoundSign v-if="!users.count && dataTypeLoaded === 'users'" />
               <div v-if="users.count && dataTypeLoaded === 'users'" class="vacancy-wrapper">
                 <TheUserCard v-for="user in users.items" :key="user.id" :user="user" />
               </div>
+              <TheNotFoundSign v-if="!companies.count && dataTypeLoaded === 'companies'" />
               <div v-if="companies.count && dataTypeLoaded === 'companies'" class="vacancy-wrapper">
                 <TheCompanyCard v-for="company in companies.items" :key="company.id" :company="company" />
               </div>
