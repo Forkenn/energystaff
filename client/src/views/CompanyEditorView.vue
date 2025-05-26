@@ -12,16 +12,53 @@ const companyData = ref({
   id: null,
   name: "",
   registration_date: "2025-01-01",
-  inn: "",
-  address: "",
-  description: "", 
+  inn: null,
+  address: null,
+  description: null, 
   is_verified: false
 })
 const companyStatus = computed(() => {
   return companyData.value.is_verified ? 'Подтверждено' : 'Не подтверждено'
 })
+let errorMsg = '';
+
+const validateFields = () => {
+  errorMsg = '';
+  if(
+    !companyData.value.name ||
+    companyData.value.name?.length < 5 ||
+    companyData.value.name?.length > 120
+  )
+    errorMsg += '• Недопустимое наименование (допустимо от 5 до 120 символов)\n';
+
+  if(!companyData.value.inn || companyData.value.inn?.length < 10)
+    errorMsg += '• Недопустимый ИНН (допустимо от 10 до 12 символов)\n';
+
+  if(companyData.value.description?.length > 5000)
+    errorMsg += '• Недопустимое описание (допустимо до 5000 символов)\n';
+
+  if(companyData.value.address?.length > 120)
+    errorMsg += '• Недопустимый адрес (допустимо до 120 символов)\n';
+
+  if(companyData.value.registration_date == '' || !companyData.value.registration_date)
+    errorMsg += '• Недопустимая дата\n';
+}
+
+const validateINN = (event) => {
+  let value = event.target.value.replace(/[^\d]/g, '');
+  if (value.length > 12)
+    value = value.slice(0, 12);
+
+  companyData.value.inn = value;
+};
 
 const editCompany = async() => {
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка сохранения изменений:\n${errorMsg}`);
+    return;
+  }
+
   try {
     companyData.value.inn = String(companyData.value.inn);
     await CompaniesService.editCompany(companyData.value.id, companyData.value)
@@ -60,7 +97,7 @@ onMounted(async () => {
             <div class="col-auto sys-col-600-flex">
               <div class="custom-form-floating">
                 <input type="text" class="form-control flex-grow-1 sys-input-600-flex" id="InputName" placeholder="Наименование" v-model="companyData.name">
-                <label for="InputName">Наименование</label>
+                <label for="InputName">Наименование <span class="required-field">*</span></label>
               </div>
             </div>
             <div class="col d-flex">
@@ -74,13 +111,20 @@ onMounted(async () => {
             <div class="col-auto">
               <div class="custom-form-floating">
                 <input type="date" class="form-control sys-input-288" id="InputCompanyDate" placeholder="Дата регистрации" v-model="companyData.registration_date">
-                <label for="InputCompanyDate">Дата регистрации</label>
+                <label for="InputCompanyDate">Дата регистрации <span class="required-field">*</span></label>
               </div>
             </div>
             <div class="col-auto">
               <div class="custom-form-floating">
-                <input type="text" class="form-control sys-input-288" id="InputCompanyINN" placeholder="ИНН" v-model="companyData.inn">
-                <label for="InputCompanyINN">ИНН</label>
+                <input
+                  type="text"
+                  class="form-control sys-input-288"
+                  id="InputCompanyINN"
+                  placeholder="ИНН"
+                  v-model="companyData.inn"
+                  @input="validateINN"
+                >
+                <label for="InputCompanyINN">ИНН <span class="required-field">*</span></label>
               </div>
             </div>
             <div class="col-auto">
