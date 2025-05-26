@@ -162,6 +162,11 @@ main {
   height: 48px;
 }
 
+.sys-col-176 {
+  width: 176px !important;
+  box-sizing: content-box;
+}
+
 .sys-col-184 {
   width: 184px !important;
   box-sizing: content-box;

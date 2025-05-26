@@ -13,6 +13,8 @@ import { useUserStore } from '@/stores/user';
 const route = useRoute();
 const router = useRouter();
 
+let errorMsg = '';
+
 const userStore = useUserStore();
 
 const creatorMode = ref(true);
@@ -27,28 +29,56 @@ const vacancyData = ref({
   position: "",
   specialization: "",
   description: "",
-  salary: 0,
+  salary: null,
   salaryFrom: true,
   work_hours: "",
   location: null,
   location_id: null,
-  vacancy_types: [{
-      id: 0,
-      name: "string"
-  }],
-  vacancy_formats: [{
-      id: 0,
-      name: "string"
-  }],
-  vacancy_schedules: [{
-      id: 0,
-      name: "string"
-  }],
+  vacancy_types: [{}],
+  vacancy_formats: [{}],
+  vacancy_schedules: [{}],
   vacancy_types_ids: [],
   vacancy_formats_ids: [],
   vacancy_schedules_ids: []
 })
 const selectedLocation = ref(null);
+
+const validateFields = () => {
+errorMsg = '';
+  if(
+    !vacancyData.value.position ||
+    vacancyData.value.position?.length < 4 ||
+    vacancyData.value.position?.length > 120
+  )
+    errorMsg += '• Недопустимая позиция (допустимо от 4 до 120 символов)\n';
+
+  if(
+    !vacancyData.value.specialization ||
+    vacancyData.value.specialization?.length < 4 ||
+    vacancyData.value.specialization?.length > 120
+  )
+    errorMsg += '• Недопустимая специализация (допустимо от 4 до 120 символов)\n';
+
+  if(vacancyData.value.work_hours?.length > 50)
+    errorMsg += '• Недопустимые рабочие часы (допустимо до 50 символов)\n';
+
+  if(vacancyData.value.description?.length > 5000)
+    errorMsg += '• Недопустимое описание (допустимо до 5000 символов)\n';
+
+  const salary = Number(vacancyData.value.salary);
+
+  if(!salary || salary > 5000000 || salary < 0)
+    errorMsg += '• Недопустимая зарплата (допустимо до 5000000)\n';
+
+  if(vacancyData.value.vacancy_types_ids[0] == undefined && !vacancyData.value.vacancy_types_ids[1])
+    errorMsg += '• Не указана занятость\n';
+
+  if(vacancyData.value.vacancy_schedules_ids[0] == undefined && !vacancyData.value.vacancy_schedules_ids[1])
+    errorMsg += '• Не указан график\n';
+
+  if(vacancyData.value.vacancy_formats_ids[0] == undefined && !vacancyData.value.vacancy_formats_ids[1])
+    errorMsg += '• Не указан формат\n';
+}
 
 const fetchLocations = async(params) => {
   const response = await ToolsService.getLocations(params);
@@ -76,6 +106,12 @@ const convertIds = (full=false) => {
 
 const editVacancy = async() => {
   convertIds();
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка сохранения изменений:\n${errorMsg}`);
+    return;
+  }
+
   try {
     await VacanciesService.editVacancy(vacancyId, vacancyData.value);
     router.push({ name: 'home' });
@@ -86,6 +122,12 @@ const editVacancy = async() => {
 
 const createVacancy = async() => {
   convertIds();
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка сохранения изменений:\n${errorMsg}`);
+    return;
+  }
+
   try {
     await VacanciesService.addVacancy(vacancyData.value);
     router.push({ name: 'home' });
@@ -149,7 +191,7 @@ onMounted(async () => {
       vacancyData.value = response.data;
       selectedLocation.value = response.data.location;
     } catch(err) {
-      alert('Вакансия не найдена!')
+      alert('Вакансия не найдена')
       router.push({ name: 'vacancy_editor' });
     } finally {
       creatorMode.value = false;
@@ -166,7 +208,7 @@ onMounted(async () => {
       convertIds(true);
       dataLoading.value = false;
     } catch(err) {
-      alert('Ошибка сервера!')
+      alert('Ошибка сервера')
       router.push({ name: 'home' });
     }
 })
@@ -192,7 +234,7 @@ onMounted(async () => {
                   placeholder="Должность"
                   v-model="vacancyData.position"
                 >
-                <label for="InputName">Должность</label>
+                <label for="InputName">Должность  <span class="required-field">*</span></label>
               </div>
             </div>
             <div class="col d-flex">
@@ -209,7 +251,7 @@ onMounted(async () => {
                   placeholder="Специализация"
                   v-model="vacancyData.specialization"
                 >
-                <label for="InputSpecialization">Специализация</label>
+                <label for="InputSpecialization">Специализация  <span class="required-field">*</span></label>
               </div>
             </div>
             <div class="col d-flex">
@@ -222,7 +264,7 @@ onMounted(async () => {
                     placeholder="Зарплата"
                     v-model="vacancyData.salary"
                   >
-                  <label for="InputSalary">Зарплата</label>
+                  <label for="InputSalary">Зарплата <span class="required-field">*</span></label>
                 </div>
                 <span class="input-group-text sys-input-group-text-38">₽</span>
               </div>
@@ -230,11 +272,11 @@ onMounted(async () => {
           </div>
           <div class="row">
             <div class="col-auto">
-              <div style="width: 80px;">
-                  Занятость
+              <div style="width: 88px;">
+                  Занятость  <span class="required-field">*</span>
               </div>
             </div>
-            <div class="col-auto sys-col-184">
+            <div class="col-auto sys-col-176">
               <div class="form-check">
                 <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkTypeFull" :id="1" @click="toggleCheckType(1)" :checked="isSelectedType(1)">
                 <label class="form-check-label sys-check-label" for="checkTypeFull">
@@ -285,21 +327,21 @@ onMounted(async () => {
               </div>
             </div>
             <div class="col-auto">
-              <div class="form-check" style="padding-top: 10px;">
+              <!--<div class="form-check" style="padding-top: 10px;">
                 <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkSalaryFrom" v-model="vacancyData.salaryFrom">
                 <label class="form-check-label sys-check-label" for="checkSalaryFrom">
                     {{ vacancyData.salaryFrom ? "Нижняя граница" : "Верхняя граница" }} {{ "з/п" }}
                 </label>
-              </div>
+              </div>-->
             </div>
           </div>
           <div class="row">
             <div class="col-auto">
-              <div style="width: 80px;">
-                  Формат
+              <div style="width: 88px;">
+                  Формат  <span class="required-field">*</span>
               </div>
             </div>
-            <div class="col-auto sys-col-184" style="flex-direction: column;">
+            <div class="col-auto sys-col-176" style="flex-direction: column;">
               <div class="form-check">
                 <input class="form-check-input sys-check-20" type="checkbox" value="" id="checkFormatPlace" :id="1" @click="toggleCheckFormat(1)" :checked="isSelectedFormat(1)">
                 <label class="form-check-label" for="checkFormatPlace">
@@ -330,7 +372,7 @@ onMounted(async () => {
                 v-model="vacancyData.vacancy_schedules"
                 :items="serverSchedules"
                 :isLoading="dataLoading"
-                placeholder="График работы"
+                placeholder="График работы *"
               />
             </div>
           </div>
