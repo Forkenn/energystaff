@@ -16,5 +16,5 @@ class Company(Base):
     registration_date: orm.Mapped[date] = orm.mapped_column(Date(), nullable=True)
     inn: orm.Mapped[str] = orm.mapped_column(alch.String(12), unique=True, nullable=True)
     address: orm.Mapped[str] = orm.mapped_column(alch.String(120), nullable=True)
-    description: orm.Mapped[str] = orm.mapped_column(alch.String(512), nullable=True)
+    description: orm.Mapped[str] = orm.mapped_column(alch.String(5000), nullable=True)
     is_verified: orm.Mapped[bool] = orm.mapped_column(alch.Boolean(), default=False)

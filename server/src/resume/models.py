@@ -48,7 +48,7 @@ class Resume(Base):
         alch.String(120), nullable=True
     )
     salary: orm.Mapped[int] = orm.mapped_column(alch.Integer(), server_default='0')
-    description: orm.Mapped[str] = orm.mapped_column(alch.String(500))
+    description: orm.Mapped[str] = orm.mapped_column(alch.String(5000))
     user_id: orm.Mapped[int] = orm.mapped_column(
         alch.ForeignKey("users.id", ondelete='CASCADE'), index=True, unique=True
     )

@@ -24,8 +24,8 @@ class SResumeCreate(BaseModel):
     description: str | None = Field(
         default=...,
         min_length=0,
-        max_length=500,
-        description="Description from 0 to 500 symbols"
+        max_length=5000,
+        description="Description from 0 to 5000 symbols"
     )
     resume_types_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
     resume_formats_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)

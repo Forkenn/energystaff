@@ -27,7 +27,7 @@ class Negotiation(Base):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
     status: orm.Mapped[str] = orm.mapped_column(alch.String(), default=NegotiationStatus.PENDING.value)
-    employer_description: orm.Mapped[str] = orm.mapped_column(alch.String(150), nullable=True)
+    employer_description: orm.Mapped[str] = orm.mapped_column(alch.String(500), nullable=True)
     applicant_id: orm.Mapped[int] = orm.mapped_column(
         alch.ForeignKey("users.id", ondelete='CASCADE'), index=True
     )

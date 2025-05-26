@@ -51,6 +51,6 @@ class SCompanyEdit(BaseModel):
     description: str | None = Field(
         default=...,
         min_length=0,
-        max_length=512,
-        description="Company description from 0 to 512 symbols"
+        max_length=5000,
+        description="Company description from 0 to 5000 symbols"
     )

@@ -20,7 +20,7 @@ class Recommendation(Base):
     __tablename__='recommendations'
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, index=True)
-    description: orm.Mapped[str] = orm.mapped_column(alch.String(500))
+    description: orm.Mapped[str] = orm.mapped_column(alch.String(5000))
     applicant_id = orm.mapped_column(
         alch.ForeignKey("users.id", ondelete='CASCADE'), index=True, unique=True
     )
