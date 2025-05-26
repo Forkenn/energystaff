@@ -90,7 +90,7 @@ class NegotiationsService {
     return await instance
       .post('/negotiations/employer/reject', {
         negotiation_id: data.negotiation_id,
-        desctiption: data.desctiption
+        employer_description: data.employer_description
     })
       .then((response) => response)
       .catch((err) => {
@@ -109,7 +109,7 @@ class NegotiationsService {
     return await instance
     .post('/negotiations/employer/accept', {
         negotiation_id: data.negotiation_id,
-        desctiption: data.desctiption
+        employer_description: data.employer_description
     })
       .then((response) => response)
       .catch((err) => {

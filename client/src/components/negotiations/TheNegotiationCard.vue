@@ -12,15 +12,17 @@ const props = defineProps({
 });
 
 const router = useRouter();
+let errorMsg = '';
 
 const userStore = useUserStore();
 const user = computed(() => userStore.user.data);
 
 const showModalContacts = ref(false)
+const showModalInfoSend = ref(false)
 
 const negotiationData = ref({
     negotiation_id: props.negotiation.id,
-    desctiption: "Тестовое описание!"
+    employer_description: ""
 })
 
 const deleteNegotiation = async() => {
@@ -32,11 +34,23 @@ const deleteNegotiation = async() => {
     }
 }
 
-const showContacts = async() => {
-    alert(negotiationData.value.desctiption);
+const validateFields = () => {
+    errorMsg = '';
+    if(
+        negotiationData.value.employer_description.length < 50 ||
+        negotiationData.value.employer_description.length > 500
+    )
+        errorMsg += '• Недопустимое описание (допустимо от 50 до 500 символов)\n';
 }
 
 const invite = async() => {
+    validateFields();
+    if(errorMsg != '') {
+        alert(`Ошибка переговоров:\n${errorMsg}`);
+        return;
+    }
+
+    showModalInfoSend.value = false;
     try {
         await NegotiationsService.acceptNegotiation(negotiationData.value);
         router.go(0);
@@ -47,6 +61,13 @@ const invite = async() => {
 }
 
 const reject = async() => {
+    validateFields();
+    if(errorMsg != '') {
+        alert(`Ошибка переговоров:\n${errorMsg}`);
+        return;
+    }
+
+    showModalInfoSend.value = false;
     try {
         await NegotiationsService.regectNegotiation(negotiationData.value);
         router.go(0);
@@ -56,20 +77,34 @@ const reject = async() => {
 }
 
 const revokeAndInvite = async() => {
+    validateFields();
+    if(errorMsg != '') {
+        alert(`Ошибка переговоров:\n${errorMsg}`);
+        return;
+    }
+
+    showModalInfoSend.value = false;
     try {
         await NegotiationsService.resetNegotiation(negotiationData.value);
         invite();
     } catch(err) {
-        alert('Ошибка обработки!');
+        alert('Ошибка обработки');
     }
 }
 
 const revokeAndReject = async() => {
+    validateFields();
+    if(errorMsg != '') {
+        alert(`Ошибка переговоров:\n${errorMsg}`);
+        return;
+    }
+
+    showModalInfoSend.value = false;
     try {
         await NegotiationsService.resetNegotiation(negotiationData.value);
         reject();
     } catch(err) {
-        alert('Ошибка обработки!');
+        alert('Ошибка обработки');
     }
 }
 
@@ -77,7 +112,7 @@ const goToResume = () => {
   if(user.value.is_employer)
     router.push({ name: 'resume_page', query: {id: props.negotiation.applicant_id }})
   else
-  router.push({ name: 'vacancy_page', params: { id: props.negotiation.vacancy_id } })
+    router.push({ name: 'vacancy_page', params: { id: props.negotiation.vacancy_id } })
 }
 
 </script>
@@ -106,12 +141,12 @@ const goToResume = () => {
         <div v-if="user.is_employer" class="city">
             {{ negotiation.user_location }}
         </div>
-        <button v-if="user.is_applicant && negotiation.status === 'accepted'" class="btn btn-primary sys-btn-288" @click.stop="showModalContacts = true">Контакты</button>
-        <button v-if="user.is_applicant && ['accepted', 'pending'].includes(negotiation.status)" class="btn btn-primary sys-btn-288" @click="deleteNegotiation">Отозвать и удалить</button>
-        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click.stop="invite">Пригласить</button>
-        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click.stop="reject">Отказать</button>
-        <button v-if="user.is_employer && negotiation.status === 'accepted'" class="btn btn-primary sys-btn-288" @click.stop="revokeAndReject">Отозвать и отказать</button>
-        <button v-if="user.is_employer && negotiation.status === 'rejected'" class="btn btn-primary sys-btn-288" @click,stop="revokeAndInvite">Отозвать и пригласить</button>
+        <button v-if="user.is_applicant && ['accepted', 'rejected'].includes(negotiation.status)" class="btn btn-primary sys-btn-288" @click.stop="showModalContacts = true">Информация</button>
+        <button v-if="user.is_applicant && ['accepted', 'pending'].includes(negotiation.status)" class="btn btn-danger sys-btn-288" @click="deleteNegotiation">Отозвать и удалить</button>
+        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click.stop="showModalInfoSend = true">Пригласить</button>
+        <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-danger sys-btn-288" @click.stop="showModalInfoSend = true">Отказать</button>
+        <button v-if="user.is_employer && negotiation.status === 'accepted'" class="btn btn-danger sys-btn-288" @click.stop="showModalInfoSend = true">Отозвать и отказать</button>
+        <button v-if="user.is_employer && negotiation.status === 'rejected'" class="btn btn-primary sys-btn-288" @click.stop="showModalInfoSend = true">Отозвать и пригласить</button>
     </div>
   </div>
 
@@ -120,10 +155,29 @@ const goToResume = () => {
       <h5 class="modal-title">Сообщение от работодателя</h5>
     </template>
 
-    <p>{{ negotiationData.desctiption }}</p>
+    <p>{{ negotiation.employer_description }}</p>
 
     <template #footer>
       <button class="btn btn-secondary" @click="showModalContacts = false">Закрыть</button>
+    </template>
+  </TheModal>
+
+  <TheModal v-if="showModalInfoSend" @close="showModalInfoSend = false">
+    <template #header>
+      <h5 class="modal-title">Сообщение для соискателя</h5>
+    </template>
+
+    <div class="negotiation-text-area">
+        <label for="formControlExtended" class="form-label">Контакты, причины отказа и т.п.</label>
+        <textarea class="form-control" id="formControlExtended" rows="5" v-model="negotiationData.employer_description"></textarea>
+    </div>
+
+    <template #footer>
+      <button v-if="negotiation.status === 'pending'" class="btn btn-primary" @click.stop="invite">Пригласить</button>
+      <button v-if="negotiation.status === 'pending'" class="btn btn-danger" @click.stop="reject">Отказать</button>
+      <button v-if="negotiation.status === 'accepted'" class="btn btn-danger" @click.stop="revokeAndReject">Отозвать и отказать</button>
+      <button v-if="negotiation.status === 'rejected'" class="btn btn-primary" @click.stop="revokeAndInvite">Отозвать и пригласить</button>
+      <button class="btn btn-secondary" @click="showModalInfoSend = false">Закрыть</button>
     </template>
   </TheModal>
 </template>
