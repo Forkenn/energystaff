@@ -14,7 +14,7 @@ const applicantId = route.query.id;
 
 const isLoading = ref(true);
 const creatorMode = ref(true);
-
+let errorMsg = '';
 
 let recommendationData = {
   description: "Проверка связи",
@@ -33,6 +33,19 @@ const newRecommendationData = ref({
 })
 
 const files = ref([]);
+
+const validateFields = () => {
+  errorMsg = '';
+
+  if(
+    newRecommendationData.value.documents.length < 1 ||
+    newRecommendationData.value.documents.length > 10
+  )
+    errorMsg += '• Недопустимое кол-во документов (допустимо от 1 до 10 файлов)\n';
+
+  if(10 < newRecommendationData.value.description.length > 5000 )
+    errorMsg += '• Недопустимое описание (допустимо до 5000 символов)\n';
+}
 
 const prepareFiles = () => {
   if (!creatorMode.value) {
@@ -54,6 +67,12 @@ const prepareFiles = () => {
 
 const saveRecommendation = async() => {
   prepareFiles();
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка сохранения изменений:\n${errorMsg}`);
+    return;
+  }
+
   if(!creatorMode.value) {
     try {
       await RecommendationsService.editRecommendation(recommendationData.id, newRecommendationData.value)
@@ -122,7 +141,7 @@ onMounted(async () => {
             </div>
             <div class="row">
                 <div class="col" style="flex-direction: column;">
-                  <label class="form-label">Подтверждающие документы</label>
+                  <label class="form-label">Подтверждающие документы <span class="required-field">*</span></label>
                     <MultiUpload v-model="files" :isLoading="isLoading" />
                 </div>
             </div>
