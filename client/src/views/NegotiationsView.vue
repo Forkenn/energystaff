@@ -6,6 +6,7 @@ import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import TheNegotiationCard from '@/components/negotiations/TheNegotiationCard.vue';
 import ThePaginator from '@/components/global/ThePaginator.vue';
+import TheNotFoundSign from '@/components/global/TheNotFoundSign.vue';
 import NegotiationsService from '@/services/negotiations.service';
 
 import { useUserStore } from '@/stores/user';
@@ -135,6 +136,7 @@ onMounted(async () => {
         <div v-if="negotiations.count" class="negotiations-wrapper">
           <TheNegotiationCard v-for="negotiation in negotiations.items" :key="negotiation.id" :negotiation="negotiation"/>
         </div>
+        <TheNotFoundSign v-else />
         <ThePaginator :total="totalNegotiationsCount" :per-page="perPage" :page="currentPage" @update:page="onPageChange" />
       </div>
     </div>
