@@ -38,17 +38,17 @@ class SCompanyEdit(BaseModel):
     registration_date: date
     inn: str = Field(
         default=...,
-        min_length=12,
+        min_length=10,
         max_length=12,
-        description="Company INN, 12 symbols"
+        description="Company INN, 10 or 12 symbols"
     )
-    address: str = Field(
+    address: str | None = Field(
         default=...,
         min_length=0,
         max_length=120,
         description="Company address from 0 to 120 symbols"
     )
-    description: str = Field(
+    description: str | None = Field(
         default=...,
         min_length=0,
         max_length=512,
