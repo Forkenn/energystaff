@@ -1,17 +1,19 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import VacanciesService from '@/services/vacancies.service';
 import ResumeService from '@/services/resume.service';
+import TheBlockPage from '@/components/global/TheBlockPage.vue';
 import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
 let errorMsg = '';
 
 const userStore = useUserStore();
+const userData = computed(() => userStore.user.data);
 
 const creatorMode = ref(true);
 
@@ -169,6 +171,9 @@ const toggleCheckFormat = (id) => {
 }
 
 onMounted(async () => {
+  if(!userData.is_verified)
+    return;
+
   try {
     const response = await ResumeService.getMyResume();
     resumeData.value = response.data;
@@ -197,6 +202,7 @@ onMounted(async () => {
 
 <template>
   <TheHeader />
+  <TheBlockPage v-if="!userData.is_verified"/>
   <main>
     <div class="container container-pd52">
       <div class="resume-container">
