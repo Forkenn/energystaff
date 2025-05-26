@@ -23,11 +23,11 @@ class SNegotiationResult(BaseModel):
 
 
 class SNegotiationChangeStatus(SNegotiationsIdBody):
-    desctiption: str = Field(
+    employer_description: str = Field(
         default=...,
-        min_length=12,
-        max_length=150,
-        description="Description from 12 to 150 symbols"
+        min_length=50,
+        max_length=500,
+        description="Description from 50 to 500 symbols"
     )
 
 
@@ -50,6 +50,7 @@ class SNegotiationEmpPreview(SNegotiationResult):
     user_surname: str
     user_last_name: str
     user_location: str | None = 'Город не указан'
+    employer_description: str | None = None
 
 
 class SNegotiationEmpPreviews(SBaseQueryCountResponse):

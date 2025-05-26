@@ -31,6 +31,7 @@ class NegotiationRepository(CommonRepository[Negotiation]):
                 Negotiation.status,
                 Negotiation.vacancy_id,
                 Negotiation.applicant_id,
+                Negotiation.employer_description,
                 Vacancy.position.label("vacancy_position"),
                 Vacancy.salary.label("vacancy_salary"),
                 Company.name.label("company_name")
@@ -80,6 +81,7 @@ class NegotiationRepository(CommonRepository[Negotiation]):
                 Negotiation.status,
                 Negotiation.vacancy_id,
                 Negotiation.applicant_id,
+                Negotiation.employer_description,
                 Vacancy.position.label("vacancy_position"),
                 Vacancy.salary.label("vacancy_salary"),
                 User.surname.label("user_surname"),

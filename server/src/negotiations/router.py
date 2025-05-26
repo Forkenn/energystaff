@@ -67,7 +67,10 @@ async def accept_negotiation(
         service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationResult:
     negotiation: Negotiation = await service.update_negotiation(
-        data.negotiation_id, user.id, NegotiationStatus.ACCEPTED, data.desctiption
+        data.negotiation_id,
+        user.id,
+        NegotiationStatus.ACCEPTED,
+        data.employer_description
     )
 
     return negotiation
@@ -79,7 +82,10 @@ async def reject_negotiation(
         service: NegotiationService = Depends(get_neg_service)
 ) -> SNegotiationResult:
     negotiation: Negotiation = await service.update_negotiation(
-        data.negotiation_id, user.id, NegotiationStatus.REJECTED, data.desctiption
+        data.negotiation_id,
+        user.id,
+        NegotiationStatus.REJECTED,
+        data.employer_description
     )
 
     return negotiation
