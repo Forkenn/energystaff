@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
@@ -8,8 +8,8 @@ import VacanciesService from '@/services/vacancies.service';
 import ResumeService from '@/services/resume.service';
 import { useUserStore } from '@/stores/user';
 
-const route = useRoute();
 const router = useRouter();
+let errorMsg = '';
 
 const userStore = useUserStore();
 
@@ -20,10 +20,10 @@ const serverFormats = ref([]);
 const dataLoading = ref(true);
 
 const resumeData = ref({
-  position: "",
-  specialization: "",
-  description: "",
-  salary: 0,
+  position: null,
+  specialization: null,
+  description: null,
+  salary: null,
   resume_types: [{
       id: 0,
       name: "string"
@@ -35,6 +35,43 @@ const resumeData = ref({
   resume_types_ids: [],
   resume_formats_ids: []
 })
+
+const validateFields = () => {
+  errorMsg = '';
+  resumeData.value.salary = resumeData.value.salary === "" ? null : resumeData.value.salary;
+
+  if(
+    !resumeData.value.position ||
+    resumeData.value.position?.length < 4 ||
+    resumeData.value.position?.length > 120
+  )
+    errorMsg += '• Недопустимая позиция (допустимо от 4 до 120 символов)\n';
+
+  if(
+    !resumeData.value.specialization ||
+    resumeData.value.specialization?.length < 4 ||
+    resumeData.value.specialization?.length > 120
+  )
+    errorMsg += '• Недопустимая специализация (допустимо от 4 до 120 символов)\n';
+
+  const salary = Number(resumeData.value.salary);
+
+  if(salary > 5000000 || salary < 0)
+    errorMsg += '• Недопустимая зарплата (допустимо до 5000000)\n';
+
+  console.log(resumeData.value.resume_types_ids);
+
+  if(!resumeData.value.resume_types_ids.length)
+    errorMsg += '• Не указана занятость\n';
+
+  if(!resumeData.value.resume_formats_ids.length)
+    errorMsg += '• Не указан график\n';
+
+}
+
+const validateSalary = (event) => {
+  resumeData.value.salary = event.target.value.replace(/[^\d]/g, '');
+};
 
 const convertIds = () => {
     const resumeTypesObj = resumeData.value.resume_types
@@ -48,6 +85,12 @@ const convertIds = () => {
 }
 
 const editResume = async() => {
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка сохранения изменений:\n${errorMsg}`);
+    return;
+  }
+
   try {
     await ResumeService.editMyResume(resumeData.value);
     alert('Данные сохранены');
@@ -57,6 +100,12 @@ const editResume = async() => {
 }
 
 const createResume = async() => {
+  validateFields();
+  if(errorMsg != '') {
+    alert(`Ошибка сохранения изменений:\n${errorMsg}`);
+    return;
+  }
+
   try {
     await ResumeService.addResume(resumeData.value);
     alert('Данные сохранены');
@@ -157,7 +206,7 @@ onMounted(async () => {
                 <div class="col d-flex">
                     <div class="custom-form-floating">
                         <input type="text" class="form-control flex-grow-1 sys-input-900-flex" id="InputPosition" placeholder="Желаемая должность" v-model="resumeData.position">
-                        <label for="InputPosition">Желаемая должность</label>
+                        <label for="InputPosition">Желаемая должность <span class="required-field">*</span></label>
                     </div>
                 </div>
             </div>
@@ -165,13 +214,20 @@ onMounted(async () => {
                 <div class="col d-flex">
                     <div class="custom-form-floating">
                         <input type="text" class="form-control flex-grow-1 sys-input-600-flex" id="InputSpecialization" placeholder="Специализация" v-model="resumeData.specialization">
-                        <label for="InputSpecialization">Специализация</label>
+                        <label for="InputSpecialization">Специализация <span class="required-field">*</span></label>
                     </div>
                 </div>
                 <div class="col d-flex">
                     <div class="floating-input-group">
                         <div class="custom-form-floating">
-                            <input type="text" class="form-control flex-grow-1 sys-input-group-250" id="InputSalary" placeholder="Зарплата"  v-model="resumeData.salary">
+                            <input
+                              type="text"
+                              class="form-control flex-grow-1 sys-input-group-250"
+                              id="InputSalary"
+                              placeholder="Зарплата"
+                              v-model="resumeData.salary"
+                              @input="validateSalary"
+                            >
                             <label for="InputSalary">Зарплата</label>
                         </div>
                         <span class="input-group-text sys-input-group-text-38">₽</span>
@@ -180,8 +236,8 @@ onMounted(async () => {
             </div>
             <div class="row">
                 <div class="col-auto">
-                    <div style="width: 80px;">
-                        Занятость
+                    <div style="width: 90px;">
+                        Занятость <span class="required-field">*</span>
                     </div>
                 </div>
                 <div class="col d-flex col-checkbox" style="flex-direction: column;">
@@ -226,8 +282,8 @@ onMounted(async () => {
 
             <div class="row">
                 <div class="col-auto">
-                    <div style="width: 80px;">
-                        График
+                    <div style="width: 90px;">
+                        График <span class="required-field">*</span>
                     </div>
                 </div>
                 <div class="col d-flex col-checkbox" style="flex-direction: column;">
@@ -298,6 +354,11 @@ onMounted(async () => {
   border-style: solid;
   border-radius: 10px;
   background-color: #FFFFFF;
+}
+
+.required-field {
+  color: red;
+  font-weight: 700;
 }
 
 .editor-wrapper {
