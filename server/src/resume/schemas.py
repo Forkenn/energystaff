@@ -10,18 +10,18 @@ from src.users.schemas import SApplicantRead
 class SResumeCreate(BaseModel):
     position: str = Field(
         default=...,
-        min_length=5,
+        min_length=4,
         max_length=120,
-        description="Position from 5 to 120 symbols"
+        description="Position from 4 to 120 symbols"
     )
     specialization: str = Field(
         default=...,
-        min_length=5,
+        min_length=4,
         max_length=120,
-        description="Specialization from 5 to 120 symbols"
+        description="Specialization from 4 to 120 symbols"
     )
-    salary: int = Field(None, ge=0)
-    description: str = Field(
+    salary: int | None = Field(..., ge=0, le=5000000)
+    description: str | None = Field(
         default=...,
         min_length=0,
         max_length=500,
@@ -29,6 +29,11 @@ class SResumeCreate(BaseModel):
     )
     resume_types_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
     resume_formats_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
+
+    @field_validator("salary", mode="before")
+    @classmethod
+    def set_default_if_none(cls, v):
+        return v if v is not None else 0
 
 
 class SResumeUserRead(BaseModel):
@@ -54,8 +59,12 @@ class SResumeRead(BaseModel):
     id: int
     position: str
     specialization: str
-    salary: int
+    salary: int | None
     description: str
     user: SResumeUserRead | None = Field(..., serialization_alias="applicant")
     resume_types: list[SBaseCatalogItemRead]
     resume_formats: list[SBaseCatalogItemRead]
+
+    def model_post_init(self, __context: Any):
+        if self.salary == 0:
+            self.salary = None
