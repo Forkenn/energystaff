@@ -356,11 +356,6 @@ onMounted(async () => {
   background-color: #FFFFFF;
 }
 
-.required-field {
-  color: red;
-  font-weight: 700;
-}
-
 .editor-wrapper {
   margin: 48px;
 }
