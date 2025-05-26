@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Annotated, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from src.core.schemas.catalog import SBaseCatalogItemRead
 from src.core.schemas.common import SBaseQuerySliceBody
@@ -35,15 +35,15 @@ class SCompany(BaseModel):
 class SVacancyCreate(BaseModel):
     position: str = Field(
         default=...,
-        min_length=10,
+        min_length=4,
         max_length=120,
-        description="Position from 10 to 120 symbols"
+        description="Position from 4 to 120 symbols"
     )
     specialization: str = Field(
         default=...,
-        min_length=10,
+        min_length=4,
         max_length=120,
-        description="Specialization from 10 to 120 symbols"
+        description="Specialization from 4 to 120 symbols"
     )
     work_hours: str | None = Field(
         default=...,
@@ -51,17 +51,22 @@ class SVacancyCreate(BaseModel):
         max_length=50,
         description="Work hours from 0 to 50 symbols"
     )
-    salary: int = Field(None, ge=0)
+    salary: int | None = Field(..., ge=0, le=5000000)
     description: str = Field(
         default=...,
         min_length=0,
-        max_length=500,
-        description="Description from 0 to 500 symbols"
+        max_length=5000,
+        description="Description from 0 to 5000 symbols"
     )
     location_id: int | None = None
     vacancy_types_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
     vacancy_formats_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
     vacancy_schedules_ids: list[Annotated[int, Field(strict=True, ge=0)]] = Field(..., min_length=1)
+
+    @field_validator("salary", mode="before")
+    @classmethod
+    def set_default_if_none(cls, v):
+        return v if v is not None else 0
 
 
 class SVacancyRead(BaseModel):
