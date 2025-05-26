@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import TheHeader from '@/components/global/TheHeader.vue';
 import TheFooter from '@/components/global/TheFooter.vue';
 import ResumeService from '@/services/resume.service';
 import RecommendationsService from '@/services/recommendations.service';
+import ToolsService from '@/services/tools.service';
 import TheFilesList from '@/components/global/TheFilesList.vue';
 
 const resume = ref({});
@@ -13,6 +14,10 @@ const recommendation = ref({});
 const route = useRoute();
 const router = useRouter();
 const applicantId = route.query.id;
+const serverEduLevels = ref([]);
+const serverEduInstitution = ref({});
+const eduInstitution = ref('')
+const dataLoading = ref(true);
 
 const formattedTypes = computed(() => {
 	const list = resume.value.resume_types
@@ -44,19 +49,69 @@ const formattedFormats = computed(() => {
   return `${allButLast} или ${last}`
 })
 
+const edu_level = computed(() => {
+  if(!serverEduLevels.value)
+    return 'не загружено'
+
+  let level = serverEduLevels.value.find(
+        obj => obj.id === resume.value.applicant?.edu_level_id
+  );
+
+  if(!level)
+    return 'не указано'
+
+  if(resume.value.applicant?.edu_status == "progress") 
+    return level?.name + ' (в процессе)'
+
+  return level?.name
+})
+
+const updateEdu = () => {
+  console.log(serverEduInstitution.value)
+  if(!serverEduInstitution.value.id) {
+    eduInstitution.value = 'не загружено';
+    return;
+  }
+
+  if(resume.value.applicant?.edu_institution_id) {
+    eduInstitution.value = serverEduInstitution.value.name;
+    return;
+  }
+
+  eduInstitution.value = 'не указано';
+}
+
+watch(serverEduInstitution, updateEdu);
+
 onMounted(async() => {
   try {
 		const response = await ResumeService.getResumeByUserId(applicantId, true);
 		resume.value = response.data;
+    dataLoading.value = false;
 	} catch(err) {
-		router.push({ name: "home" });
+    if (window.history.state?.back) {
+      alert('УПС!\nРезюме уже удалено...');
+      router.go(-1);
+    } else {
+      router.push({ name: "home" });
+    }
 	}
 
   try {
 		const response = await RecommendationsService.getApplicantRec(applicantId);
 		recommendation.value = response.data;
-	} catch(err) {
-	}
+	} catch(err) {}
+
+  try {
+    let response = await ToolsService.getEduLevels();
+    serverEduLevels.value = response.data.items;
+  } catch(err) {}
+
+  try {
+    const response = await ToolsService.getEduInstitutionbyId(resume.value.applicant.edu_institution_id);
+    serverEduInstitution.value = response.data;
+    dataLoading.value = false;
+  } catch(err) {}
 });
 </script>
 
@@ -86,7 +141,11 @@ onMounted(async() => {
           </p>
           <p>
             Образовательное учреждение: 
-            <span>{{ resume.applicant?.edu_institution_id }}</span>
+            <span>{{ eduInstitution }}</span>
+          </p>
+          <p>
+            Уровень образования: 
+            <span>{{ edu_level }}</span>
           </p>
           <p class="mt-4">
             Желаемая позиция: 
@@ -98,7 +157,8 @@ onMounted(async() => {
           </p>
           <p>
             Ожидаемая зарплата: 
-            <span>{{ resume.salary }} ₽</span>
+            <span v-if="!resume.salary || resume.salary == 0">не указано</span>
+            <span v-else>{{ resume.salary }} ₽</span>
           </p>
           <p>
             Предпочитаемый тип занятости: 
@@ -108,7 +168,7 @@ onMounted(async() => {
             Предпочитаемый формат работы: 
             <span>{{ formattedFormats }}</span>
           </p>
-          <div class="resume-description">
+          <div v-if="resume.description" class="resume-description">
             <h1 class="mt-5 mb-4">Описание</h1>
             <p>
               {{ resume.description }}
