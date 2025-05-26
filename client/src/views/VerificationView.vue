@@ -6,13 +6,20 @@ import TheHeader from '@/components/global/TheHeader.vue'
 import TheFooter from '@/components/global/TheFooter.vue'
 import ThePaginator from '@/components/global/ThePaginator.vue';
 import TheApplicantCard from '@/components/verification/TheApplicantCard.vue';
+import TheWarningSign from '@/components/global/TheWarningSign.vue';
+import TheNotFoundSign from '@/components/global/TheNotFoundSign.vue';
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 
 import UserService from '@/services/user.service';
 import ToolsService from '@/services/tools.service';
 
+import { useUserStore } from '@/stores/user';
+
 const route = useRoute();
 const router = useRouter();
+
+const userStore = useUserStore();
+const userData = computed(() => userStore.user.data);
 
 const filters = ref({
   q: "",
@@ -76,6 +83,9 @@ const loadApplicantsCount = async() => {
 
 const loadApplicants = async() => {
   await loadEduLevels();
+
+  if(!userData.value.is_verified)
+    return;
 
   if(filters.value.searchBy == 'name') {
     await loadApplicantsCount();
@@ -302,6 +312,8 @@ onMounted(async() => {
               </div>
             </div>
             <div class="col d-flex w-100" style="flex-direction: column;">
+              <TheWarningSign v-if="!userData.is_verified" />
+              <TheNotFoundSign v-else-if="!users.count" />
               <div v-if="users.count" class="vacancy-wrapper">
                 <TheApplicantCard v-for="user in users.items" :key="user.id" :user="user" :edu_levels="eduLevels.items"/>
               </div>

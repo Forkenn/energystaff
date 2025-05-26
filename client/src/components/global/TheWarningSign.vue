@@ -6,7 +6,7 @@
   <div class="warning-wrapper">
     <img src="../../assets/icons/Warning.svg" width="200" height="200">
     <div>
-      Аккаунт не подтверждён
+      Учётная запись не подтверждёна
     </div>
     <div>
       Действия в системе ограничены
