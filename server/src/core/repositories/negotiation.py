@@ -34,9 +34,11 @@ class NegotiationRepository(CommonRepository[Negotiation]):
                 Negotiation.employer_description,
                 Vacancy.position.label("vacancy_position"),
                 Vacancy.salary.label("vacancy_salary"),
+                Location.name.label("vacancy_location"),
                 Company.name.label("company_name")
             )
             .join(Vacancy, Negotiation.vacancy_id == Vacancy.id)
+            .join(Location, Location.id == Vacancy.location_id)
             .join(Company, Vacancy.company_id == Company.id)
             .where(Negotiation.applicant_id == applicant_id)
         )
