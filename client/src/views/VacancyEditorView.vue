@@ -35,9 +35,18 @@ const vacancyData = ref({
   work_hours: "",
   location: null,
   location_id: null,
-  vacancy_types: [{}],
-  vacancy_formats: [{}],
-  vacancy_schedules: [{}],
+  vacancy_types: [{
+    id: 0,
+    name: 'string'
+  }],
+  vacancy_formats: [{
+    id: 0,
+    name: 'string'
+  }],
+  vacancy_schedules: [{
+    id: 0,
+    name: 'string'
+  }],
   vacancy_types_ids: [],
   vacancy_formats_ids: [],
   vacancy_schedules_ids: []
@@ -71,13 +80,25 @@ errorMsg = '';
   if(!salary || salary > 5000000 || salary < 0)
     errorMsg += '• Недопустимая зарплата (допустимо до 5000000)\n';
 
-  if(vacancyData.value.vacancy_types_ids[0] == undefined && !vacancyData.value.vacancy_types_ids[1])
+  if(
+    vacancyData.value.vacancy_types_ids[0] == 0 &&
+    !vacancyData.value.vacancy_types_ids[1] ||
+    vacancyData.value.vacancy_types_ids.length == 0
+  )
     errorMsg += '• Не указана занятость\n';
 
-  if(vacancyData.value.vacancy_schedules_ids[0] == undefined && !vacancyData.value.vacancy_schedules_ids[1])
+  if(
+    vacancyData.value.vacancy_schedules_ids[0] == 0 &&
+    !vacancyData.value.vacancy_schedules_ids[1] ||
+    vacancyData.value.vacancy_schedules_ids.length == 0
+  )
     errorMsg += '• Не указан график\n';
 
-  if(vacancyData.value.vacancy_formats_ids[0] == undefined && !vacancyData.value.vacancy_formats_ids[1])
+  if(
+    vacancyData.value.vacancy_formats_ids[0] == 0 &&
+    !vacancyData.value.vacancy_formats_ids[1] ||
+    vacancyData.value.vacancy_formats_ids.length == 0
+  )
     errorMsg += '• Не указан формат\n';
 }
 

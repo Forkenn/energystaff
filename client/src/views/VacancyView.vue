@@ -135,7 +135,7 @@ onMounted(async() => {
 					<div class="col-7 column">
 						<div class="vacancy-description">
 							<h1 class="mb-4">Описание</h1>
-							<p>
+							<p class="description-plain">
 								{{ vacancy.description }}
 							</p>
 						</div>
@@ -228,10 +228,14 @@ onMounted(async() => {
 }
 
 .vacancy-description p {
-	text-align: justify;
-	color: #343434;
+  text-align: justify;
+  color: #343434;
   font-size: 20px;
   font-weight: 400;
+}
+
+.description-plain {
+	white-space: pre-wrap;
 }
 
 </style>

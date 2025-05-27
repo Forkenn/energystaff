@@ -75,7 +75,7 @@ onMounted(async() => {
           </p>
           <div class="company-description">
             <h1 class="mt-5 mb-4">Описание</h1>
-            <p>
+            <p class="description-plain">
               {{ company.description || "Не указано" }}
             </p>
           </div>
@@ -149,6 +149,10 @@ onMounted(async() => {
 
 .control-buttons button {
   margin-right: 24px;
+}
+
+.description-plain {
+	white-space: pre-wrap;
 }
 
 </style>

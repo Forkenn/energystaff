@@ -170,7 +170,7 @@ onMounted(async() => {
           </p>
           <div v-if="resume.description" class="resume-description">
             <h1 class="mt-5 mb-4">Описание</h1>
-            <p>
+            <p class="description-plain">
               {{ resume.description }}
             </p>
           </div>
@@ -180,7 +180,7 @@ onMounted(async() => {
         <div class="resume-wrapper">
           <div class="resume-description">
             <h1 class="mb-4">Рекомендации образовательного учреждения</h1>
-            <p>
+            <p class="description-plain">
               {{ recommendation.description }}
             </p>
           </div>
@@ -259,6 +259,10 @@ onMounted(async() => {
 
 .control-buttons button {
   margin-right: 24px;
+}
+
+.description-plain {
+	white-space: pre-wrap;
 }
 
 </style>
