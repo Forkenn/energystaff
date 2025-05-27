@@ -83,7 +83,8 @@ class UserRepository(CommonRepository[User]):
         query = alch.select(User).options(
             selectinload(User.applicant),
             selectinload(User.employer),
-            selectinload(User.edu_worker)
+            selectinload(User.edu_worker),
+            selectinload(User.location)
         )
 
         query = await self._get_users_by_fullname_query(

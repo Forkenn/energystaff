@@ -77,6 +77,7 @@ class SUserPreview(BaseModel):
     is_verified: bool
     is_active: bool
     is_superuser: bool
+    location: SBaseCatalogItemRead | None = None
     applicant: SApplicantRead | None = None
     employer: SEmployerRead | None = None
     edu_worker: SEduWorkerRead | None = None
