@@ -90,7 +90,9 @@ class VacanciesService {
         position: data.position,
         specialization: data.specialization,
         salary: data.salary,
+        work_hours: data.work_hours,
         description: data.description,
+        location_id: data.location_id,
         vacancy_types_ids: data.vacancy_types_ids,
         vacancy_formats_ids: data.vacancy_formats_ids,
         vacancy_schedules_ids: data.vacancy_schedules_ids
