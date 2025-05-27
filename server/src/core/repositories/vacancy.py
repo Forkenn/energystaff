@@ -145,6 +145,7 @@ class VacancyRepository(CommonRepository[Vacancy]):
                 ),
                 isouter=True
             )
+            .where(Company.is_verified)
         )
 
         if location_id is not None:
