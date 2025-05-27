@@ -16,7 +16,7 @@ from src.users.models import User
 from src.vacancies.models import Vacancy
 from src.vacancies.schemas import (
     SVacancyCreate, SVacancyRead, SVacanciesPreview, SVacanciesPreviewsQuery,
-    SVacanciesCountQuery
+    SVacanciesCountQuery, SVacancyReadFull
 )
 
 router = APIRouter(prefix='/vacancies', tags=['Vacancies'])
@@ -83,7 +83,7 @@ async def get_vacancy_by_id(
         id: int,
         user: User = Depends(current_user),
         vacancy_service: VacancyService = Depends(get_vacancy_service)
-) -> SVacancyRead:
+) -> SVacancyReadFull:
     vacancy: Vacancy = await vacancy_service.get_full_vacancy(id)
     return vacancy
 

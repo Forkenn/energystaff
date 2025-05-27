@@ -76,12 +76,15 @@ class SVacancyRead(BaseModel):
     work_hours: str | None
     salary: int
     description: str
-    company: SCompany
     location: SBaseCatalogItemRead | None
     author_id: int
     vacancy_types: list[SBaseCatalogItemRead]
     vacancy_formats: list[SBaseCatalogItemRead]
     vacancy_schedules: list[SBaseCatalogItemRead]
+
+
+class SVacancyReadFull(SVacancyRead):
+    company: SCompany
 
 
 class SVacancyNegotiation(BaseModel):
