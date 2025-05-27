@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import TheFooter from '@/components/global/TheFooter.vue';
 import TheHeader from '@/components/global/TheHeader.vue';
+import TheBlockPage from '@/components/global/TheBlockPage.vue';
 import MultiSelect from '@/components/global/MultiSelect.vue';
 import CatalogSearch from '@/components/global/CatalogSearch.vue';
 import VacanciesService from '@/services/vacancies.service';
@@ -181,6 +182,9 @@ const toggleCheckFormat = (id) => {
 }
 
 onMounted(async () => {
+  if(!userStore.user.data.is_verified)
+    return;
+
   if (vacancyId) {
     try {
       const response = await VacanciesService.getVacancy(vacancyId);
@@ -217,6 +221,7 @@ onMounted(async () => {
 
 <template>
   <TheHeader />
+  <TheBlockPage v-if="!userStore.user.data.is_verified"/>
   <main>
     <div class="container container-pd52">
       <div class="vacancy-container">

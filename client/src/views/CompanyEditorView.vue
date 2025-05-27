@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 
 import TheFooter from '@/components/global/TheFooter.vue';
 import TheHeader from '@/components/global/TheHeader.vue';
+import TheBlockPage from '@/components/global/TheBlockPage.vue';
 import CompaniesService from '@/services/companies.service';
 import { useUserStore } from '@/stores/user';
 
@@ -68,6 +69,9 @@ const editCompany = async() => {
 }
 
 onMounted(async () => {
+  if(!userStore.user.data.is_verified)
+    return;
+
   const companyId = userStore.user.data.employer?.company_id;
   if(companyId) {
     try {
@@ -86,6 +90,7 @@ onMounted(async () => {
 
 <template>
   <TheHeader />
+  <TheBlockPage v-if="!userStore.user.data.is_verified"/>
   <main>
     <div class="container container-pd52">
       <div class="company-container">
