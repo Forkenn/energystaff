@@ -171,7 +171,7 @@ const toggleCheckFormat = (id) => {
 }
 
 onMounted(async () => {
-  if(!userData.is_verified)
+  if(!userData.value.is_verified)
     return;
 
   try {

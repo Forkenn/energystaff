@@ -15,8 +15,8 @@ from src.negotiations.schemas import (
 router = APIRouter(prefix='/negotiations', tags=['Negotiations'])
 
 current_user = RoleManager(SystemRole.ACTIVE)
-current_applicant = RoleManager(SystemRole.ACTIVE, SystemRole.APPLICANT)
-current_employer = RoleManager(SystemRole.ACTIVE, SystemRole.EMPLOYER)
+current_applicant = RoleManager(SystemRole.ACTIVE, SystemRole.VERIFIED, SystemRole.APPLICANT)
+current_employer = RoleManager(SystemRole.ACTIVE,  SystemRole.VERIFIED, SystemRole.EMPLOYER)
 
 @router.get('/applicant')
 async def get_applicant_negotiations_cards(

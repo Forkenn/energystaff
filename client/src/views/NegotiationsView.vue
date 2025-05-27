@@ -40,6 +40,9 @@ const onPageChange = (newPage) => {
 }
 
 const getNegotiationsCount = async() => {
+  if(!userData.value.is_verified)
+    return;
+
   const filters = {status: filterBy.value};
   try {
       let response;
@@ -55,6 +58,9 @@ const getNegotiationsCount = async() => {
 }
 
 const getNegotiations = async() => {
+  if(!userData.value.is_verified)
+    return;
+
   pagination.value.start = (currentPage.value - 1) * perPage;
   pagination.value.end = pagination.value.start + perPage
   const filters = {...{status: filterBy.value}, ...pagination.value};
