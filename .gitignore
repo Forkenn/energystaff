@@ -6,4 +6,5 @@ pgadmin
 storage
 .python-version
 .env
+dumper
 nginx.conf
