@@ -7,4 +7,8 @@ storage
 .python-version
 .env
 dumper
+
+# Production files
 nginx.conf
+docker-compose.prod.yml
+run_prod.sh
