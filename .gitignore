@@ -11,4 +11,6 @@ dumper
 # Production files
 nginx.conf
 docker-compose.prod.yml
+open_prod.sh
+close_prod.sh
 run_prod.sh
