@@ -227,13 +227,13 @@ onMounted(async () => {
               </div>
             </div>
             <div class="col-auto">
-              <div v-if="userData.applicant" class="custom-form-floating">
+              <div v-if="userData.applicant && !userData.is_superuser" class="custom-form-floating">
                 <input type="text" class="form-control sys-input-288" id="InputEDUid" placeholder="Номер зачётной книжки" v-model="userData.applicant.edu_number">
                 <label for="InputEDUid">Номер зачётной книжки</label>
               </div>
             </div>
         </div>
-        <div v-if="userData.applicant" class="row form-row">
+        <div v-if="userData.applicant && !userData.is_superuser" class="row form-row">
             <div class="col-auto">
               <CatalogSearch :callback="fetchInstitutions" :isLoading="dataLoading" v-model="selectedInstitution"/>
             </div>
