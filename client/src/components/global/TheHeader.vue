@@ -50,8 +50,8 @@ onBeforeUnmount(() => {
             </router-link>
             <nav class="nav-panel">
                 <div v-if="!user.status.loggedIn">
-                    <a href="#">Соискателям</a>
-                    <a href="#">Работодателям</a>
+                    <!--<a href="#">Соискателям</a>
+                    <a href="#">Работодателям</a>-->
                 </div>
                 <div v-else-if="user.data.is_superuser">
                     <router-link :to="{ name: 'control_page' }">
