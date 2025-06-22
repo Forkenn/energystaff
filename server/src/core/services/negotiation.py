@@ -69,7 +69,9 @@ class NegotiationService(CommonService[NegotiationRepository]):
         if not vacancy:
             raise NotFoundException()
         
-        if await self.repository.exists_by_vacancy_id(vacancy_id):
+        if await self.repository.exists_for_applicant(
+            vacancy_id, applicant_id
+        ):
             raise AlreadyExistException()
         
         negotiation = await self.repository.create(

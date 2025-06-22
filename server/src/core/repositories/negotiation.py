@@ -153,3 +153,15 @@ class NegotiationRepository(CommonRepository[Negotiation]):
         query = alch.select(1).where(Negotiation.vacancy_id == vacancy_id)
         result = await self.session.scalar(query)
         return result is not None
+    
+    async def exists_for_applicant(
+            self,
+            vacancy_id: int,
+            applicant_id: int
+    ) -> bool:
+        query = alch.select(1).where(
+            Negotiation.vacancy_id == vacancy_id,
+            Negotiation.applicant_id == applicant_id
+        )
+        result = await self.session.scalar(query)
+        return result is not None
