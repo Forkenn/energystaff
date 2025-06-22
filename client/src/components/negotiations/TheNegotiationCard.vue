@@ -142,7 +142,7 @@ const goToResume = () => {
             {{ negotiation.user_location }}
         </div>
         <button v-if="user.is_applicant && ['accepted', 'rejected'].includes(negotiation.status)" class="btn btn-primary sys-btn-288" @click.stop="showModalContacts = true">Информация</button>
-        <button v-if="user.is_applicant && ['accepted', 'pending'].includes(negotiation.status)" class="btn btn-danger sys-btn-288" @click="deleteNegotiation">Отозвать и удалить</button>
+        <button v-if="user.is_applicant && negotiation.status == 'pending'" class="btn btn-danger sys-btn-288" @click.stop="deleteNegotiation">Отозвать и удалить</button>
         <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-primary sys-btn-288" @click.stop="showModalInfoSend = true">Пригласить</button>
         <button v-if="user.is_employer && negotiation.status === 'pending'" class="btn btn-danger sys-btn-288" @click.stop="showModalInfoSend = true">Отказать</button>
         <button v-if="user.is_employer && negotiation.status === 'accepted'" class="btn btn-danger sys-btn-288" @click.stop="showModalInfoSend = true">Отозвать и отказать</button>
